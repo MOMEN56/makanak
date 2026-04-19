@@ -47,3 +47,4 @@ app.*.map.json
 # Project-local files
 Global_Engineering_Rules.md
 lib/core/utils/app_keys.dart
+lib/core/utils/assets.dart
