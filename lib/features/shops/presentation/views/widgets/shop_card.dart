@@ -4,13 +4,10 @@ import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
+import 'package:makanak/shared/widgets/network_image_with_placeholder.dart';
 
 class ShopCard extends StatelessWidget {
-  const ShopCard({
-    super.key,
-    required this.shop,
-    this.onShopTap,
-  });
+  const ShopCard({super.key, required this.shop, this.onShopTap});
 
   final ShopModel shop;
   final VoidCallback? onShopTap;
@@ -19,22 +16,26 @@ class ShopCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: AppColors.white,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(15),
         child: Column(
           children: [
             SizedBox(
               height: 140,
               width: double.infinity,
-              child: ClipRRect(
+              child: NetworkImageWithPlaceholder(
+                imageUrl: shop.imageUrl,
+                height: 140,
+                width: double.infinity,
+                cacheWidth: 700,
+                placeholderIcon: Icons.storefront_outlined,
+                placeholderColor: AppColors.greyBackground,
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  shop.imageUrl,
-                  width: double.infinity,
-                  height: 140,
-                  fit: BoxFit.cover,
-                ),
               ),
             ),
             const Gap(16),
@@ -49,7 +50,7 @@ class ShopCard extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      shop.categoryIcon,
+                      Icons.local_restaurant_sharp,
                       size: 22.5,
                       color: AppColors.shopCategoryIconColor,
                     ),

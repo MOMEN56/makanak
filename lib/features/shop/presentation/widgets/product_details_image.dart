@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/shared/widgets/network_image_with_placeholder.dart';
 
 class ProductDetailsImage extends StatelessWidget {
   const ProductDetailsImage({super.key, required this.imageUrl});
@@ -8,29 +9,20 @@ class ProductDetailsImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
+    return Container(
+      height: 260,
+      width: double.infinity,
+      decoration: BoxDecoration(
         color: AppColors.white,
-        child: Image.network(
-          imageUrl,
-          height: 260,
-          width: double.infinity,
-          fit: BoxFit.cover,
-          cacheWidth: 800,
-          filterQuality: FilterQuality.low,
-          errorBuilder: (_, __, ___) {
-            return const SizedBox(
-              height: 260,
-              child: Center(
-                child: Icon(
-                  Icons.image_not_supported_outlined,
-                  color: AppColors.lightGrey,
-                ),
-              ),
-            );
-          },
-        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: NetworkImageWithPlaceholder(
+        imageUrl: imageUrl,
+        height: 260,
+        width: double.infinity,
+        cacheWidth: 800,
+        placeholderColor: AppColors.white,
       ),
     );
   }

@@ -4,88 +4,15 @@ import 'package:makanak/features/shop/presentation/views/product_details_view.da
 import 'package:makanak/features/shop/presentation/widgets/product_card.dart';
 
 class ProductsList extends StatelessWidget {
-  const ProductsList({super.key});
+  const ProductsList({super.key, required this.products});
 
-  static const List<ProductModel> _products = [
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-      name: 'سلطة فريش',
-      price: '120 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-      name: 'برجر كلاسيك',
-      price: '180 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-      name: 'سلطة فريش',
-      price: '120 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-      name: 'برجر كلاسيك',
-      price: '180 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-      name: 'سلطة فريش',
-      price: '120 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-      name: 'برجر كلاسيك',
-      price: '180 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-      name: 'سلطة فريش',
-      price: '120 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-      name: 'برجر كلاسيك',
-      price: '180 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-      name: 'سلطة فريش',
-      price: '120 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-      name: 'برجر كلاسيك',
-      price: '180 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-      name: 'سلطة فريش',
-      price: '120 جنيه',
-    ),
-    ProductModel(
-      imageUrl:
-          'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-      name: 'برجر كلاسيك',
-      price: '180 جنيه',
-    ),
-  ];
+  final List<ProductModel> products;
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
       padding: EdgeInsets.zero,
-      itemCount: _products.length,
+      itemCount: products.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 14,
@@ -93,7 +20,7 @@ class ProductsList extends StatelessWidget {
         childAspectRatio: 0.68,
       ),
       itemBuilder: (context, index) {
-        final product = _products[index];
+        final product = products[index];
 
         return ProductCard(
           product: product,

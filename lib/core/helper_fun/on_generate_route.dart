@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:makanak/features/shop/presentation/views/products_list_view.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
-import 'package:makanak/features/shops/presentation/views/shops_list_view.dart';
+import 'package:makanak/features/shops/presentation/views/shops_view.dart';
 
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
-    case ShopsListView.routeName:
+    case ShopsView.routeName:
       return MaterialPageRoute(
         settings: settings,
-        builder: (_) => const ShopsListView(),
+        builder: (_) => const ShopsView(),
       );
     case ProductsListView.routeName:
       final shopModel = settings.arguments;

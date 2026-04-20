@@ -22,7 +22,7 @@ class ProductDetailsViewBody extends StatelessWidget {
           const Gap(24),
           Text(
             product.name,
-            style: TextStyles.Bold24.copyWith(
+            style: TextStyles.bold24.copyWith(
               color: AppColors.primaryDarkColor,
             ),
           ),
@@ -31,7 +31,7 @@ class ProductDetailsViewBody extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  product.price,
+                  product.priceText,
                   style: TextStyles.bold16.copyWith(
                     color: AppColors.primaryColor,
                   ),

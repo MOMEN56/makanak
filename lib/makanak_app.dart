@@ -3,7 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:makanak/core/helper_fun/on_generate_route.dart';
 import 'package:makanak/core/utils/app_colors.dart';
-import 'package:makanak/features/shops/presentation/views/shops_list_view.dart';
+import 'package:makanak/features/shops/presentation/views/shops_view.dart';
 
 class MakanakApp extends StatelessWidget {
   const MakanakApp({super.key});
@@ -23,6 +23,10 @@ class MakanakApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Cairo',
+        primaryColor: AppColors.primaryColor,
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: AppColors.primaryColor,
+        ),
         scaffoldBackgroundColor: AppColors.greyBackground,
       ),
       builder: (context, child) {
@@ -40,7 +44,7 @@ class MakanakApp extends StatelessWidget {
           ),
         );
       },
-      initialRoute: ShopsListView.routeName,
+      initialRoute: ShopsView.routeName,
       onGenerateRoute: onGenerateRoute,
     );
   }

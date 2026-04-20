@@ -3,6 +3,7 @@ import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/presentation/widgets/add_button.dart';
+import 'package:makanak/shared/widgets/network_image_with_placeholder.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
@@ -30,19 +31,10 @@ class ProductCard extends StatelessWidget {
             Expanded(
               child: SizedBox(
                 width: double.infinity,
-                child: Image.network(
-                  product.imageUrl,
-                  fit: BoxFit.cover,
+                child: NetworkImageWithPlaceholder(
+                  imageUrl: product.imageUrl,
+                  width: double.infinity,
                   cacheWidth: 400,
-                  filterQuality: FilterQuality.low,
-                  errorBuilder: (_, __, ___) {
-                    return const Center(
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        color: AppColors.lightGrey,
-                      ),
-                    );
-                  },
                 ),
               ),
             ),
@@ -64,7 +56,7 @@ class ProductCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          product.price,
+                          product.priceText,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyles.semiBold14.copyWith(
