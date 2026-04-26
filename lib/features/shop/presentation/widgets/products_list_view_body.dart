@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_state.dart';
@@ -18,8 +19,10 @@ class ProductsListViewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shopPrimaryColor = AppColors.fromHex(shopModel.primaryColor);
+
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: AppResponsive.all(context, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -36,7 +39,7 @@ class ProductsListViewBody extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyles.bold16.copyWith(
-                    color: AppColors.primaryDarkColor,
+                    color: AppColors.darkerShade(shopPrimaryColor),
                     fontSize: 20,
                   ),
                 ),
@@ -45,7 +48,8 @@ class ProductsListViewBody extends StatelessWidget {
           ),
           const Gap(30),
           SearchTextField(
-            hintText: 'نفسك تجيب ايه؟',
+            hintText:
+                '\u0646\u0641\u0633\u0643 \u062A\u062C\u064A\u0628 \u0627\u064A\u0647\u061F',
             onChanged: (value) {},
           ),
           const Gap(24),
@@ -53,21 +57,26 @@ class ProductsListViewBody extends StatelessWidget {
             child: BlocBuilder<ProductsCubit, ProductsState>(
               builder: (context, state) {
                 return switch (state) {
-                  ProductsInitial() || ProductsLoading() =>
-                    const CustomLoadingIndicator(),
-                  ProductsSuccess(:final products) => products.isEmpty
-                      ? const StateMessage(
-                          message: 'لا توجد منتجات متاحة حاليا.',
+                  ProductsInitial() ||
+                  ProductsLoading() => const CustomLoadingIndicator(),
+                  ProductsSuccess(:final products) =>
+                    products.isEmpty
+                        ? const StateMessage(
+                          message:
+                              '\u0644\u0627 \u062A\u0648\u062C\u062F \u0645\u0646\u062A\u062C\u0627\u062A \u0645\u062A\u0627\u062D\u0629 \u062D\u0627\u0644\u064A\u0627.',
                         )
-                      : ProductsList(products: products),
+                        : ProductsList(
+                          products: products,
+                          primaryColor: shopPrimaryColor,
+                        ),
                   ProductsFailure(:final message) => StateMessage(
-                      message: message,
-                      onRetry: () {
-                        context.read<ProductsCubit>().fetchProducts(
-                              shopModel.id ?? '',
-                            );
-                      },
-                    ),
+                    message: message,
+                    onRetry: () {
+                      context.read<ProductsCubit>().fetchProducts(
+                        shopModel.id ?? '',
+                      );
+                    },
+                  ),
                 };
               },
             ),

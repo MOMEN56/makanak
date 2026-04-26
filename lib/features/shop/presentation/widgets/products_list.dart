@@ -4,9 +4,14 @@ import 'package:makanak/features/shop/presentation/views/product_details_view.da
 import 'package:makanak/features/shop/presentation/widgets/product_card.dart';
 
 class ProductsList extends StatelessWidget {
-  const ProductsList({super.key, required this.products});
+  const ProductsList({
+    super.key,
+    required this.products,
+    required this.primaryColor,
+  });
 
   final List<ProductModel> products;
+  final Color primaryColor;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +29,7 @@ class ProductsList extends StatelessWidget {
 
         return ProductCard(
           product: product,
+          primaryColor: primaryColor,
           onTap: () {
             Navigator.push(
               context,
@@ -31,7 +37,10 @@ class ProductsList extends StatelessWidget {
                 transitionDuration: const Duration(milliseconds: 300),
                 reverseTransitionDuration: const Duration(milliseconds: 300),
                 pageBuilder: (context, animation, secondaryAnimation) {
-                  return ProductDetailsView(product: product);
+                  return ProductDetailsView(
+                    product: product,
+                    primaryColor: primaryColor,
+                  );
                 },
                 transitionsBuilder: (
                   context,

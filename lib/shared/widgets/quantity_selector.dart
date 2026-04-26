@@ -8,11 +8,13 @@ class QuantitySelector extends StatefulWidget {
     this.initialQuantity = 1,
     this.minQuantity = 1,
     this.onChanged,
+    this.color,
   });
 
   final int initialQuantity;
   final int minQuantity;
   final ValueChanged<int>? onChanged;
+  final Color? color;
 
   @override
   State<QuantitySelector> createState() => _QuantitySelectorState();
@@ -46,6 +48,8 @@ class _QuantitySelectorState extends State<QuantitySelector> {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedColor = widget.color ?? AppColors.primaryColor;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.grey[100],
@@ -56,7 +60,11 @@ class _QuantitySelectorState extends State<QuantitySelector> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _QuantityButton(icon: Icons.remove, onTap: _decrement),
+            _QuantityButton(
+              icon: Icons.remove,
+              onTap: _decrement,
+              color: resolvedColor,
+            ),
             SizedBox(
               width: 56,
               child: Text(
@@ -65,7 +73,11 @@ class _QuantitySelectorState extends State<QuantitySelector> {
                 style: TextStyles.bold16.copyWith(color: Colors.black),
               ),
             ),
-            _QuantityButton(icon: Icons.add, onTap: _increment),
+            _QuantityButton(
+              icon: Icons.add,
+              onTap: _increment,
+              color: resolvedColor,
+            ),
           ],
         ),
       ),
@@ -74,15 +86,20 @@ class _QuantitySelectorState extends State<QuantitySelector> {
 }
 
 class _QuantityButton extends StatelessWidget {
-  const _QuantityButton({required this.icon, required this.onTap});
+  const _QuantityButton({
+    required this.icon,
+    required this.onTap,
+    required this.color,
+  });
 
   final IconData icon;
   final VoidCallback onTap;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.primaryColor,
+      color: color,
       shape: const CircleBorder(),
       child: InkWell(
         onTap: onTap,

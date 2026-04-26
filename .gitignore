@@ -22,6 +22,7 @@ migrate_working_dir/
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
 #.vscode/
+.vscode/launch.json
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -32,6 +33,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+.gradle-user-home/
 
 # Symbolication related
 app.*.symbols
@@ -45,6 +47,9 @@ app.*.map.json
 /android/app/release
 
 # Project-local files
+/google-services.json
+/android/app/google-services.json
+/pubspec.lock
 Global_Engineering_Rules.md
 lib/core/utils/app_keys.dart
 lib/core/utils/assets.dart

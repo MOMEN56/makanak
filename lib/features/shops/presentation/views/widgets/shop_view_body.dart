@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_cubit.dart';
 import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_state.dart';
 import 'package:makanak/features/shops/presentation/views/widgets/shops_header.dart';
@@ -17,9 +18,9 @@ class ShopsViewBody extends StatelessWidget {
       builder: (context, state) {
         return CustomScrollView(
           slivers: [
-            const SliverPadding(
-              padding: EdgeInsets.only(top: 48, left: 24, right: 24),
-              sliver: SliverToBoxAdapter(child: ShopsHeader()),
+            SliverPadding(
+              padding: AppResponsive.fromLTRB(context, 24, 48, 24, 0),
+              sliver: const SliverToBoxAdapter(child: ShopsHeader()),
             ),
             switch (state) {
               ShopsInitial() || ShopsLoading() => const SliverFillRemaining(

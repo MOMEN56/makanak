@@ -14,4 +14,32 @@ abstract final class AppColors {
   static const Color shopCategoryIconBackground = Color(0xffF3F3FC);
   static const Color shopCategoryIconColor = primaryDarkColor;
   static const Color white = Color(0xffFFFFFF);
+
+  static Color fromHex(String? hexColor, {Color fallback = primaryColor}) {
+    if (hexColor == null || hexColor.trim().isEmpty) {
+      return fallback;
+    }
+
+    var normalizedHex = hexColor.trim().replaceFirst('#', '');
+    if (normalizedHex.length == 6) {
+      normalizedHex = 'FF$normalizedHex';
+    }
+
+    if (normalizedHex.length != 8) {
+      return fallback;
+    }
+
+    final colorValue = int.tryParse(normalizedHex, radix: 16);
+    if (colorValue == null) {
+      return fallback;
+    }
+
+    return Color(colorValue);
+  }
+
+  static Color darkerShade(Color color, [double amount = 0.18]) {
+    final hslColor = HSLColor.fromColor(color);
+    final darkerLightness = (hslColor.lightness - amount).clamp(0.0, 1.0);
+    return hslColor.withLightness(darkerLightness).toColor();
+  }
 }

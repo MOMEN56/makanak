@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 
 class AddButton extends StatelessWidget {
-  const AddButton({super.key, this.onTap});
+  const AddButton({super.key, this.onTap, this.color});
 
   final VoidCallback? onTap;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.primaryColor,
+      color: color ?? AppColors.primaryColor,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap,

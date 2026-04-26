@@ -11,14 +11,18 @@ class ProductCard extends StatelessWidget {
     required this.product,
     this.onTap,
     this.onAdd,
+    this.primaryColor,
   });
 
   final ProductModel product;
   final VoidCallback? onTap;
   final VoidCallback? onAdd;
+  final Color? primaryColor;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedPrimaryColor = primaryColor ?? AppColors.primaryColor;
+
     return Material(
       color: AppColors.white,
       borderRadius: BorderRadius.circular(8),
@@ -60,11 +64,11 @@ class ProductCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyles.semiBold14.copyWith(
-                            color: AppColors.primaryDarkColor,
+                            color: AppColors.darkerShade(resolvedPrimaryColor),
                           ),
                         ),
                       ),
-                      AddButton(onTap: onAdd),
+                      AddButton(onTap: onAdd, color: resolvedPrimaryColor),
                     ],
                   ),
                 ],

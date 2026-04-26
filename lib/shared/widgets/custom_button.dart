@@ -9,28 +9,33 @@ class CustomButton extends StatelessWidget {
     this.onTap,
     this.icon,
     this.hasShadowEffect = false,
+    this.color,
   });
 
   final String hint;
   final VoidCallback? onTap;
   final Widget? icon;
   final bool hasShadowEffect;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedColor = color ?? AppColors.primaryColor;
+    final gradientStartColor = AppColors.darkerShade(resolvedColor);
+
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow: hasShadowEffect
-            ? const [
+            ? [
                 BoxShadow(
-                  color: Color(0xFFBFDBFE),
+                  color: resolvedColor.withValues(alpha: 0.28),
                   blurRadius: 6,
                   offset: Offset(0, 4),
                   spreadRadius: -4,
                 ),
                 BoxShadow(
-                  color: Color(0xFFBFDBFE),
+                  color: resolvedColor.withValues(alpha: 0.22),
                   blurRadius: 15,
                   offset: Offset(0, 10),
                   spreadRadius: -3,
@@ -47,11 +52,11 @@ class CustomButton extends StatelessWidget {
           child: Ink(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.centerRight,
                 end: Alignment.centerLeft,
-                colors: [AppColors.primaryDarkColor, AppColors.primaryColor],
+                colors: [gradientStartColor, resolvedColor],
               ),
             ),
             child: Row(

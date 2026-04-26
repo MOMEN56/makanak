@@ -7,12 +7,19 @@ import 'package:makanak/features/shop/presentation/widgets/product_details_image
 import 'package:makanak/shared/widgets/quantity_selector.dart';
 
 class ProductDetailsViewBody extends StatelessWidget {
-  const ProductDetailsViewBody({super.key, required this.product});
+  const ProductDetailsViewBody({
+    super.key,
+    required this.product,
+    required this.primaryColor,
+  });
 
   final ProductModel product;
+  final Color primaryColor;
 
   @override
   Widget build(BuildContext context) {
+    final darkerPrimaryColor = AppColors.darkerShade(primaryColor);
+
     return Container(
       color: Colors.white,
       child: ListView(
@@ -23,7 +30,7 @@ class ProductDetailsViewBody extends StatelessWidget {
           Text(
             product.name,
             style: TextStyles.bold24.copyWith(
-              color: AppColors.primaryDarkColor,
+              color: darkerPrimaryColor,
             ),
           ),
           const Gap(8),
@@ -33,11 +40,11 @@ class ProductDetailsViewBody extends StatelessWidget {
                 child: Text(
                   product.priceText,
                   style: TextStyles.bold16.copyWith(
-                    color: AppColors.primaryColor,
+                    color: primaryColor,
                   ),
                 ),
               ),
-              const QuantitySelector(),
+              QuantitySelector(color: primaryColor),
             ],
           ),
           const Gap(20),
