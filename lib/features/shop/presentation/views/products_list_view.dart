@@ -4,6 +4,7 @@ import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
 import 'package:makanak/features/shop/presentation/widgets/products_list_view_body.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
+import 'package:makanak/shared/widgets/keyboard_dismiss_on_tap.dart';
 
 class ProductsListView extends StatelessWidget {
   const ProductsListView({super.key, required this.shopModel});
@@ -16,7 +17,11 @@ class ProductsListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<ProductsCubit>()..fetchProducts(shopModel.id ?? ''),
-      child: Scaffold(body: ProductsListViewBody(shopModel: shopModel)),
+      child: Scaffold(
+        body: KeyboardDismissOnTap(
+          child: ProductsListViewBody(shopModel: shopModel),
+        ),
+      ),
     );
   }
 }

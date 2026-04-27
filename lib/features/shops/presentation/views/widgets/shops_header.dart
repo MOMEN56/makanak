@@ -8,7 +8,9 @@ import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state
 import 'package:makanak/shared/widgets/search_text_field.dart';
 
 class ShopsHeader extends StatelessWidget {
-  const ShopsHeader({super.key});
+  const ShopsHeader({super.key, this.onSearchChanged});
+
+  final ValueChanged<String>? onSearchChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +30,7 @@ class ShopsHeader extends StatelessWidget {
               child: BlocBuilder<AuthCubit, AuthState>(
                 buildWhen:
                     (previous, current) =>
-                        (previous is AuthLoading) !=
-                        (current is AuthLoading),
+                        (previous is AuthLoading) != (current is AuthLoading),
                 builder: (context, state) {
                   final isLoading = state is AuthLoading;
 
@@ -74,7 +75,11 @@ class ShopsHeader extends StatelessWidget {
           ],
         ),
         const Gap(32),
-        const SearchTextField(hintText: 'ابحث عن المكان اللي نفسك فيه..'),
+        SearchTextField(
+          hintText:
+              '\u0627\u0628\u062d\u062b \u0639\u0646 \u0627\u0644\u0645\u0643\u0627\u0646 \u0627\u0644\u0644\u064a \u0646\u0641\u0633\u0643 \u0641\u064a\u0647..',
+          onChanged: onSearchChanged,
+        ),
         const Gap(32),
       ],
     );

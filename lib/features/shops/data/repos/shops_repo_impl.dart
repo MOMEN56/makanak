@@ -10,9 +10,13 @@ class ShopsRepoImpl implements ShopsRepo {
   final SupabaseDatabaseService _databaseService;
 
   @override
-  Future<Either<Failure, List<ShopModel>>> fetchShops() async {
+  Future<Either<Failure, List<ShopModel>>> fetchShops({
+    String query = '',
+  }) async {
     try {
-      final shopsData = await _databaseService.fetchVisibleActiveShops();
+      final shopsData = await _databaseService.fetchVisibleActiveShops(
+        query: query,
+      );
       final shops = shopsData.map(ShopModel.fromJson).toList();
       return right(shops);
     } catch (_) {

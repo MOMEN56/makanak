@@ -4,18 +4,29 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseDatabaseService {
   const SupabaseDatabaseService(this._client);
 
+  static const int defaultFetchLimit = 30;
+
   final SupabaseClient _client;
 
-  Future<List<Map<String, dynamic>>> fetchVisibleActiveShops() async {
+  Future<List<Map<String, dynamic>>> fetchVisibleActiveShops({
+    String query = '',
+    int limit = defaultFetchLimit,
+  }) async {
     try {
-      final data = await _client
+      final normalizedQuery = query.trim();
+      var request = _client
           .from('shops')
           .select(
             'id, owner_id, name, logo_url, primary_color, category, is_active, is_visible, is_open, working_hours',
           )
           .eq('is_visible', true)
-          .eq('is_active', true)
-          .order('name');
+          .eq('is_active', true);
+
+      if (normalizedQuery.isNotEmpty) {
+        request = request.ilike('name', '%$normalizedQuery%');
+      }
+
+      final data = await request.order('name').limit(limit);
 
       return List<Map<String, dynamic>>.from(data);
     } on PostgrestException catch (e) {
@@ -26,17 +37,30 @@ class SupabaseDatabaseService {
   }
 
   Future<List<Map<String, dynamic>>> fetchVisibleProductsByShopId(
-    String shopId,
-  ) async {
+    String shopId, {
+    String query = '',
+    bool? priceAscending,
+    int limit = defaultFetchLimit,
+  }) async {
     try {
-      final data = await _client
+      final normalizedQuery = query.trim();
+      var request = _client
           .from('products')
           .select(
             'id, shop_id, name, description, image_url, price, in_stock, stock_quantity, is_visible',
           )
           .eq('shop_id', shopId)
-          .eq('is_visible', true)
-          .order('name');
+          .eq('is_visible', true);
+
+      if (normalizedQuery.isNotEmpty) {
+        request = request.ilike('name', '%$normalizedQuery%');
+      }
+
+      final orderedRequest =
+          priceAscending == null
+              ? request.order('name')
+              : request.order('price', ascending: priceAscending);
+      final data = await orderedRequest.limit(limit);
 
       return List<Map<String, dynamic>>.from(data);
     } on PostgrestException catch (e) {

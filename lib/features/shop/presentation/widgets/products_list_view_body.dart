@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
+import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_state.dart';
 import 'package:makanak/features/shop/presentation/widgets/products_list.dart';
@@ -16,6 +17,13 @@ class ProductsListViewBody extends StatelessWidget {
   const ProductsListViewBody({super.key, required this.shopModel});
 
   final ShopModel shopModel;
+
+  void _onPriceSortChanged(BuildContext context, ProductPriceSort priceSort) {
+    context.read<ProductsCubit>().changePriceSort(
+      shopModel.id ?? '',
+      priceSort,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,12 @@ class ProductsListViewBody extends StatelessWidget {
           SearchTextField(
             hintText:
                 '\u0646\u0641\u0633\u0643 \u062A\u062C\u064A\u0628 \u0627\u064A\u0647\u061F',
-            onChanged: (value) {},
+            onChanged: (value) {
+              context.read<ProductsCubit>().searchProducts(
+                shopModel.id ?? '',
+                value,
+              );
+            },
           ),
           const Gap(24),
           Expanded(
@@ -68,6 +81,10 @@ class ProductsListViewBody extends StatelessWidget {
                         : ProductsList(
                           products: products,
                           primaryColor: shopPrimaryColor,
+                          priceSort: state.priceSort,
+                          onPriceSortChanged: (priceSort) {
+                            _onPriceSortChanged(context, priceSort);
+                          },
                         ),
                   ProductsFailure(:final message) => StateMessage(
                     message: message,

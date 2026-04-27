@@ -22,8 +22,9 @@ class ShopsList extends StatelessWidget {
 
           return ShopCard(
             shop: shop,
-            onShopTap: () {
-              Navigator.push(
+            onShopTap: () async {
+              FocusManager.instance.primaryFocus?.unfocus();
+              await Navigator.push(
                 context,
                 PageRouteBuilder(
                   transitionDuration: const Duration(milliseconds: 300),
@@ -41,6 +42,8 @@ class ShopsList extends StatelessWidget {
                   },
                 ),
               );
+              if (!context.mounted) return;
+              FocusManager.instance.primaryFocus?.unfocus();
             },
           );
         },

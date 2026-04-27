@@ -11,18 +11,24 @@ class ProductsRepoImpl implements ProductsRepo {
 
   @override
   Future<Either<Failure, List<ProductModel>>> fetchProductsByShopId(
-    String shopId,
-  ) async {
+    String shopId, {
+    String query = '',
+    ProductPriceSort priceSort = ProductPriceSort.none,
+  }) async {
     try {
       final productsData = await _databaseService.fetchVisibleProductsByShopId(
         shopId,
+        query: query,
+        priceAscending: switch (priceSort) {
+          ProductPriceSort.none => null,
+          ProductPriceSort.lowToHigh => true,
+          ProductPriceSort.highToLow => false,
+        },
       );
       final products = productsData.map(ProductModel.fromJson).toList();
       return right(products);
     } catch (_) {
-      return left(
-        const Failure('تعذر تحميل المنتجات الآن. حاول مرة أخرى.'),
-      );
+      return left(const Failure('تعذر تحميل المنتجات الآن. حاول مرة أخرى.'));
     }
   }
 }
