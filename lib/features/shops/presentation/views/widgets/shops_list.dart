@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
-import 'package:makanak/features/shop/presentation/views/products_list_view.dart';
+import 'package:makanak/features/shop/presentation/views/products_view.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/features/shops/presentation/views/widgets/shop_card.dart';
 

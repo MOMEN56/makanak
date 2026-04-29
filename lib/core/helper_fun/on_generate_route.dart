@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
 import 'package:makanak/features/auth/presentation/views/sign_in_view.dart';
 import 'package:makanak/features/auth/presentation/views/sign_up_view.dart';
-import 'package:makanak/features/shop/presentation/views/products_list_view.dart';
+import 'package:makanak/features/shop/presentation/views/products_view.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/features/shops/presentation/views/shops_view.dart';
 

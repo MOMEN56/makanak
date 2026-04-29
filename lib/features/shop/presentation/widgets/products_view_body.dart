@@ -7,6 +7,7 @@ import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_state.dart';
+import 'package:makanak/features/shop/presentation/widgets/fiilter_items_widgets.dart';
 import 'package:makanak/features/shop/presentation/widgets/products_list.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
@@ -55,15 +56,33 @@ class ProductsListViewBody extends StatelessWidget {
             ],
           ),
           const Gap(30),
-          SearchTextField(
-            hintText:
-                '\u0646\u0641\u0633\u0643 \u062A\u062C\u064A\u0628 \u0627\u064A\u0647\u061F',
-            onChanged: (value) {
-              context.read<ProductsCubit>().searchProducts(
-                shopModel.id ?? '',
-                value,
-              );
-            },
+          Row(
+            children: [
+              Expanded(
+                child: SearchTextField(
+                  hintText:
+                      '\u0646\u0641\u0633\u0643 \u062a\u062c\u064a\u0628 \u0627\u064a\u0647\u061f',
+                  onChanged: (value) {
+                    context.read<ProductsCubit>().searchProducts(
+                      shopModel.id ?? '',
+                      value,
+                    );
+                  },
+                ),
+              ),
+              const Gap(10),
+              BlocSelector<ProductsCubit, ProductsState, ProductPriceSort>(
+                selector: (state) => state.priceSort,
+                builder: (context, priceSort) {
+                  return FilterItemsWidgets(
+                    priceSort: priceSort,
+                    onPriceSortChanged: (priceSort) {
+                      _onPriceSortChanged(context, priceSort);
+                    },
+                  );
+                },
+              ),
+            ],
           ),
           const Gap(24),
           Expanded(
@@ -72,20 +91,10 @@ class ProductsListViewBody extends StatelessWidget {
                 return switch (state) {
                   ProductsInitial() ||
                   ProductsLoading() => const CustomLoadingIndicator(),
-                  ProductsSuccess(:final products) =>
-                    products.isEmpty
-                        ? const StateMessage(
-                          message:
-                              '\u0644\u0627 \u062A\u0648\u062C\u062F \u0645\u0646\u062A\u062C\u0627\u062A \u0645\u062A\u0627\u062D\u0629 \u062D\u0627\u0644\u064A\u0627.',
-                        )
-                        : ProductsList(
-                          products: products,
-                          primaryColor: shopPrimaryColor,
-                          priceSort: state.priceSort,
-                          onPriceSortChanged: (priceSort) {
-                            _onPriceSortChanged(context, priceSort);
-                          },
-                        ),
+                  ProductsSuccess(:final products) => ProductsList(
+                    products: products,
+                    primaryColor: shopPrimaryColor,
+                  ),
                   ProductsFailure(:final message) => StateMessage(
                     message: message,
                     onRetry: () {

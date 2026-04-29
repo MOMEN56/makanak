@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
-import 'package:makanak/features/shop/presentation/widgets/products_list_view_body.dart';
+import 'package:makanak/features/shop/presentation/widgets/products_view_body.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/keyboard_dismiss_on_tap.dart';
 

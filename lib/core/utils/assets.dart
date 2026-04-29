@@ -26,6 +26,10 @@ class Assets {
   /// assets/icons/app_icon.png
   static const String assetsIconsAppIcon = "assets/icons/app_icon.png";
 
+  /// Assets for assetsIconsIdkEmoji
+  /// assets/icons/idk_emoji.png
+  static const String assetsIconsIdkEmoji = "assets/icons/idk_emoji.png";
+
   /// Assets for assetsIconsSplashBrand800x320
   /// assets/icons/splash_brand_800x320.png
   static const String assetsIconsSplashBrand800x320 = "assets/icons/splash_brand_800x320.png";
