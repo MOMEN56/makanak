@@ -5,12 +5,15 @@ import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
 import 'package:makanak/features/auth/presentation/views/sign_in_view.dart';
 import 'package:makanak/features/auth/presentation/views/sign_up_view.dart';
+import 'package:makanak/features/bottom_navigation/presentation/views/bottom_navigation_view.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/views/add_user_address_view.dart';
 import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/submit_order_view.dart';
+import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
+import 'package:makanak/features/profile/presentation/views/profile_view.dart';
 import 'package:makanak/features/shop/presentation/views/products_view.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/features/shops/presentation/views/shops_view.dart';
@@ -31,6 +34,11 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return MaterialPageRoute(
         settings: settings,
         builder: (_) => const SignUpView(),
+      );
+    case BottomNavigationView.routeName:
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => const BottomNavigationView(),
       );
     case CartView.routeName:
       final arguments = settings.arguments;
@@ -84,6 +92,16 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return MaterialPageRoute(
         settings: settings,
         builder: (_) => const ShopsView(),
+      );
+    case OrderHistoryView.routeName:
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => const OrderHistoryView(),
+      );
+    case ProfileView.routeName:
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => const ProfileView(),
       );
     case ProductsView.routeName:
       final shopModel = settings.arguments;

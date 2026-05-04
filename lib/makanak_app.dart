@@ -47,16 +47,12 @@ class MakanakApp extends StatelessWidget {
           builder: (context, child) {
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: const SystemUiOverlayStyle(
-                statusBarColor: AppColors.greyBackground,
-                statusBarIconBrightness: Brightness.dark,
-                statusBarBrightness: Brightness.light,
-                systemNavigationBarColor: AppColors.greyBackground,
+                systemNavigationBarColor: Colors.transparent,
+                systemNavigationBarDividerColor: Colors.transparent,
                 systemNavigationBarIconBrightness: Brightness.dark,
+                systemNavigationBarContrastEnforced: false,
               ),
-              child: ColoredBox(
-                color: AppColors.greyBackground,
-                child: SafeArea(child: child ?? const SizedBox.shrink()),
-              ),
+              child: child ?? const SizedBox.shrink(),
             );
           },
           initialRoute: AuthGateView.routeName,

@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/services/supabase_client_service.dart';
 import 'package:makanak/makanak_app.dart';
@@ -8,5 +9,6 @@ Future<void> main() async {
 
   await SupabaseClientService.initialize();
   setupServiceLocator();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(const MakanakApp());
 }

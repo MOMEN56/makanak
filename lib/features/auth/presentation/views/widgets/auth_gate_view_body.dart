@@ -7,7 +7,7 @@ import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:makanak/features/auth/presentation/views/sign_in_view.dart';
 import 'package:makanak/features/auth/presentation/views/widgets/auth_logo_badge.dart';
-import 'package:makanak/features/shops/presentation/views/shops_view.dart';
+import 'package:makanak/features/bottom_navigation/presentation/views/bottom_navigation_view.dart';
 
 class AuthGateViewBody extends StatelessWidget {
   const AuthGateViewBody({super.key});
@@ -19,7 +19,7 @@ class AuthGateViewBody extends StatelessWidget {
           (previous, current) => previous.runtimeType != current.runtimeType,
       builder: (context, state) {
         return switch (state) {
-          AuthAuthenticated() => const ShopsView(),
+          AuthAuthenticated() => const BottomNavigationView(),
           AuthUnauthenticated() => const SignInView(),
           _ => Directionality(
             textDirection: TextDirection.rtl,
