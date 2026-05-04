@@ -76,8 +76,7 @@ class ShopsHeader extends StatelessWidget {
         ),
         const Gap(32),
         SearchTextField(
-          hintText:
-              '\u0627\u0628\u062d\u062b \u0639\u0646 \u0627\u0644\u0645\u0643\u0627\u0646 \u0627\u0644\u0644\u064a \u0646\u0641\u0633\u0643 \u0641\u064a\u0647..',
+          hintText: 'ابحث عن المكان اللي نفسك فيه..',
           onChanged: onSearchChanged,
         ),
         const Gap(32),

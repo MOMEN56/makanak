@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:makanak/core/helper_fun/on_generate_route.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
@@ -25,7 +26,7 @@ class MakanakApp extends StatelessWidget {
         },
         child: MaterialApp(
           navigatorKey: _navigatorKey,
-          title: 'مكانك',
+          title: AppStrings.appTitle,
           debugShowCheckedModeBanner: false,
           locale: const Locale('ar'),
           supportedLocales: const [Locale('ar')],

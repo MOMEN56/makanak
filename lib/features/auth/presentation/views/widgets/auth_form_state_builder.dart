@@ -18,10 +18,7 @@ class AuthFormStateData {
 }
 
 class AuthFormStateBuilder extends StatelessWidget {
-  const AuthFormStateBuilder({
-    super.key,
-    required this.builder,
-  });
+  const AuthFormStateBuilder({super.key, required this.builder});
 
   final Widget Function(BuildContext context, AuthFormStateData data) builder;
 

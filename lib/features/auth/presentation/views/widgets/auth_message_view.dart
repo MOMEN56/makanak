@@ -4,10 +4,7 @@ import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state
 import 'package:makanak/features/auth/presentation/views/widgets/auth_status_card.dart';
 
 class AuthMessageView extends StatelessWidget {
-  const AuthMessageView({
-    super.key,
-    required this.messageState,
-  });
+  const AuthMessageView({super.key, required this.messageState});
 
   final AuthUnauthenticated? messageState;
 
@@ -22,10 +19,7 @@ class AuthMessageView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const Gap(20),
-        AuthStatusCard(
-          message: state.message!,
-          isError: state.isError,
-        ),
+        AuthStatusCard(message: state.message!, isError: state.isError),
       ],
     );
   }

@@ -20,7 +20,7 @@ class FilterItemsWidgets extends StatelessWidget {
       height: 56,
       child: PopupMenuButton<ProductPriceSort>(
         initialValue: priceSort,
-        tooltip: '\u0641\u0644\u062a\u0631',
+        tooltip: 'فلتر',
         color: AppColors.white,
         surfaceTintColor: AppColors.white,
         elevation: 4,
@@ -76,19 +76,13 @@ class _PriceSortItem {
 }
 
 const _sortItems = [
-  _PriceSortItem(
-    value: ProductPriceSort.none,
-    label:
-        '\u0627\u0644\u062a\u0631\u062a\u064a\u0628 \u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a',
-  ),
+  _PriceSortItem(value: ProductPriceSort.none, label: 'الترتيب الافتراضي'),
   _PriceSortItem(
     value: ProductPriceSort.lowToHigh,
-    label:
-        '\u0627\u0644\u0633\u0639\u0631: \u0645\u0646 \u0627\u0644\u0623\u0642\u0644 \u0644\u0644\u0623\u0639\u0644\u0649',
+    label: 'السعر: من الأقل للأعلى',
   ),
   _PriceSortItem(
     value: ProductPriceSort.highToLow,
-    label:
-        '\u0627\u0644\u0633\u0639\u0631: \u0645\u0646 \u0627\u0644\u0623\u0639\u0644\u0649 \u0644\u0644\u0623\u0642\u0644',
+    label: 'السعر: من الأعلى للأقل',
   ),
 ];

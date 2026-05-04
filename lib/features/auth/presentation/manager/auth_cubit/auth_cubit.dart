@@ -191,7 +191,8 @@ class AuthCubit extends Cubit<AuthState> {
           return;
         }
 
-        final profile = authResult.profile ?? ProfileEntity(id: session.user.id);
+        final profile =
+            authResult.profile ?? ProfileEntity(id: session.user.id);
         emit(AuthAuthenticated(profile: profile));
       },
     );

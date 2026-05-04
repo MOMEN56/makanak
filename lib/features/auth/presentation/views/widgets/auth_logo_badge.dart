@@ -3,10 +3,7 @@ import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/assets.dart';
 
 class AuthLogoBadge extends StatelessWidget {
-  const AuthLogoBadge({
-    super.key,
-    this.asset = Assets.assetsIconsAppIcon,
-  });
+  const AuthLogoBadge({super.key, this.asset = Assets.assetsIconsAppIcon});
 
   final String asset;
 
@@ -26,11 +23,7 @@ class AuthLogoBadge extends StatelessWidget {
           ),
         ],
       ),
-      child: Image.asset(
-        asset,
-        width: 64,
-        height: 64,
-      ),
+      child: Image.asset(asset, width: 64, height: 64),
     );
   }
 }

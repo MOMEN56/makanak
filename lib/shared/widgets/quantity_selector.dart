@@ -9,12 +9,20 @@ class QuantitySelector extends StatefulWidget {
     this.minQuantity = 1,
     this.onChanged,
     this.color,
+    this.buttonSize = 36,
+    this.iconSize = 20,
+    this.valueWidth = 56,
+    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
   });
 
   final int initialQuantity;
   final int minQuantity;
   final ValueChanged<int>? onChanged;
   final Color? color;
+  final double buttonSize;
+  final double iconSize;
+  final double valueWidth;
+  final EdgeInsetsGeometry padding;
 
   @override
   State<QuantitySelector> createState() => _QuantitySelectorState();
@@ -26,14 +34,25 @@ class _QuantitySelectorState extends State<QuantitySelector> {
   @override
   void initState() {
     super.initState();
-    quantity =
-        widget.initialQuantity < widget.minQuantity
-            ? widget.minQuantity
-            : widget.initialQuantity;
+    quantity = _clampedQuantity(widget.initialQuantity);
+  }
+
+  @override
+  void didUpdateWidget(covariant QuantitySelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialQuantity != oldWidget.initialQuantity ||
+        widget.minQuantity != oldWidget.minQuantity) {
+      quantity = _clampedQuantity(widget.initialQuantity);
+    }
+  }
+
+  int _clampedQuantity(int value) {
+    return value < widget.minQuantity ? widget.minQuantity : value;
   }
 
   void _updateQuantity(int value) {
-    setState(() => quantity = value);
+    final updatedQuantity = _clampedQuantity(value);
+    setState(() => quantity = updatedQuantity);
     widget.onChanged?.call(quantity);
   }
 
@@ -52,11 +71,11 @@ class _QuantitySelectorState extends State<QuantitySelector> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(999),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: widget.padding,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -64,9 +83,11 @@ class _QuantitySelectorState extends State<QuantitySelector> {
               icon: Icons.remove,
               onTap: _decrement,
               color: resolvedColor,
+              size: widget.buttonSize,
+              iconSize: widget.iconSize,
             ),
             SizedBox(
-              width: 56,
+              width: widget.valueWidth,
               child: Text(
                 '$quantity',
                 textAlign: TextAlign.center,
@@ -77,6 +98,8 @@ class _QuantitySelectorState extends State<QuantitySelector> {
               icon: Icons.add,
               onTap: _increment,
               color: resolvedColor,
+              size: widget.buttonSize,
+              iconSize: widget.iconSize,
             ),
           ],
         ),
@@ -90,11 +113,15 @@ class _QuantityButton extends StatelessWidget {
     required this.icon,
     required this.onTap,
     required this.color,
+    required this.size,
+    required this.iconSize,
   });
 
   final IconData icon;
   final VoidCallback onTap;
   final Color color;
+  final double size;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -105,9 +132,9 @@ class _QuantityButton extends StatelessWidget {
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: SizedBox(
-          height: 36,
-          width: 36,
-          child: Icon(icon, color: AppColors.white, size: 20),
+          height: size,
+          width: size,
+          child: Icon(icon, color: AppColors.white, size: iconSize),
         ),
       ),
     );

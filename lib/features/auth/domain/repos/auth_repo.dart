@@ -4,11 +4,7 @@ import 'package:makanak/features/auth/domain/entities/profile_entity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 class AuthOperationResult {
-  const AuthOperationResult({
-    this.message,
-    this.profile,
-    this.session,
-  });
+  const AuthOperationResult({this.message, this.profile, this.session});
 
   final String? message;
   final ProfileEntity? profile;

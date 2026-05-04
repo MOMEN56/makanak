@@ -106,10 +106,8 @@ class SignUpFormFields extends StatelessWidget {
             ),
           ),
           validator:
-              (value) => validateAuthConfirmPassword(
-                value,
-                passwordController.text,
-              ),
+              (value) =>
+                  validateAuthConfirmPassword(value, passwordController.text),
           onChanged: onChanged,
         ),
       ],

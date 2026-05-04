@@ -84,7 +84,7 @@ class ShopCard extends StatelessWidget {
             ),
             const Gap(16),
             CustomButton(
-              hint: '\u062A\u0633\u0648\u0642',
+              hint: 'تسوق',
               onTap: onShopTap,
               //hasShadowEffect: true,
             ),

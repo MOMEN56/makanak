@@ -29,15 +29,15 @@ class ShopEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        ownerId,
-        name,
-        logoUrl,
-        primaryColor,
-        category,
-        isActive,
-        isVisible,
-        isOpen,
-        workingHours,
-      ];
+    id,
+    ownerId,
+    name,
+    logoUrl,
+    primaryColor,
+    category,
+    isActive,
+    isVisible,
+    isOpen,
+    workingHours,
+  ];
 }

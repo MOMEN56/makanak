@@ -6,6 +6,9 @@ import 'package:makanak/core/services/supabase_database_service.dart';
 import 'package:makanak/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:makanak/features/auth/domain/repos/auth_repo.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
+import 'package:makanak/features/cart/data/repos/cart_repository_impl.dart';
+import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/data/repos/products_repo_impl.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
@@ -52,6 +55,10 @@ void setupServiceLocator() {
     () => ProductsRepoImpl(getIt<SupabaseDatabaseService>()),
   );
 
+  getIt.registerLazySingleton<CartRepository>(
+    () => CartRepositoryImpl(getIt<SupabaseDatabaseService>()),
+  );
+
   getIt.registerFactory<ShopsCubit>(() => ShopsCubit(getIt<ShopsRepo>()));
 
   getIt.registerFactory<ProductsCubit>(
@@ -59,4 +66,8 @@ void setupServiceLocator() {
   );
 
   getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepo>()));
+
+  getIt.registerLazySingleton<CartCubit>(
+    () => CartCubit(getIt<CartRepository>()),
+  );
 }

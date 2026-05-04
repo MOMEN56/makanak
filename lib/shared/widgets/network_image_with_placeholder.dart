@@ -29,40 +29,38 @@ class NetworkImageWithPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final image = imageUrl.isEmpty
-        ? _ImagePlaceholder(
-            height: height,
-            width: width,
-            icon: placeholderIcon,
-            color: placeholderColor,
-            iconColor: iconColor,
-          )
-        : Image.network(
-            imageUrl,
-            height: height,
-            width: width,
-            fit: fit,
-            cacheWidth: cacheWidth,
-            filterQuality: filterQuality,
-            errorBuilder: (_, __, ___) {
-              return _ImagePlaceholder(
-                height: height,
-                width: width,
-                icon: placeholderIcon,
-                color: placeholderColor,
-                iconColor: iconColor,
-              );
-            },
-          );
+    final image =
+        imageUrl.isEmpty
+            ? _ImagePlaceholder(
+              height: height,
+              width: width,
+              icon: placeholderIcon,
+              color: placeholderColor,
+              iconColor: iconColor,
+            )
+            : Image.network(
+              imageUrl,
+              height: height,
+              width: width,
+              fit: fit,
+              cacheWidth: cacheWidth,
+              filterQuality: filterQuality,
+              errorBuilder: (_, __, ___) {
+                return _ImagePlaceholder(
+                  height: height,
+                  width: width,
+                  icon: placeholderIcon,
+                  color: placeholderColor,
+                  iconColor: iconColor,
+                );
+              },
+            );
 
     if (borderRadius == null) {
       return image;
     }
 
-    return ClipRRect(
-      borderRadius: borderRadius!,
-      child: image,
-    );
+    return ClipRRect(borderRadius: borderRadius!, child: image);
   }
 }
 
@@ -88,12 +86,7 @@ class _ImagePlaceholder extends StatelessWidget {
       child: SizedBox(
         height: height,
         width: width,
-        child: Center(
-          child: Icon(
-            icon,
-            color: iconColor,
-          ),
-        ),
+        child: Center(child: Icon(icon, color: iconColor)),
       ),
     );
   }

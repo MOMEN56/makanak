@@ -137,7 +137,9 @@ class _SignUpViewBodyState extends State<SignUpViewBody> {
                                   if (Navigator.of(context).canPop()) {
                                     Navigator.of(context).pop();
                                   } else {
-                                    Navigator.of(context).pushNamedAndRemoveUntil(
+                                    Navigator.of(
+                                      context,
+                                    ).pushNamedAndRemoveUntil(
                                       SignInView.routeName,
                                       (route) => false,
                                     );

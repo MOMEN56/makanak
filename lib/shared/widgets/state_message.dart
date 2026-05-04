@@ -4,11 +4,7 @@ import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 
 class StateMessage extends StatelessWidget {
-  const StateMessage({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
+  const StateMessage({super.key, required this.message, this.onRetry});
 
   final String message;
   final VoidCallback? onRetry;

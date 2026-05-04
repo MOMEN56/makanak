@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 
@@ -26,22 +27,23 @@ class CustomButton extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: hasShadowEffect
-            ? [
-                BoxShadow(
-                  color: resolvedColor.withValues(alpha: 0.28),
-                  blurRadius: 6,
-                  offset: Offset(0, 4),
-                  spreadRadius: -4,
-                ),
-                BoxShadow(
-                  color: resolvedColor.withValues(alpha: 0.22),
-                  blurRadius: 15,
-                  offset: Offset(0, 10),
-                  spreadRadius: -3,
-                ),
-              ]
-            : null,
+        boxShadow:
+            hasShadowEffect
+                ? [
+                  BoxShadow(
+                    color: resolvedColor.withValues(alpha: 0.28),
+                    blurRadius: 6,
+                    offset: Offset(0, 4),
+                    spreadRadius: -4,
+                  ),
+                  BoxShadow(
+                    color: resolvedColor.withValues(alpha: 0.22),
+                    blurRadius: 15,
+                    offset: Offset(0, 10),
+                    spreadRadius: -3,
+                  ),
+                ]
+                : null,
       ),
       child: Material(
         color: Colors.transparent,
@@ -63,15 +65,13 @@ class CustomButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (icon != null) ...[
-                  icon!,
-                  const SizedBox(width: 12),
-                ],
                 Text(
                   hint,
                   textAlign: TextAlign.center,
                   style: TextStyles.bold16.copyWith(color: AppColors.white),
                 ),
+                Gap(6),
+                if (icon != null) ...[icon!, const SizedBox(width: 12)],
               ],
             ),
           ),

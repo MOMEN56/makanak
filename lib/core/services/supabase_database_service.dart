@@ -1,4 +1,5 @@
 import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/utils/address_form_validator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseDatabaseService {
@@ -101,6 +102,92 @@ class SupabaseDatabaseService {
               .single();
 
       return Map<String, dynamic>.from(data);
+    } on PostgrestException catch (e) {
+      throw DatabaseException(e.message, code: e.code);
+    } catch (_) {
+      throw const DatabaseException('Unexpected database error');
+    }
+  }
+
+  Future<Map<String, dynamic>> addUserAddress({
+    required String street,
+    required String floor,
+    required String building,
+    required String apartmentNumber,
+    String notes = '',
+    required String phoneNumber,
+  }) async {
+    try {
+      final normalizedPhone = AddressFormValidator.normalizeDigits(phoneNumber);
+      final data = await _client.rpc(
+        'add_user_address',
+        params: {
+          'p_street': street.trim(),
+          'p_floor': floor.trim(),
+          'p_building': building.trim(),
+          'p_apartment_number': apartmentNumber.trim(),
+          'p_address_notes': notes.trim(),
+          'p_phone_number': normalizedPhone,
+        },
+      );
+
+      return Map<String, dynamic>.from(data as Map);
+    } on PostgrestException catch (e) {
+      throw DatabaseException(e.message, code: e.code);
+    } catch (_) {
+      throw const DatabaseException('Unexpected database error');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchUserAddresses() async {
+    try {
+      final data = await _client.rpc('fetch_user_addresses');
+
+      return List<Map<String, dynamic>>.from(data);
+    } on PostgrestException catch (e) {
+      throw DatabaseException(e.message, code: e.code);
+    } catch (_) {
+      throw const DatabaseException('Unexpected database error');
+    }
+  }
+
+  Future<Map<String, dynamic>> setDefaultUserAddress(String addressId) async {
+    try {
+      final data = await _client.rpc(
+        'set_default_user_address',
+        params: {'p_address_id': addressId},
+      );
+
+      return Map<String, dynamic>.from(data as Map);
+    } on PostgrestException catch (e) {
+      throw DatabaseException(e.message, code: e.code);
+    } catch (_) {
+      throw const DatabaseException('Unexpected database error');
+    }
+  }
+
+  Future<Map<String, dynamic>> createOrder({
+    required String shopId,
+    required String productId,
+    required String addressId,
+    required int quantity,
+    required int itemsTotal,
+    required int shippingPrice,
+  }) async {
+    try {
+      final data = await _client.rpc(
+        'create_order',
+        params: {
+          'p_shop_id': shopId,
+          'p_product_id': productId,
+          'p_address_id': addressId,
+          'p_quantity': quantity,
+          'p_items_total': itemsTotal,
+          'p_shipping_price': shippingPrice,
+        },
+      );
+
+      return Map<String, dynamic>.from(data as Map);
     } on PostgrestException catch (e) {
       throw DatabaseException(e.message, code: e.code);
     } catch (_) {

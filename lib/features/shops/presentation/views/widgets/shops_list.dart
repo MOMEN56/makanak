@@ -30,7 +30,7 @@ class ShopsList extends StatelessWidget {
                   transitionDuration: const Duration(milliseconds: 300),
                   reverseTransitionDuration: const Duration(milliseconds: 300),
                   pageBuilder: (context, animation, secondaryAnimation) {
-                    return ProductsListView(shopModel: shop);
+                    return ProductsView(shopModel: shop);
                   },
                   transitionsBuilder: (
                     context,

@@ -123,9 +123,7 @@ class AuthRepoImpl implements AuthRepo {
       AuthLogger.logAuthSetupIssue(
         'Google native sign-in cannot start without GOOGLE_WEB_CLIENT_ID.',
       );
-      return left(
-        const Failure('تعذر بدء تسجيل الدخول بحساب Google الآن.'),
-      );
+      return left(const Failure('تعذر بدء تسجيل الدخول بحساب Google الآن.'));
     }
 
     try {
@@ -245,9 +243,8 @@ class AuthRepoImpl implements AuthRepo {
     }
     return profileResult.fold(
       left,
-      (profile) => right(
-        AuthOperationResult(profile: profile, session: session),
-      ),
+      (profile) =>
+          right(AuthOperationResult(profile: profile, session: session)),
     );
   }
 

@@ -42,8 +42,7 @@ class ShopsViewBody extends StatelessWidget {
                         hasScrollBody: false,
                         child: MessageEmojiWidget(
                           image: Assets.assetsIconsIdkEmoji,
-                          text:
-                              '\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u062d\u0644\u0627\u062a \u0645\u062a\u0627\u062d\u0629 \u062d\u0627\u0644\u064a\u0627.',
+                          text: 'لا توجد محلات يهذا الأسم .',
                         ),
                       )
                       : ShopsList(shops: shops),

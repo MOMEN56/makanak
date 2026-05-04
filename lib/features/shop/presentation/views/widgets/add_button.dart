@@ -18,11 +18,7 @@ class AddButton extends StatelessWidget {
         child: const SizedBox(
           height: 36,
           width: 36,
-          child: Icon(
-            Icons.add,
-            color: AppColors.white,
-            size: 22,
-          ),
+          child: Icon(Icons.add, color: AppColors.white, size: 22),
         ),
       ),
     );

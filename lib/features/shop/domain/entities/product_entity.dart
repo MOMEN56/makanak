@@ -24,18 +24,18 @@ class ProductEntity extends Equatable {
   final bool isVisible;
 
   String get desc => description ?? '';
-  String get priceText => '$price \u062c\u0646\u064a\u0647';
+  String get priceText => '$price جنيه';
 
   @override
   List<Object?> get props => [
-        id,
-        shopId,
-        name,
-        description,
-        imageUrl,
-        price,
-        inStock,
-        stockQuantity,
-        isVisible,
-      ];
+    id,
+    shopId,
+    name,
+    description,
+    imageUrl,
+    price,
+    inStock,
+    stockQuantity,
+    isVisible,
+  ];
 }
