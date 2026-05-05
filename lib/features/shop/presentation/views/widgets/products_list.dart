@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/assets.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/presentation/views/product_details_view.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/product_card.dart';
@@ -13,12 +15,16 @@ class ProductsList extends StatefulWidget {
     required this.primaryColor,
     this.shopModel,
     this.onProductSelected,
+    this.onCartRequested,
+    this.onProductAdded,
   });
 
   final List<ProductModel> products;
   final Color primaryColor;
   final ShopModel? shopModel;
   final void Function(ProductModel product, int quantity)? onProductSelected;
+  final VoidCallback? onCartRequested;
+  final VoidCallback? onProductAdded;
 
   @override
   State<ProductsList> createState() => _ProductsListState();
@@ -69,17 +75,23 @@ class _ProductsListState extends State<ProductsList> {
           primaryColor: widget.primaryColor,
           onTap: () async {
             FocusManager.instance.primaryFocus?.unfocus();
+            final cartCubit = context.read<CartCubit>();
             await Navigator.push(
               context,
               PageRouteBuilder(
                 transitionDuration: const Duration(milliseconds: 300),
                 reverseTransitionDuration: const Duration(milliseconds: 300),
                 pageBuilder: (context, animation, secondaryAnimation) {
-                  return ProductDetailsView(
-                    product: product,
-                    primaryColor: widget.primaryColor,
-                    shopModel: widget.shopModel,
-                    initialQuantity: quantity,
+                  return BlocProvider<CartCubit>.value(
+                    value: cartCubit,
+                    child: ProductDetailsView(
+                      product: product,
+                      primaryColor: widget.primaryColor,
+                      shopModel: widget.shopModel,
+                      initialQuantity: quantity,
+                      onCartRequested: widget.onCartRequested,
+                      onProductAdded: widget.onProductAdded,
+                    ),
                   );
                 },
                 transitionsBuilder: (

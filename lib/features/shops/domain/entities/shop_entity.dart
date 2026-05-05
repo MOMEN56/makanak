@@ -6,7 +6,6 @@ class ShopEntity extends Equatable {
     this.ownerId,
     required this.name,
     this.logoUrl,
-    this.primaryColor = '#004AAD',
     required this.category,
     this.isActive = true,
     this.isVisible = true,
@@ -18,7 +17,6 @@ class ShopEntity extends Equatable {
   final String? ownerId;
   final String name;
   final String? logoUrl;
-  final String primaryColor;
   final String category;
   final bool isActive;
   final bool isVisible;
@@ -33,7 +31,6 @@ class ShopEntity extends Equatable {
     ownerId,
     name,
     logoUrl,
-    primaryColor,
     category,
     isActive,
     isVisible,

@@ -4,10 +4,12 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/address_form_validator.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
+import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
+import 'package:makanak/features/cart/presentation/actions/cart_route_arguments_builder.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_header_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_indicator.dart';
@@ -104,18 +106,6 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
     Navigator.maybePop(context);
   }
 
-  CartViewArguments? _routeArguments(CartState state, Color primaryColor) {
-    final product = state.product ?? widget.cartArguments?.product;
-    if (product == null) return widget.cartArguments;
-    return CartViewArguments(
-      product: product,
-      quantity: state.quantity,
-      primaryColor: primaryColor,
-      shopModel: widget.cartArguments?.shopModel,
-      shippingPrice: state.shippingPrice,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final primaryColor =
@@ -135,7 +125,11 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
           Navigator.pushReplacementNamed(
             context,
             ConfirmingOrderView.routeName,
-            arguments: _routeArguments(state, primaryColor),
+            arguments: CartRouteArgumentsBuilder.fromState(
+              state: state,
+              primaryColor: primaryColor,
+              fallback: widget.cartArguments,
+            ),
           );
           return;
         }
@@ -145,7 +139,11 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
           Navigator.pushNamed(
             context,
             ConfirmingOrderView.routeName,
-            arguments: _routeArguments(state, primaryColor),
+            arguments: CartRouteArgumentsBuilder.fromState(
+              state: state,
+              primaryColor: primaryColor,
+              fallback: widget.cartArguments,
+            ),
           );
         }
       },
@@ -158,7 +156,7 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
 
         return SafeArea(
           child: Padding(
-            padding: AppResponsive.all(context, 20),
+            padding: AppResponsive.all(context, AppSpacing.screenEdge),
             child: Form(
               key: formKey,
               child: Column(

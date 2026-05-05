@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
+import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
+import 'package:makanak/core/utils/assets.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
+import 'package:makanak/features/cart/presentation/actions/cart_route_arguments_builder.dart';
 import 'package:makanak/features/cart/presentation/views/add_user_address_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_header_widget.dart';
@@ -16,9 +19,16 @@ import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class CartViewBody extends StatefulWidget {
-  const CartViewBody({super.key, this.cartArguments});
+  const CartViewBody({
+    super.key,
+    this.cartArguments,
+    this.bottomContentPadding = 0,
+    this.onBack,
+  });
 
   final CartViewArguments? cartArguments;
+  final double bottomContentPadding;
+  final VoidCallback? onBack;
 
   @override
   State<CartViewBody> createState() => _CartViewBodyState();
@@ -37,12 +47,10 @@ class _CartViewBodyState extends State<CartViewBody> {
     final product = state.product;
     if (product == null) return;
 
-    final routeArguments = CartViewArguments(
-      product: product,
-      quantity: state.quantity,
+    final routeArguments = CartRouteArgumentsBuilder.fromState(
+      state: state,
       primaryColor: primaryColor,
-      shopModel: widget.cartArguments?.shopModel,
-      shippingPrice: state.shippingPrice,
+      fallback: widget.cartArguments,
     );
 
     Navigator.pushNamed(
@@ -52,6 +60,16 @@ class _CartViewBodyState extends State<CartViewBody> {
           : AddUserAddressView.routeName,
       arguments: routeArguments,
     );
+  }
+
+  void _goBack() {
+    final onBack = widget.onBack;
+    if (onBack != null) {
+      onBack();
+      return;
+    }
+
+    Navigator.maybePop(context);
   }
 
   @override
@@ -70,15 +88,16 @@ class _CartViewBodyState extends State<CartViewBody> {
         final itemCount = cartProduct == null ? 0 : state.quantity;
 
         return SafeArea(
+          bottom: widget.bottomContentPadding == 0,
           child: Padding(
-            padding: AppResponsive.all(context, 20),
+            padding: AppResponsive.all(context, AppSpacing.screenEdge),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CartHeaderWidget(
                   primaryColor: primaryColor,
                   itemCount: itemCount,
-                  onBack: () => Navigator.maybePop(context),
+                  onBack: _goBack,
                 ),
                 const Gap(20),
                 CartStepIndicator(
@@ -90,7 +109,22 @@ class _CartViewBodyState extends State<CartViewBody> {
                 Expanded(
                   child:
                       cartProduct == null
-                          ? const StateMessage(message: AppStrings.cartEmpty)
+                          ? Center(
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 250,
+                                  width: 250,
+                                  child: Image.asset(
+                                    Assets.assetsIconsEmptyCartIcon,
+                                  ),
+                                ),
+                                const StateMessage(
+                                  message: AppStrings.cartEmpty,
+                                ),
+                              ],
+                            ),
+                          )
                           : ListView(
                             children: [
                               CartItemCard(
@@ -104,16 +138,16 @@ class _CartViewBodyState extends State<CartViewBody> {
                             ],
                           ),
                 ),
-                const Gap(12),
-                CustomButton(
-                  hint: AppStrings.continueText,
-                  color: primaryColor,
-                  onTap:
-                      cartProduct == null
-                          ? null
-                          : () => _goToNextStep(state, primaryColor),
-                  hasShadowEffect: false,
-                ),
+                if (cartProduct != null) ...[
+                  const Gap(12),
+                  CustomButton(
+                    hint: AppStrings.continueText,
+                    color: primaryColor,
+                    onTap: () => _goToNextStep(state, primaryColor),
+                    hasShadowEffect: false,
+                  ),
+                  SizedBox(height: widget.bottomContentPadding),
+                ],
               ],
             ),
           ),

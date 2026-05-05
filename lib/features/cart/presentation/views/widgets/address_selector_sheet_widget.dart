@@ -90,7 +90,7 @@ class _AddressSelectorSheetState extends State<AddressSelectorSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: SelectableAddressCard(
                         address: widget.addresses[index],
-                        isSelected: index == _currentIndex,
+                        isSelected: index == widget.selectedIndex,
                         primaryColor: widget.primaryColor,
                         onSetAsMain:
                             widget.addresses[index].isDefault

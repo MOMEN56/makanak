@@ -40,14 +40,28 @@ class AddressCard extends StatelessWidget {
                 ),
               ),
               if (canChangeAddress)
-                TextButton.icon(
-                  onPressed: onChangeAddress,
-                  icon: const Icon(Icons.swap_horiz_rounded, size: 18),
-                  label: const Text(AppStrings.change),
-                  style: TextButton.styleFrom(
-                    foregroundColor: primaryColor,
-                    textStyle: TextStyles.semiBold14,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  child: Center(
+                    child: TextButton(
+                      onPressed: onChangeAddress,
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.white,
+                        textStyle: TextStyles.semiBold14,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(AppStrings.change),
+                          Gap(6),
+                          Icon(Icons.swap_horiz_rounded, size: 18),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
             ],

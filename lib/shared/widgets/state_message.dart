@@ -20,7 +20,7 @@ class StateMessage extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyles.medium16.copyWith(
+              style: TextStyles.bold20.copyWith(
                 color: AppColors.shopCategoryColor,
               ),
             ),

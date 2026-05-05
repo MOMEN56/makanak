@@ -12,6 +12,7 @@ void showProductAddedSnackBar({
   required Color shopColor,
   ShopModel? shopModel,
   int quantity = 1,
+  VoidCallback? onCartTap,
 }) {
   final quantityText = quantity > 1 ? ' $quantity' : '';
 
@@ -22,6 +23,11 @@ void showProductAddedSnackBar({
     backgroundColor: shopColor,
     onBadgeTap: () {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      if (onCartTap != null) {
+        onCartTap();
+        return;
+      }
+
       Navigator.pushNamed(
         context,
         CartView.routeName,

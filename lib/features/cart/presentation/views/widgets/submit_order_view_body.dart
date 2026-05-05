@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
+import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/shop/presentation/views/products_view.dart';
@@ -78,7 +78,7 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
 
     return SafeArea(
       child: Padding(
-        padding: AppResponsive.all(context, 20),
+        padding: AppResponsive.all(context, AppSpacing.screenEdge),
         child: Column(
           children: [
             Expanded(
@@ -113,7 +113,6 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
               hasShadowEffect: true,
               color: primaryColor,
             ),
-            const Gap(12),
           ],
         ),
       ),

@@ -15,11 +15,13 @@ class BottomNavigationItem extends StatelessWidget {
     required this.data,
     required this.isSelected,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final BottomNavigationItemData data;
   final bool isSelected;
   final VoidCallback onTap;
+  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,18 @@ class BottomNavigationItem extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(data.icon, color: Colors.white, size: 24),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(data.icon, color: Colors.white, size: 24),
+                    if (badgeCount > 0)
+                      PositionedDirectional(
+                        top: -7,
+                        end: -10,
+                        child: _CartBadge(count: badgeCount),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 Text(
                   data.label,
@@ -49,6 +62,42 @@ class BottomNavigationItem extends StatelessWidget {
                   style: TextStyles.medium12.copyWith(color: Colors.white),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CartBadge extends StatelessWidget {
+  const _CartBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = count > 99 ? '99+' : '$count';
+
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: const BoxDecoration(
+        color: Color(0xFFE53935),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyles.medium12.copyWith(
+              color: Colors.white,
+              fontSize: 10,
+              height: 1,
             ),
           ),
         ),

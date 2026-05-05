@@ -18,15 +18,19 @@ abstract final class TextStyles {
     fontWeight: FontWeight.w600,
     height: 1.43,
   );
+  static const TextStyle bold16 = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+  );
+  static const TextStyle bold20 = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+  );
+
   static const TextStyle bold24 = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.w800,
     height: 1.43,
-  );
-
-  static const TextStyle bold16 = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w700,
   );
 
   static const TextStyle medium16 = TextStyle(

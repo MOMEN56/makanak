@@ -18,7 +18,7 @@ class SupabaseDatabaseService {
       var request = _client
           .from('shops')
           .select(
-            'id, owner_id, name, logo_url, primary_color, category, is_active, is_visible, is_open, working_hours',
+            'id, owner_id, name, logo_url, category, is_active, is_visible, is_open, working_hours',
           )
           .eq('is_visible', true)
           .eq('is_active', true);

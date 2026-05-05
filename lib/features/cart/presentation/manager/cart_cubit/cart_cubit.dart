@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/address_form_validator.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/data/models/address_form_draft_model.dart';
+import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
 import 'package:makanak/features/cart/data/models/confirming_order_address_model.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
@@ -12,6 +15,70 @@ class CartCubit extends Cubit<CartState> {
 
   final CartRepository _cartRepository;
   bool _hasCheckedAddresses = false;
+
+  Future<void> restoreSavedCart({String? shopId}) async {
+    final savedCart = await CartLocalStorage.loadProduct();
+    if (savedCart == null || isClosed) return;
+
+    if (shopId != null &&
+        shopId.isNotEmpty &&
+        savedCart.product.shopId != shopId) {
+      await CartLocalStorage.clear();
+      return;
+    }
+
+    emit(
+      CartInitial(
+        product: savedCart.product,
+        quantity: savedCart.quantity < 1 ? 1 : savedCart.quantity,
+        addresses: state.addresses,
+        selectedAddressIndex: _validatedAddressIndex(
+          state.selectedAddressIndex,
+          state.addresses,
+        ),
+        draft: state.draft,
+        shippingPrice: savedCart.shippingPrice,
+      ),
+    );
+  }
+
+  void addProduct(CartViewArguments arguments) {
+    final currentProduct = state.product;
+    final incomingProduct = arguments.product;
+    if (incomingProduct == null) return;
+
+    final currentProductId = currentProduct?.id;
+    final incomingProductId = incomingProduct.id;
+    final isSameProduct =
+        currentProductId != null &&
+        currentProductId.isNotEmpty &&
+        currentProductId == incomingProductId;
+    final updatedQuantity =
+        isSameProduct ? state.quantity + arguments.quantity : arguments.quantity;
+    final safeQuantity = updatedQuantity < 1 ? 1 : updatedQuantity;
+
+    emit(
+      CartInitial(
+        product: incomingProduct,
+        quantity: safeQuantity,
+        addresses: state.addresses,
+        selectedAddressIndex: _validatedAddressIndex(
+          state.selectedAddressIndex,
+          state.addresses,
+        ),
+        draft: state.draft,
+        shippingPrice: arguments.shippingPrice,
+      ),
+    );
+
+    unawaited(
+      CartLocalStorage.saveProduct(
+        product: incomingProduct,
+        quantity: safeQuantity,
+        shippingPrice: arguments.shippingPrice,
+      ),
+    );
+  }
 
   void initializeCart(CartViewArguments? arguments) {
     if (arguments == null) return;
@@ -185,6 +252,7 @@ class CartCubit extends Cubit<CartState> {
     if (isClosed) return;
 
     result.fold((failure) => emit(_errorFromState(failure.message)), (_) {
+      unawaited(CartLocalStorage.clear());
       emit(
         CartOrderSubmitted(
           product: state.product,
@@ -199,10 +267,11 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void updateQuantity(int quantity) {
+    final safeQuantity = quantity < 1 ? 1 : quantity;
     emit(
       CartInitial(
         product: state.product,
-        quantity: quantity < 1 ? 1 : quantity,
+        quantity: safeQuantity,
         addresses: state.addresses,
         selectedAddressIndex: _validatedAddressIndex(
           state.selectedAddressIndex,
@@ -212,6 +281,17 @@ class CartCubit extends Cubit<CartState> {
         shippingPrice: state.shippingPrice,
       ),
     );
+
+    final product = state.product;
+    if (product != null) {
+      unawaited(
+        CartLocalStorage.saveProduct(
+          product: product,
+          quantity: safeQuantity,
+          shippingPrice: state.shippingPrice,
+        ),
+      );
+    }
   }
 
   void removeItem() {
@@ -226,6 +306,15 @@ class CartCubit extends Cubit<CartState> {
         shippingPrice: state.shippingPrice,
       ),
     );
+    unawaited(CartLocalStorage.clear());
+  }
+
+  void clearProductFromOtherShop(String? shopId) {
+    if (shopId == null || shopId.isEmpty) return;
+    final product = state.product;
+    if (product == null || product.shopId == shopId) return;
+
+    removeItem();
   }
 
   void selectAddress(int index) {
