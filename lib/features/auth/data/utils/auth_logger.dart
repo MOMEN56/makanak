@@ -7,6 +7,8 @@ abstract final class AuthLogger {
     PlatformException error,
     StackTrace stackTrace,
   ) {
+    if (!kDebugMode) return;
+
     debugPrint(
       'Google sign-in PlatformException: '
       'code=${error.code}, message=${error.message}, details=${error.details}',
@@ -18,11 +20,15 @@ abstract final class AuthLogger {
     Object error,
     StackTrace stackTrace,
   ) {
+    if (!kDebugMode) return;
+
     debugPrint('Unexpected Google sign-in error: $error');
     debugPrintStack(stackTrace: stackTrace);
   }
 
   static void logAuthException(String operation, supa.AuthException error) {
+    if (!kDebugMode) return;
+
     debugPrint(
       '$operation AuthException: '
       'message=${error.message}, statusCode=${error.statusCode}, code=${error.code}',
@@ -30,6 +36,8 @@ abstract final class AuthLogger {
   }
 
   static void logAuthSetupIssue(String message) {
+    if (!kDebugMode) return;
+
     debugPrint('Auth setup issue: $message');
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
@@ -84,7 +85,7 @@ class ShopCard extends StatelessWidget {
             ),
             const Gap(16),
             CustomButton(
-              hint: 'تسوق',
+              hint: AppStrings.shopCardAction,
               onTap: onShopTap,
               //hasShadowEffect: true,
             ),

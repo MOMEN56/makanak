@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 
 class ProductEntity extends Equatable {
   const ProductEntity({
@@ -24,7 +25,7 @@ class ProductEntity extends Equatable {
   final bool isVisible;
 
   String get desc => description ?? '';
-  String get priceText => '$price جنيه';
+  String get priceText => AppStrings.priceInEgyptianPounds(price);
 
   @override
   List<Object?> get props => [

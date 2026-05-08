@@ -1,4 +1,7 @@
 import 'package:get_it/get_it.dart';
+import 'package:makanak/core/data/repos/address_repository_impl.dart';
+import 'package:makanak/core/domain/repos/address_repository.dart';
+import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
 import 'package:makanak/core/services/google_sign_in_service.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
 import 'package:makanak/core/services/supabase_client_service.dart';
@@ -59,6 +62,10 @@ void setupServiceLocator() {
     () => CartRepositoryImpl(getIt<SupabaseDatabaseService>()),
   );
 
+  getIt.registerLazySingleton<AddressRepository>(
+    () => AddressRepositoryImpl(getIt<SupabaseDatabaseService>()),
+  );
+
   getIt.registerFactory<ShopsCubit>(() => ShopsCubit(getIt<ShopsRepo>()));
 
   getIt.registerFactory<ProductsCubit>(
@@ -69,5 +76,9 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<CartCubit>(
     () => CartCubit(getIt<CartRepository>()),
+  );
+
+  getIt.registerLazySingleton<AddressCubit>(
+    () => AddressCubit(getIt<AddressRepository>()),
   );
 }

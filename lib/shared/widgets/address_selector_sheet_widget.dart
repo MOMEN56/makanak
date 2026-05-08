@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
-import 'package:makanak/features/cart/data/models/confirming_order_address_model.dart';
+import 'package:makanak/core/models/confirming_order_address_model.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/selectable_address_card_widget.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 
@@ -21,7 +21,7 @@ class AddressSelectorSheet extends StatefulWidget {
   final int selectedIndex;
   final ValueChanged<int> onAddressSelected;
   final Color primaryColor;
-  final Future<void> Function(int index) onMainAddressSelected;
+  final Future<bool> Function(int index) onMainAddressSelected;
 
   @override
   State<AddressSelectorSheet> createState() => _AddressSelectorSheetState();
@@ -30,6 +30,7 @@ class AddressSelectorSheet extends StatefulWidget {
 class _AddressSelectorSheetState extends State<AddressSelectorSheet> {
   late final PageController _pageController;
   late int _currentIndex;
+  bool _isSettingMainAddress = false;
 
   @override
   void initState() {
@@ -48,9 +49,16 @@ class _AddressSelectorSheetState extends State<AddressSelectorSheet> {
   }
 
   Future<void> _setMainAddress(int index) async {
-    await widget.onMainAddressSelected(index);
+    if (_isSettingMainAddress) return;
+
+    setState(() => _isSettingMainAddress = true);
+    final didUpdate = await widget.onMainAddressSelected(index);
     if (!mounted) return;
-    Navigator.pop(context);
+
+    setState(() => _isSettingMainAddress = false);
+    if (didUpdate) {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -84,16 +92,21 @@ class _AddressSelectorSheetState extends State<AddressSelectorSheet> {
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: widget.addresses.length,
+                physics:
+                    _isSettingMainAddress
+                        ? const NeverScrollableScrollPhysics()
+                        : null,
                 onPageChanged: (index) => setState(() => _currentIndex = index),
                 itemBuilder:
                     (context, index) => Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: SelectableAddressCard(
                         address: widget.addresses[index],
-                        isSelected: index == widget.selectedIndex,
+                        isSelected: index == _currentIndex,
                         primaryColor: widget.primaryColor,
                         onSetAsMain:
-                            widget.addresses[index].isDefault
+                            _isSettingMainAddress ||
+                                    widget.addresses[index].isDefault
                                 ? null
                                 : () => _setMainAddress(index),
                       ),
@@ -123,7 +136,10 @@ class _AddressSelectorSheetState extends State<AddressSelectorSheet> {
             const Gap(18),
             CustomButton(
               hint: AppStrings.useThisAddress,
-              onTap: () => widget.onAddressSelected(_currentIndex),
+              onTap:
+                  _isSettingMainAddress
+                      ? null
+                      : () => widget.onAddressSelected(_currentIndex),
               color: widget.primaryColor,
               icon: const Icon(
                 Icons.check_rounded,

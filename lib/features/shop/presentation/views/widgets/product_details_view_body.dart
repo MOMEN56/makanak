@@ -63,7 +63,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
         widget.product.name,
         quantity > 1 ? ' $quantity' : '',
       ),
-      badgeText: "السلة",
+      badgeText: AppStrings.cart,
       backgroundColor: widget.primaryColor,
       onBadgeTap: () => _openCart(quantity),
     );

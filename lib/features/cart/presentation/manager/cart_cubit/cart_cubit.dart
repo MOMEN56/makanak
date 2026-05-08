@@ -1,20 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:makanak/core/utils/address_form_validator.dart';
 import 'package:makanak/core/utils/app_strings.dart';
-import 'package:makanak/features/cart/data/models/address_form_draft_model.dart';
+import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
-import 'package:makanak/features/cart/data/models/confirming_order_address_model.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
-import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 
 class CartCubit extends Cubit<CartState> {
   CartCubit(this._cartRepository) : super(const CartInitial());
 
   final CartRepository _cartRepository;
-  bool _hasCheckedAddresses = false;
 
   Future<void> restoreSavedCart({String? shopId}) async {
     final savedCart = await CartLocalStorage.loadProduct();
@@ -31,12 +27,6 @@ class CartCubit extends Cubit<CartState> {
       CartInitial(
         product: savedCart.product,
         quantity: savedCart.quantity < 1 ? 1 : savedCart.quantity,
-        addresses: state.addresses,
-        selectedAddressIndex: _validatedAddressIndex(
-          state.selectedAddressIndex,
-          state.addresses,
-        ),
-        draft: state.draft,
         shippingPrice: savedCart.shippingPrice,
       ),
     );
@@ -61,12 +51,6 @@ class CartCubit extends Cubit<CartState> {
       CartInitial(
         product: incomingProduct,
         quantity: safeQuantity,
-        addresses: state.addresses,
-        selectedAddressIndex: _validatedAddressIndex(
-          state.selectedAddressIndex,
-          state.addresses,
-        ),
-        draft: state.draft,
         shippingPrice: arguments.shippingPrice,
       ),
     );
@@ -95,12 +79,6 @@ class CartCubit extends Cubit<CartState> {
         CartInitial(
           product: state.product,
           quantity: arguments.quantity,
-          addresses: state.addresses,
-          selectedAddressIndex: _validatedAddressIndex(
-            state.selectedAddressIndex,
-            state.addresses,
-          ),
-          draft: state.draft,
           shippingPrice: arguments.shippingPrice,
         ),
       );
@@ -111,118 +89,12 @@ class CartCubit extends Cubit<CartState> {
       CartInitial(
         product: arguments.product,
         quantity: arguments.quantity,
-        addresses: state.addresses,
-        selectedAddressIndex: _validatedAddressIndex(
-          state.selectedAddressIndex,
-          state.addresses,
-        ),
-        draft: state.draft,
         shippingPrice: arguments.shippingPrice,
       ),
     );
   }
 
-  Future<void> checkSavedAddresses() async {
-    if (_hasCheckedAddresses) {
-      _emitAddressState(state.addresses);
-      return;
-    }
-
-    emit(_loadingFromState());
-    final result = await _cartRepository.fetchUserAddresses();
-    if (isClosed) return;
-
-    result.fold(
-      (failure) {
-        _hasCheckedAddresses = true;
-        emit(_errorFromState(failure.message));
-      },
-      (addresses) {
-        _hasCheckedAddresses = true;
-        _emitAddressState(addresses);
-      },
-    );
-  }
-
-  Future<void> fetchAddresses() async {
-    if (state.addresses.isNotEmpty) {
-      _emitAddressesLoaded(state.addresses);
-      return;
-    }
-
-    emit(_loadingFromState());
-    final result = await _cartRepository.fetchUserAddresses();
-    if (isClosed) return;
-
-    result.fold((failure) => emit(_errorFromState(failure.message)), (
-      addresses,
-    ) {
-      _hasCheckedAddresses = true;
-      _emitAddressesLoaded(addresses);
-    });
-  }
-
-  Future<void> saveAddress({
-    required String street,
-    required String floor,
-    required String building,
-    required String apartmentNumber,
-    String notes = '',
-    required String phoneNumber,
-  }) async {
-    emit(_loadingFromState());
-    final result = await _cartRepository.saveAddress(
-      street: street,
-      floor: floor,
-      building: building,
-      apartmentNumber: apartmentNumber,
-      notes: notes,
-      phoneNumber: phoneNumber,
-    );
-    if (isClosed) return;
-
-    result.fold((failure) => emit(_errorFromState(failure.message)), (address) {
-      final updatedAddresses = [
-        ...state.addresses,
-        if (!state.addresses.any((item) => item.id == address.id)) address,
-      ];
-      _hasCheckedAddresses = true;
-      _emitAddressesLoaded(updatedAddresses);
-    });
-  }
-
-  Future<void> setDefaultAddress(int index) async {
-    if (index < 0 || index >= state.addresses.length) return;
-
-    final address = state.addresses[index];
-    if (address.isDefault) {
-      selectAddress(index);
-      return;
-    }
-
-    emit(_loadingFromState());
-    final result = await _cartRepository.setDefaultAddress(address.id);
-    if (isClosed) return;
-
-    result.fold((failure) => emit(_errorFromState(failure.message)), (_) {
-      final updatedAddresses =
-          state.addresses
-              .map(
-                (item) => ConfirmingOrderAddressModel(
-                  id: item.id,
-                  title: item.title,
-                  phone: item.phone,
-                  details: item.details,
-                  notes: item.notes,
-                  isDefault: item.id == address.id,
-                ),
-              )
-              .toList();
-      _emitAddressesLoaded(updatedAddresses, selectedAddressIndex: index);
-    });
-  }
-
-  Future<void> createOrder() async {
+  Future<void> createOrder({required String addressId}) async {
     final product = state.product;
     final productId = product?.id;
     if (product == null || productId == null || productId.isEmpty) {
@@ -230,21 +102,16 @@ class CartCubit extends Cubit<CartState> {
       return;
     }
 
-    if (state.addresses.isEmpty) {
+    if (addressId.isEmpty) {
       emit(_errorFromState(AppStrings.invalidAddress));
       return;
     }
 
-    final selectedAddressIndex = _validatedAddressIndex(
-      state.selectedAddressIndex,
-      state.addresses,
-    );
-    final selectedAddress = state.addresses[selectedAddressIndex];
     emit(_loadingFromState());
     final result = await _cartRepository.createOrder(
       shopId: product.shopId,
       productId: productId,
-      addressId: selectedAddress.id,
+      addressId: addressId,
       quantity: state.quantity,
       itemsTotal: state.itemsSubtotal,
       shippingPrice: state.shippingPrice,
@@ -257,9 +124,6 @@ class CartCubit extends Cubit<CartState> {
         CartOrderSubmitted(
           product: state.product,
           quantity: state.quantity,
-          addresses: state.addresses,
-          selectedAddressIndex: selectedAddressIndex,
-          draft: const AddressFormDraft(),
           shippingPrice: state.shippingPrice,
         ),
       );
@@ -272,12 +136,6 @@ class CartCubit extends Cubit<CartState> {
       CartInitial(
         product: state.product,
         quantity: safeQuantity,
-        addresses: state.addresses,
-        selectedAddressIndex: _validatedAddressIndex(
-          state.selectedAddressIndex,
-          state.addresses,
-        ),
-        draft: state.draft,
         shippingPrice: state.shippingPrice,
       ),
     );
@@ -295,17 +153,7 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void removeItem() {
-    emit(
-      CartInitial(
-        addresses: state.addresses,
-        selectedAddressIndex: _validatedAddressIndex(
-          state.selectedAddressIndex,
-          state.addresses,
-        ),
-        draft: state.draft,
-        shippingPrice: state.shippingPrice,
-      ),
-    );
+    emit(CartInitial(shippingPrice: state.shippingPrice));
     unawaited(CartLocalStorage.clear());
   }
 
@@ -317,51 +165,10 @@ class CartCubit extends Cubit<CartState> {
     removeItem();
   }
 
-  void selectAddress(int index) {
-    if (index < 0 || index >= state.addresses.length) return;
-    _emitAddressesLoaded(state.addresses, selectedAddressIndex: index);
-  }
-
-  void saveDraft({
-    required String addressName,
-    required String phone,
-    required String floor,
-    required String building,
-    required String apartment,
-    required String notes,
-  }) {
-    emit(
-      CartInitial(
-        product: state.product,
-        quantity: state.quantity,
-        addresses: state.addresses,
-        selectedAddressIndex: _validatedAddressIndex(
-          state.selectedAddressIndex,
-          state.addresses,
-        ),
-        draft: AddressFormDraft(
-          addressName: addressName,
-          phone: AddressFormValidator.normalizeDigits(phone),
-          floor: floor,
-          building: building,
-          apartment: apartment,
-          notes: notes,
-        ),
-        shippingPrice: state.shippingPrice,
-      ),
-    );
-  }
-
   CartLoading _loadingFromState() {
     return CartLoading(
       product: state.product,
       quantity: state.quantity,
-      addresses: state.addresses,
-      selectedAddressIndex: _validatedAddressIndex(
-        state.selectedAddressIndex,
-        state.addresses,
-      ),
-      draft: state.draft,
       shippingPrice: state.shippingPrice,
     );
   }
@@ -371,63 +178,7 @@ class CartCubit extends Cubit<CartState> {
       message,
       product: state.product,
       quantity: state.quantity,
-      addresses: state.addresses,
-      selectedAddressIndex: _validatedAddressIndex(
-        state.selectedAddressIndex,
-        state.addresses,
-      ),
-      draft: state.draft,
       shippingPrice: state.shippingPrice,
     );
-  }
-
-  void _emitAddressState(List<ConfirmingOrderAddressModel> addresses) {
-    emit(
-      CartAddressChecked(
-        addresses.isNotEmpty,
-        product: state.product,
-        quantity: state.quantity,
-        addresses: addresses,
-        selectedAddressIndex: _defaultAddressIndex(addresses),
-        draft: state.draft,
-        shippingPrice: state.shippingPrice,
-      ),
-    );
-  }
-
-  void _emitAddressesLoaded(
-    List<ConfirmingOrderAddressModel> addresses, {
-    int? selectedAddressIndex,
-  }) {
-    emit(
-      CartAddressesLoaded(
-        addresses,
-        product: state.product,
-        quantity: state.quantity,
-        selectedAddressIndex: _validatedAddressIndex(
-          selectedAddressIndex ?? _defaultAddressIndex(addresses),
-          addresses,
-        ),
-        draft: state.draft,
-        shippingPrice: state.shippingPrice,
-      ),
-    );
-  }
-
-  int _defaultAddressIndex(List<ConfirmingOrderAddressModel> addresses) {
-    if (addresses.isEmpty) return 0;
-    final defaultIndex = addresses.indexWhere((address) => address.isDefault);
-    return defaultIndex < 0 ? 0 : defaultIndex;
-  }
-
-  int _validatedAddressIndex(
-    int selectedAddressIndex,
-    List<ConfirmingOrderAddressModel> addresses,
-  ) {
-    if (addresses.isEmpty) return 0;
-    if (selectedAddressIndex < 0 || selectedAddressIndex >= addresses.length) {
-      return _defaultAddressIndex(addresses);
-    }
-    return selectedAddressIndex;
   }
 }

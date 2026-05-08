@@ -42,6 +42,7 @@ class AppStrings {
   static const currency = 'ج.م';
   static const trackOrder = 'تتبع طلبي';
   static const shopDataUnavailable = 'بيانات المحل غير متاحة';
+  static const productDataUnavailable = 'بيانات المنتج غير متاحة';
   static const requiredFieldMessage = 'هذا الحقل مطلوب';
   static const phoneRequired = 'رقم الهاتف مطلوب';
   static const phoneDigitsOnly = 'رقم الهاتف يجب أن يحتوي على أرقام فقط';
@@ -50,6 +51,121 @@ class AppStrings {
       'رقم الهاتف يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015';
   static const addToCart = 'اضف للسلة';
   static const productSearchHint = 'نفسك تجيب ايه؟';
+  static const account = 'الحساب';
+  static const savedAddresses = 'العناوين المحفوظة';
+  static const signOut = 'تسجيل الخروج';
+  static const goToShopsList = 'الذهاب لقائمة المحلات';
+  static const retry = 'إعادة المحاولة';
+
+  static const home = 'الرئيسية';
+  static const orderHistory = 'سجل الطلبات';
+  static const shopsHeaderTitle = 'نفسك في إيه؟';
+  static const shopsSearchHint = 'ابحث عن المكان اللي نفسك فيه..';
+  static const shopsEmptySearch = 'لا توجد محلات بهذا الاسم.';
+  static const shopsLoadError =
+      'تعذر تحميل المحلات الآن. حاول مرة أخرى بعد قليل.';
+  static const shopCardAction = 'تسوق';
+  static const productsEmptySearch = 'لا توجد منتجات بهذا الاسم.';
+  static const productsLoadError = 'تعذر تحميل المنتجات الآن. حاول مرة أخرى.';
+  static const filterTooltip = 'فلتر';
+  static const priceSortDefault = 'الترتيب الافتراضي';
+  static const priceSortLowToHigh = 'السعر: من الأقل للأعلى';
+  static const priceSortHighToLow = 'السعر: من الأعلى للأقل';
+
+  static const authSignInTitle = 'أهلًا بك في مكانك';
+  static const authSignInSubtitle =
+      'سجّل دخولك للوصول السريع إلى المتاجر والمنتجات ومتابعة طلباتك بسهولة.';
+  static const authSignInFormTitle = 'تسجيل الدخول';
+  static const authSignInFormSubtitle = 'ابدأ الجلسة بالطريقة المناسبة لك.';
+  static const authSignUpTitle = 'أنشئ حسابك في مكانك';
+  static const authSignUpSubtitle =
+      'أنشئ حسابًا جديدًا لحفظ بياناتك والدخول السريع إلى تجربة تسوق عربية سهلة.';
+  static const authSignUpFormTitle = 'حساب جديد';
+  static const authEmail = 'البريد الإلكتروني';
+  static const authEmailHint = 'example@email.com';
+  static const authPassword = 'كلمة المرور';
+  static const authPasswordHint = 'أدخلي كلمة المرور';
+  static const authSignUpPasswordHint = 'أنشئي كلمة مرور قوية';
+  static const authConfirmPassword = 'تأكيد كلمة المرور';
+  static const authConfirmPasswordHint = 'أعيدي كتابة كلمة المرور';
+  static const authFullName = 'الاسم الكامل';
+  static const authFullNameHint = 'اكتبي اسمك كما تحبين ظهوره';
+  static const authSignInButton = 'دخول';
+  static const authCreateAccountButton = 'إنشاء الحساب';
+  static const authCreateAccountLink = 'إنشاء حساب';
+  static const authHaveNoAccount = 'لسه ما عندكش حساب؟';
+  static const authAlreadyHaveAccount = 'عندك حساب بالفعل؟';
+  static const authGoogleContinue = 'المتابعة بحساب Google';
+  static const authPreparingAccountTitle = 'جار تجهيز حسابك';
+  static const authPreparingAccountSubtitle =
+      'لحظات بسيطة ونوصلك للصفحة المناسبة.';
+
+  static const authSignInLoading = 'جاري تسجيل الدخول...';
+  static const authSignUpLoading = 'جاري إنشاء الحساب...';
+  static const authGoogleLoading = 'جاري تجهيز تسجيل الدخول بحساب Google...';
+  static const authSignOutLoading = 'جاري تسجيل الخروج...';
+  static const authPasswordRecoveryMessage =
+      'يمكنك الآن تحديث كلمة المرور من بريد الاستعادة.';
+  static const authSessionStartError =
+      'تعذر بدء الجلسة الآن. حاول مرة أخرى بعد قليل.';
+  static const authSignInError =
+      'تعذر تسجيل الدخول الآن. حاول مرة أخرى بعد قليل.';
+  static const authSignUpConfirmMessage =
+      'تم إنشاء الحساب بنجاح. راجعي بريدك الإلكتروني لتأكيد الحساب ثم سجلي الدخول.';
+  static const authSignUpError =
+      'تعذر إنشاء الحساب الآن. حاول مرة أخرى بعد قليل.';
+  static const authProfileSyncError =
+      'تعذر تجهيز بيانات الحساب الآن. حاول مرة أخرى بعد قليل.';
+  static const authSignOutError =
+      'تعذر تسجيل الخروج الآن. حاول مرة أخرى بعد قليل.';
+  static const authRequestFailed =
+      'تعذر تنفيذ الطلب الآن. حاول مرة أخرى بعد قليل.';
+
+  static const googleSignInStartError =
+      'تعذر بدء تسجيل الدخول بحساب Google الآن.';
+  static const googleSignInStartLaterError =
+      'تعذر بدء تسجيل الدخول بحساب Google الآن. حاول مرة أخرى لاحقًا.';
+  static const googleSignInCancelled = 'تم إلغاء تسجيل الدخول بحساب Google.';
+  static const googleSignInCompleteError =
+      'تعذر إكمال تسجيل الدخول بحساب Google الآن.';
+  static const googleSignInError =
+      'تعذر تسجيل الدخول بحساب Google الآن. حاول مرة أخرى.';
+  static const googleSignInLaunchError =
+      'تعذر فتح شاشة تسجيل الدخول بحساب Google الآن.';
+  static const googleOAuthContinueMessage =
+      'كمّلي تسجيل الدخول بحساب Google من الشاشة التي فُتحت.';
+  static const googleSignInNetworkError =
+      'تعذر تسجيل Google الآن بسبب مشكلة اتصال. تحققي من الإنترنت ثم حاولي مرة أخرى.';
+
+  static const authEmailSendRateLimit =
+      'تم إرسال محاولات كثيرة خلال وقت قصير. انتظري قليلًا ثم حاولي مرة أخرى.';
+  static const authInvalidCredentials =
+      'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+  static const authEmailNotConfirmed =
+      'فعّلي بريدك الإلكتروني أولًا ثم حاولي مرة أخرى.';
+  static const authUserAlreadyRegistered =
+      'يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل.';
+  static const authWeakPassword =
+      'كلمة المرور ضعيفة. استخدمي 8 أحرف على الأقل.';
+  static const authNetworkError = 'تحققي من اتصال الإنترنت ثم حاولي مرة أخرى.';
+  static const authSignUpDisabled =
+      'إنشاء الحساب غير متاح الآن. حاولي مرة أخرى لاحقًا.';
+  static const authInvalidEmail =
+      'صيغة البريد الإلكتروني غير مقبولة. جرّبي بريدًا آخر.';
+  static const authTooManyRequests =
+      'تمت محاولات كثيرة خلال وقت قصير. انتظري دقيقة ثم جرّبي مرة أخرى ببريد جديد.';
+  static const authSignUpFailed =
+      'تعذر إنشاء الحساب الآن. راجعي البيانات وحاولي مرة أخرى.';
+
+  static const authFullNameRequired = 'من فضلك أدخلي الاسم الكامل.';
+  static const authFullNameTooShort =
+      'الاسم الكامل يجب أن يكون 3 أحرف على الأقل.';
+  static const authEmailRequired = 'من فضلك أدخلي البريد الإلكتروني.';
+  static const authEmailInvalid = 'صيغة البريد الإلكتروني غير صحيحة.';
+  static const authPasswordRequired = 'من فضلك أدخلي كلمة المرور.';
+  static const authPasswordTooShort = 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
+  static const authConfirmPasswordRequired = 'من فضلك أكدي كلمة المرور.';
+  static const authPasswordsDoNotMatch = 'كلمتا المرور غير متطابقتين.';
 
   static String requiredField(String fieldName) => '$fieldName مطلوب';
 
@@ -61,4 +177,6 @@ class AppStrings {
 
   static String productAddedToCart(String productName, String quantityText) =>
       'تمت إضافة$quantityText $productName إلى';
+
+  static String priceInEgyptianPounds(int price) => '$price جنيه';
 }

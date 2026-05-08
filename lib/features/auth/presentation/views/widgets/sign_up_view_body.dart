@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:makanak/features/auth/presentation/views/sign_in_view.dart';
@@ -46,9 +47,8 @@ class _SignUpViewBodyState extends State<SignUpViewBody> {
         final messageState = authState.messageState;
 
         return AuthScaffold(
-          title: 'أنشئ حسابك في مكانك',
-          subtitle:
-              'أنشئ حسابًا جديدًا لحفظ بياناتك والدخول السريع إلى تجربة تسوق عربية سهلة.',
+          title: AppStrings.authSignUpTitle,
+          subtitle: AppStrings.authSignUpSubtitle,
           showBackButton: true,
           child: Form(
             key: _formKey,
@@ -57,7 +57,7 @@ class _SignUpViewBodyState extends State<SignUpViewBody> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'حساب جديد',
+                  AppStrings.authSignUpFormTitle,
                   textAlign: TextAlign.center,
                   style: TextStyles.bold24.copyWith(
                     color: AppColors.shopNameColor,
@@ -88,7 +88,7 @@ class _SignUpViewBodyState extends State<SignUpViewBody> {
                 ),
                 const Gap(22),
                 AuthPrimaryButton(
-                  label: 'إنشاء الحساب',
+                  label: AppStrings.authCreateAccountButton,
                   isLoading: loadingOperation == AuthLoadingOperation.signUp,
                   onPressed:
                       isLoading
@@ -124,7 +124,7 @@ class _SignUpViewBodyState extends State<SignUpViewBody> {
                     spacing: 4,
                     children: [
                       Text(
-                        'عندك حساب بالفعل؟',
+                        AppStrings.authAlreadyHaveAccount,
                         style: TextStyles.regular14.copyWith(
                           color: AppColors.shopCategoryColor,
                         ),
@@ -145,7 +145,7 @@ class _SignUpViewBodyState extends State<SignUpViewBody> {
                                     );
                                   }
                                 },
-                        child: const Text('تسجيل الدخول'),
+                        child: const Text(AppStrings.authSignInFormTitle),
                       ),
                     ],
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 abstract final class AuthErrorMapper {
@@ -10,58 +11,58 @@ abstract final class AuthErrorMapper {
     final code = error.code?.toLowerCase();
 
     if (code == 'over_email_send_rate_limit') {
-      return 'تم إرسال محاولات كثيرة خلال وقت قصير. انتظري قليلًا ثم حاولي مرة أخرى.';
+      return AppStrings.authEmailSendRateLimit;
     }
 
     if (message.contains('invalid login credentials')) {
-      return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+      return AppStrings.authInvalidCredentials;
     }
 
     if (message.contains('email not confirmed')) {
-      return 'فعّلي بريدك الإلكتروني أولًا ثم حاولي مرة أخرى.';
+      return AppStrings.authEmailNotConfirmed;
     }
 
     if (message.contains('user already registered') ||
         message.contains('already been registered')) {
-      return 'يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل.';
+      return AppStrings.authUserAlreadyRegistered;
     }
 
     if (message.contains('password should be at least') ||
         message.contains('weak password')) {
-      return 'كلمة المرور ضعيفة. استخدمي 8 أحرف على الأقل.';
+      return AppStrings.authWeakPassword;
     }
 
     if (message.contains('network') || message.contains('socket')) {
-      return 'تحققي من اتصال الإنترنت ثم حاولي مرة أخرى.';
+      return AppStrings.authNetworkError;
     }
 
     if (message.contains('signup') &&
         (message.contains('disabled') || message.contains('not allowed'))) {
-      return 'إنشاء الحساب غير متاح الآن. حاولي مرة أخرى لاحقًا.';
+      return AppStrings.authSignUpDisabled;
     }
 
     if (message.contains('email') &&
         (message.contains('invalid') || message.contains('not valid'))) {
-      return 'صيغة البريد الإلكتروني غير مقبولة. جرّبي بريدًا آخر.';
+      return AppStrings.authInvalidEmail;
     }
 
     if (message.contains('rate limit') ||
         message.contains('too many') ||
         message.contains('security purposes')) {
-      return 'تمت محاولات كثيرة خلال وقت قصير. انتظري دقيقة ثم جرّبي مرة أخرى ببريد جديد.';
+      return AppStrings.authTooManyRequests;
     }
 
     if (message.contains('database') ||
         message.contains('saving') ||
         message.contains('trigger')) {
-      return 'تعذر تجهيز بيانات الحساب الآن. حاول مرة أخرى بعد قليل.';
+      return AppStrings.authProfileSyncError;
     }
 
     if (isSignUp) {
-      return 'تعذر إنشاء الحساب الآن. راجعي البيانات وحاولي مرة أخرى.';
+      return AppStrings.authSignUpFailed;
     }
 
-    return 'تعذر تنفيذ الطلب الآن. حاول مرة أخرى بعد قليل.';
+    return AppStrings.authRequestFailed;
   }
 
   static String mapGooglePlatformError(PlatformException error) {
@@ -71,19 +72,19 @@ abstract final class AuthErrorMapper {
     final combined = '$code $message $details';
 
     if (combined.contains('10') || combined.contains('developer_error')) {
-      return 'تعذر بدء تسجيل الدخول بحساب Google الآن. حاول مرة أخرى لاحقًا.';
+      return AppStrings.googleSignInStartLaterError;
     }
 
     if (combined.contains('12500') ||
         combined.contains('sign_in_failed') ||
         combined.contains('sign in failed')) {
-      return 'تعذر بدء تسجيل الدخول بحساب Google الآن. حاول مرة أخرى لاحقًا.';
+      return AppStrings.googleSignInStartLaterError;
     }
 
     if (combined.contains('network')) {
-      return 'تعذر تسجيل Google الآن بسبب مشكلة اتصال. تحققي من الإنترنت ثم حاولي مرة أخرى.';
+      return AppStrings.googleSignInNetworkError;
     }
 
-    return 'تعذر بدء تسجيل الدخول بحساب Google الآن. حاول مرة أخرى لاحقًا.';
+    return AppStrings.googleSignInStartLaterError;
   }
 }

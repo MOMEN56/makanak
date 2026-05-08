@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/bottom_navigation/presentation/views/widgets/bottom_navigation_item.dart';
 import 'package:makanak/features/bottom_navigation/presentation/views/widgets/cart_navigation_tab.dart';
 import 'package:makanak/features/bottom_navigation/presentation/views/widgets/liquid_glass_bottom_navigation.dart';
@@ -29,13 +31,19 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
   int _cartAnimationTrigger = 0;
 
   static const _items = [
-    BottomNavigationItemData(icon: Icons.home_rounded, label: 'الرئيسية'),
-    BottomNavigationItemData(icon: Icons.shopping_cart_rounded, label: 'السلة'),
+    BottomNavigationItemData(icon: Icons.home_rounded, label: AppStrings.home),
+    BottomNavigationItemData(
+      icon: Icons.shopping_cart_rounded,
+      label: AppStrings.cart,
+    ),
     BottomNavigationItemData(
       icon: Icons.receipt_long_rounded,
-      label: 'سجل الطلبات',
+      label: AppStrings.orderHistory,
     ),
-    BottomNavigationItemData(icon: Icons.person_rounded, label: 'الحساب'),
+    BottomNavigationItemData(
+      icon: Icons.person_rounded,
+      label: AppStrings.account,
+    ),
   ];
 
   @override
@@ -48,8 +56,11 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<CartCubit>.value(
-      value: getIt<CartCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<CartCubit>.value(value: getIt<CartCubit>()),
+        BlocProvider<AddressCubit>.value(value: getIt<AddressCubit>()),
+      ],
       child: Scaffold(
         backgroundColor: AppColors.greyBackground,
         body: Stack(
@@ -72,7 +83,6 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
                 ],
               ),
             ),
-
             PositionedDirectional(
               start: 20,
               end: 20,

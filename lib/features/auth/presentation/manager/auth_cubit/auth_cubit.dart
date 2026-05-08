@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/errors/failures.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/auth/domain/entities/profile_entity.dart';
 import 'package:makanak/features/auth/domain/repos/auth_repo.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
@@ -55,7 +56,7 @@ class AuthCubit extends Cubit<AuthState> {
     _isAuthRequestInProgress = true;
     emit(
       const AuthLoading(
-        message: 'جاري تسجيل الدخول...',
+        message: AppStrings.authSignInLoading,
         operation: AuthLoadingOperation.signIn,
       ),
     );
@@ -80,7 +81,7 @@ class AuthCubit extends Cubit<AuthState> {
     _isAuthRequestInProgress = true;
     emit(
       const AuthLoading(
-        message: 'جاري إنشاء الحساب...',
+        message: AppStrings.authSignUpLoading,
         operation: AuthLoadingOperation.signUp,
       ),
     );
@@ -102,7 +103,7 @@ class AuthCubit extends Cubit<AuthState> {
     _isAuthRequestInProgress = true;
     emit(
       const AuthLoading(
-        message: 'جاري تجهيز تسجيل الدخول بحساب Google...',
+        message: AppStrings.authGoogleLoading,
         operation: AuthLoadingOperation.google,
       ),
     );
@@ -120,7 +121,7 @@ class AuthCubit extends Cubit<AuthState> {
     _isAuthRequestInProgress = true;
     emit(
       const AuthLoading(
-        message: 'جاري تسجيل الخروج...',
+        message: AppStrings.authSignOutLoading,
         operation: AuthLoadingOperation.signOut,
       ),
     );
@@ -166,7 +167,7 @@ class AuthCubit extends Cubit<AuthState> {
       case supa.AuthChangeEvent.passwordRecovery:
         emit(
           const AuthUnauthenticated(
-            message: 'يمكنك الآن تحديث كلمة المرور من بريد الاستعادة.',
+            message: AppStrings.authPasswordRecoveryMessage,
           ),
         );
         return;

@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
-import 'package:makanak/features/cart/data/models/confirming_order_address_model.dart';
+import 'package:makanak/core/models/confirming_order_address_model.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/confirming_card_widget.dart';
 
 class AddressCard extends StatelessWidget {
@@ -73,14 +73,16 @@ class AddressCard extends StatelessWidget {
               color: AppColors.darkerShade(primaryColor),
             ),
           ),
-          const Gap(6),
-          Text(
-            address.details,
-            style: TextStyles.regular14.copyWith(
-              color: AppColors.shopCategoryColor,
-              height: 1.45,
+          if (address.details.trim().isNotEmpty) ...[
+            const Gap(6),
+            Text(
+              address.details,
+              style: TextStyles.regular14.copyWith(
+                color: AppColors.shopCategoryColor,
+                height: 1.45,
+              ),
             ),
-          ),
+          ],
           const Gap(8),
           _AddressInfo(icon: Icons.phone_outlined, text: address.phone),
           if (address.notes.isNotEmpty) ...[

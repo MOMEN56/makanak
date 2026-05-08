@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/services/supabase_database_service.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 
@@ -28,7 +29,7 @@ class ProductsRepoImpl implements ProductsRepo {
       final products = productsData.map(ProductModel.fromJson).toList();
       return right(products);
     } catch (_) {
-      return left(const Failure('تعذر تحميل المنتجات الآن. حاول مرة أخرى.'));
+      return left(const Failure(AppStrings.productsLoadError));
     }
   }
 }

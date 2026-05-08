@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/auth/presentation/views/widgets/auth_form_validators.dart';
 import 'package:makanak/features/auth/presentation/views/widgets/auth_text_form_field.dart';
 
@@ -36,8 +37,8 @@ class SignUpFormFields extends StatelessWidget {
       children: [
         AuthTextFormField(
           controller: fullNameController,
-          label: 'الاسم الكامل',
-          hint: 'اكتبي اسمك كما تحبين ظهوره',
+          label: AppStrings.authFullName,
+          hint: AppStrings.authFullNameHint,
           textInputAction: TextInputAction.next,
           enabled: enabled,
           prefixIcon: const Icon(
@@ -50,8 +51,8 @@ class SignUpFormFields extends StatelessWidget {
         const Gap(14),
         AuthTextFormField(
           controller: emailController,
-          label: 'البريد الإلكتروني',
-          hint: 'example@email.com',
+          label: AppStrings.authEmail,
+          hint: AppStrings.authEmailHint,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           enabled: enabled,
@@ -65,8 +66,8 @@ class SignUpFormFields extends StatelessWidget {
         const Gap(14),
         AuthTextFormField(
           controller: passwordController,
-          label: 'كلمة المرور',
-          hint: 'أنشئي كلمة مرور قوية',
+          label: AppStrings.authPassword,
+          hint: AppStrings.authSignUpPasswordHint,
           obscureText: obscurePassword,
           textInputAction: TextInputAction.next,
           enabled: enabled,
@@ -88,8 +89,8 @@ class SignUpFormFields extends StatelessWidget {
         const Gap(14),
         AuthTextFormField(
           controller: confirmPasswordController,
-          label: 'تأكيد كلمة المرور',
-          hint: 'أعيدي كتابة كلمة المرور',
+          label: AppStrings.authConfirmPassword,
+          hint: AppStrings.authConfirmPasswordHint,
           obscureText: obscureConfirmPassword,
           textInputAction: TextInputAction.done,
           enabled: enabled,

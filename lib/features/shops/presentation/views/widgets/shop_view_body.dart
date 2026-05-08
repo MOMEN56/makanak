@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/assets.dart';
 import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_cubit.dart';
 import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_state.dart';
@@ -42,7 +43,7 @@ class ShopsViewBody extends StatelessWidget {
                         hasScrollBody: false,
                         child: MessageEmojiWidget(
                           image: Assets.assetsIconsIdkEmoji,
-                          text: 'لا توجد محلات يهذا الأسم .',
+                          text: AppStrings.shopsEmptySearch,
                         ),
                       )
                       : ShopsList(shops: shops),

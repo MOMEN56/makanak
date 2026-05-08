@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 
 class StateMessage extends StatelessWidget {
@@ -28,7 +29,7 @@ class StateMessage extends StatelessWidget {
               const Gap(16),
               TextButton(
                 onPressed: onRetry,
-                child: const Text('إعادة المحاولة'),
+                child: const Text(AppStrings.retry),
               ),
             ],
           ],

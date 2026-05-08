@@ -23,6 +23,7 @@ migrate_working_dir/
 # is commented out by default.
 #.vscode/
 .vscode/launch.json
+.npx-cache/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -50,6 +51,7 @@ app.*.map.json
 /google-services.json
 /android/app/google-services.json
 /pubspec.lock
+AGENTS.md
 Global_Engineering_Rules.md
 lib/core/utils/app_keys.dart
 lib/core/utils/assets.dart

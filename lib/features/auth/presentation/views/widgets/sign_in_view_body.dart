@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:makanak/features/auth/presentation/views/sign_up_view.dart';
@@ -42,9 +43,8 @@ class _SignInViewBodyState extends State<SignInViewBody> {
         final messageState = authState.messageState;
 
         return AuthScaffold(
-          title: 'أهلًا بك في مكانك',
-          subtitle:
-              'سجّل دخولك للوصول السريع إلى المتاجر والمنتجات ومتابعة طلباتك بسهولة.',
+          title: AppStrings.authSignInTitle,
+          subtitle: AppStrings.authSignInSubtitle,
           child: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -52,7 +52,7 @@ class _SignInViewBodyState extends State<SignInViewBody> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'تسجيل الدخول',
+                  AppStrings.authSignInFormTitle,
                   textAlign: TextAlign.center,
                   style: TextStyles.bold24.copyWith(
                     color: AppColors.shopNameColor,
@@ -61,7 +61,7 @@ class _SignInViewBodyState extends State<SignInViewBody> {
                 ),
                 const Gap(10),
                 Text(
-                  'ابدأ الجلسة بالطريقة المناسبة لك.',
+                  AppStrings.authSignInFormSubtitle,
                   textAlign: TextAlign.center,
                   style: TextStyles.regular14.copyWith(
                     color: AppColors.shopCategoryColor,
@@ -71,8 +71,8 @@ class _SignInViewBodyState extends State<SignInViewBody> {
                 const Gap(22),
                 AuthTextFormField(
                   controller: _emailController,
-                  label: 'البريد الإلكتروني',
-                  hint: 'example@email.com',
+                  label: AppStrings.authEmail,
+                  hint: AppStrings.authEmailHint,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   enabled: !isLoading,
@@ -86,8 +86,8 @@ class _SignInViewBodyState extends State<SignInViewBody> {
                 const Gap(14),
                 AuthTextFormField(
                   controller: _passwordController,
-                  label: 'كلمة المرور',
-                  hint: 'أدخلي كلمة المرور',
+                  label: AppStrings.authPassword,
+                  hint: AppStrings.authPasswordHint,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
                   enabled: !isLoading,
@@ -115,7 +115,7 @@ class _SignInViewBodyState extends State<SignInViewBody> {
                 ),
                 const Gap(22),
                 AuthPrimaryButton(
-                  label: 'دخول',
+                  label: AppStrings.authSignInButton,
                   isLoading: loadingOperation == AuthLoadingOperation.signIn,
                   onPressed:
                       isLoading
@@ -150,7 +150,7 @@ class _SignInViewBodyState extends State<SignInViewBody> {
                     spacing: 4,
                     children: [
                       Text(
-                        'لسه ما عندكش حساب؟',
+                        AppStrings.authHaveNoAccount,
                         style: TextStyles.regular14.copyWith(
                           color: AppColors.shopCategoryColor,
                         ),
@@ -164,7 +164,7 @@ class _SignInViewBodyState extends State<SignInViewBody> {
                                     context,
                                   ).pushNamed(SignUpView.routeName);
                                 },
-                        child: const Text('إنشاء حساب'),
+                        child: const Text(AppStrings.authCreateAccountLink),
                       ),
                     ],
                   ),

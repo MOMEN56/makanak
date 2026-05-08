@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
+import 'package:makanak/core/presentation/manager/address_cubit/address_state.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
@@ -10,10 +12,11 @@ import 'package:makanak/features/cart/presentation/actions/cart_route_arguments_
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/cart/presentation/views/submit_order_view.dart';
-import 'package:makanak/features/cart/presentation/views/widgets/address_selector_sheet_widget.dart';
+import 'package:makanak/shared/widgets/address_selector_sheet_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_header_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_indicator.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/confirming_order_content.dart';
+import 'package:makanak/shared/views/add_address_view.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 
 class ConfirmingOrderViewBody extends StatefulWidget {
@@ -32,7 +35,7 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
     super.initState();
     final cartCubit = context.read<CartCubit>();
     cartCubit.initializeCart(widget.cartArguments);
-    cartCubit.fetchAddresses();
+    context.read<AddressCubit>().fetchAddresses();
   }
 
   void _showAddressError(String message) {
@@ -50,7 +53,7 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
     Navigator.maybePop(context);
   }
 
-  void _openAddressSelector(CartState state, Color primaryColor) {
+  void _openAddressSelector(AddressState state, Color primaryColor) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.white,
@@ -63,19 +66,42 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
             selectedIndex: state.selectedAddressIndex,
             primaryColor: primaryColor,
             onAddressSelected: (index) {
-              context.read<CartCubit>().selectAddress(index);
+              context.read<AddressCubit>().selectAddress(index);
               Navigator.pop(bottomSheetContext);
             },
             onMainAddressSelected: (index) async {
-              final cartCubit = context.read<CartCubit>();
-              await cartCubit.setDefaultAddress(index);
+              final addressCubit = context.read<AddressCubit>();
+              final didUpdate = await addressCubit.setDefaultAddress(index);
+
+              if (!bottomSheetContext.mounted) return didUpdate;
+
+              final state = addressCubit.state;
+              if (state is AddressError) {
+                _showAddressError(state.message);
+              }
+
+              return didUpdate;
             },
           ),
     );
   }
 
-  void _goToSubmitOrder() {
-    context.read<CartCubit>().createOrder();
+  void _openAddAddressView() {
+    Navigator.of(
+      context,
+    ).push(AddAddressView.route(addressCubit: context.read<AddressCubit>()));
+  }
+
+  void _goToSubmitOrder(AddressState addressState) {
+    if (addressState.addresses.isEmpty) return;
+    final selectedAddressIndex =
+        addressState.selectedAddressIndex < 0 ||
+                addressState.selectedAddressIndex >=
+                    addressState.addresses.length
+            ? 0
+            : addressState.selectedAddressIndex;
+    final selectedAddress = addressState.addresses[selectedAddressIndex];
+    context.read<CartCubit>().createOrder(addressId: selectedAddress.id);
   }
 
   @override
@@ -103,54 +129,71 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
         }
       },
       builder: (context, state) {
-        final isLoading = state is CartLoading;
+        return BlocConsumer<AddressCubit, AddressState>(
+          listener: (context, addressState) {
+            if (addressState is AddressError) {
+              final route = ModalRoute.of(context);
+              if (route != null && !route.isCurrent) return;
 
-        return SafeArea(
-          child: Padding(
-            padding: AppResponsive.all(context, AppSpacing.screenEdge),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CartStepHeaderWidget(
-                  title: AppStrings.confirmOrder,
-                  onBack: _goBackToPreviousStep,
-                  primaryColor: primaryColor,
+              _showAddressError(addressState.message);
+            }
+          },
+          builder: (context, addressState) {
+            final isLoading =
+                state is CartLoading || addressState is AddressLoading;
+
+            return SafeArea(
+              child: Padding(
+                padding: AppResponsive.all(context, AppSpacing.screenEdge),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CartStepHeaderWidget(
+                      title: AppStrings.confirmOrder,
+                      onBack: _goBackToPreviousStep,
+                      primaryColor: primaryColor,
+                    ),
+                    const Gap(20),
+                    CartStepIndicator(
+                      currentStep: 2,
+                      primaryColor: primaryColor,
+                      showAddressStep: !addressState.hasSavedAddress,
+                    ),
+                    const Gap(20),
+                    Expanded(
+                      child: ConfirmingOrderContent(
+                        state: state,
+                        addressState: addressState,
+                        primaryColor: primaryColor,
+                        isLoading: isLoading,
+                        onChangeAddress:
+                            () => _openAddressSelector(
+                              addressState,
+                              primaryColor,
+                            ),
+                        onAddAddress: _openAddAddressView,
+                      ),
+                    ),
+                    const Gap(18),
+                    CustomButton(
+                      hint:
+                          isLoading
+                              ? AppStrings.confirmingOrder
+                              : AppStrings.confirmOrder,
+                      hasShadowEffect: true,
+                      color: primaryColor,
+                      onTap:
+                          isLoading ||
+                                  addressState.addresses.isEmpty ||
+                                  state.product == null
+                              ? null
+                              : () => _goToSubmitOrder(addressState),
+                    ),
+                  ],
                 ),
-                const Gap(20),
-                CartStepIndicator(
-                  currentStep: 2,
-                  primaryColor: primaryColor,
-                  showAddressStep: !state.hasSavedAddress,
-                ),
-                const Gap(20),
-                Expanded(
-                  child: ConfirmingOrderContent(
-                    state: state,
-                    primaryColor: primaryColor,
-                    isLoading: isLoading,
-                    onRetry: _goBackToPreviousStep,
-                    onChangeAddress:
-                        () => _openAddressSelector(state, primaryColor),
-                  ),
-                ),
-                const Gap(18),
-                CustomButton(
-                  hint:
-                      isLoading
-                          ? AppStrings.confirmingOrder
-                          : AppStrings.confirmOrder,
-                  hasShadowEffect: true,
-                  color: primaryColor,
-                  onTap:
-                      isLoading ||
-                              state.addresses.isEmpty ||
-                              state.product == null
-                          ? null
-                          : _goToSubmitOrder,
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

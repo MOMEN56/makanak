@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
+import 'package:makanak/core/presentation/manager/address_cubit/address_state.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
@@ -40,22 +42,26 @@ class _CartViewBodyState extends State<CartViewBody> {
     super.initState();
     final cartCubit = context.read<CartCubit>();
     cartCubit.initializeCart(widget.cartArguments);
-    cartCubit.checkSavedAddresses();
+    context.read<AddressCubit>().checkSavedAddresses();
   }
 
-  void _goToNextStep(CartState state, Color primaryColor) {
-    final product = state.product;
+  void _goToNextStep(
+    CartState cartState,
+    AddressState addressState,
+    Color primaryColor,
+  ) {
+    final product = cartState.product;
     if (product == null) return;
 
     final routeArguments = CartRouteArgumentsBuilder.fromState(
-      state: state,
+      state: cartState,
       primaryColor: primaryColor,
       fallback: widget.cartArguments,
     );
 
     Navigator.pushNamed(
       context,
-      state.hasSavedAddress
+      addressState.hasSavedAddress
           ? ConfirmingOrderView.routeName
           : AddUserAddressView.routeName,
       arguments: routeArguments,
@@ -79,15 +85,18 @@ class _CartViewBodyState extends State<CartViewBody> {
         CartViewArguments.defaultPrimaryColor;
 
     return BlocBuilder<CartCubit, CartState>(
-      builder: (context, state) {
-        if (state is CartLoading && state.addresses.isEmpty) {
-          return CustomLoadingIndicator(color: primaryColor);
-        }
+      builder: (context, cartState) {
+        return BlocBuilder<AddressCubit, AddressState>(
+          builder: (context, addressState) {
+            if (addressState is AddressLoading &&
+                addressState.addresses.isEmpty) {
+              return CustomLoadingIndicator(color: primaryColor);
+            }
 
-        final cartProduct = state.product;
-        final itemCount = cartProduct == null ? 0 : state.quantity;
+            final cartProduct = cartState.product;
+            final itemCount = cartProduct == null ? 0 : cartState.quantity;
 
-        return SafeArea(
+            return SafeArea(
           bottom: widget.bottomContentPadding == 0,
           child: Padding(
             padding: AppResponsive.all(context, AppSpacing.screenEdge),
@@ -96,14 +105,14 @@ class _CartViewBodyState extends State<CartViewBody> {
               children: [
                 CartHeaderWidget(
                   primaryColor: primaryColor,
-                  itemCount: itemCount,
-                  onBack: _goBack,
-                ),
+                      itemCount: itemCount,
+                      onBack: _goBack,
+                    ),
                 const Gap(20),
                 CartStepIndicator(
                   currentStep: 0,
                   primaryColor: primaryColor,
-                  showAddressStep: !state.hasSavedAddress,
+                      showAddressStep: !addressState.hasSavedAddress,
                 ),
                 const Gap(12),
                 Expanded(
@@ -129,7 +138,7 @@ class _CartViewBodyState extends State<CartViewBody> {
                             children: [
                               CartItemCard(
                                 product: cartProduct,
-                                quantity: state.quantity,
+                                quantity: cartState.quantity,
                                 primaryColor: primaryColor,
                                 onRemove: context.read<CartCubit>().removeItem,
                                 onQuantityChanged:
@@ -143,7 +152,12 @@ class _CartViewBodyState extends State<CartViewBody> {
                   CustomButton(
                     hint: AppStrings.continueText,
                     color: primaryColor,
-                    onTap: () => _goToNextStep(state, primaryColor),
+                        onTap:
+                            () => _goToNextStep(
+                              cartState,
+                              addressState,
+                              primaryColor,
+                            ),
                     hasShadowEffect: false,
                   ),
                   SizedBox(height: widget.bottomContentPadding),
@@ -151,6 +165,8 @@ class _CartViewBodyState extends State<CartViewBody> {
               ],
             ),
           ),
+        );
+          },
         );
       },
     );

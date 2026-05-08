@@ -24,23 +24,10 @@ class ShopsList extends StatelessWidget {
             shop: shop,
             onShopTap: () async {
               FocusManager.instance.primaryFocus?.unfocus();
-              await Navigator.push(
+              await Navigator.pushNamed(
                 context,
-                PageRouteBuilder(
-                  transitionDuration: const Duration(milliseconds: 300),
-                  reverseTransitionDuration: const Duration(milliseconds: 300),
-                  pageBuilder: (context, animation, secondaryAnimation) {
-                    return ProductsView(shopModel: shop);
-                  },
-                  transitionsBuilder: (
-                    context,
-                    animation,
-                    secondaryAnimation,
-                    child,
-                  ) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                ),
+                ProductsView.routeName,
+                arguments: shop,
               );
               if (!context.mounted) return;
               FocusManager.instance.primaryFocus?.unfocus();

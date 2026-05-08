@@ -33,13 +33,19 @@ class CartLocalStorage {
       final productData = data['product'] as Map<String, dynamic>;
       return CartLocalData(
         product: ProductModel.fromJson(productData),
-        quantity: data['quantity'] as int? ?? 1,
-        shippingPrice: data['shipping_price'] as int? ?? 35,
+        quantity: _readInt(data['quantity'], defaultValue: 1),
+        shippingPrice: _readInt(data['shipping_price'], defaultValue: 35),
       );
     } catch (_) {
       await clear();
       return null;
     }
+  }
+
+  static int _readInt(Object? value, {required int defaultValue}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? defaultValue;
   }
 
   static Future<void> clear() async {

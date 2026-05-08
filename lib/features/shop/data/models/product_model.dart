@@ -20,10 +20,10 @@ class ProductModel extends ProductEntity {
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString(),
       imageUrl: json['image_url']?.toString() ?? '',
-      price: json['price'] as int,
-      inStock: json['in_stock'] as bool? ?? true,
-      stockQuantity: json['stock_quantity'] as int,
-      isVisible: json['is_visible'] as bool? ?? true,
+      price: _readInt(json['price']),
+      inStock: _readBool(json['in_stock']),
+      stockQuantity: _readInt(json['stock_quantity']),
+      isVisible: _readBool(json['is_visible']),
     );
   }
 
@@ -39,5 +39,22 @@ class ProductModel extends ProductEntity {
       'stock_quantity': stockQuantity,
       'is_visible': isVisible,
     }..removeWhere((key, value) => value == null);
+  }
+
+  static int _readInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static bool _readBool(Object? value, {bool defaultValue = true}) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+
+    final normalized = value?.toString().toLowerCase().trim();
+    if (normalized == 'true' || normalized == '1') return true;
+    if (normalized == 'false' || normalized == '0') return false;
+
+    return defaultValue;
   }
 }

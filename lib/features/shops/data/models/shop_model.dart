@@ -20,9 +20,9 @@ class ShopModel extends ShopEntity {
       name: json['name']?.toString() ?? '',
       logoUrl: json['logo_url']?.toString(),
       category: json['category']?.toString() ?? '',
-      isActive: json['is_active'] as bool? ?? true,
-      isVisible: json['is_visible'] as bool? ?? true,
-      isOpen: json['is_open'] as bool? ?? true,
+      isActive: _readBool(json['is_active']),
+      isVisible: _readBool(json['is_visible']),
+      isOpen: _readBool(json['is_open']),
       workingHours: json['working_hours']?.toString() ?? '',
     );
   }
@@ -39,5 +39,16 @@ class ShopModel extends ShopEntity {
       'is_open': isOpen,
       'working_hours': workingHours,
     }..removeWhere((key, value) => value == null);
+  }
+
+  static bool _readBool(Object? value, {bool defaultValue = true}) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+
+    final normalized = value?.toString().toLowerCase().trim();
+    if (normalized == 'true' || normalized == '1') return true;
+    if (normalized == 'false' || normalized == '0') return false;
+
+    return defaultValue;
   }
 }

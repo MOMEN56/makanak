@@ -4,6 +4,8 @@ class ProfileModel extends ProfileEntity {
   const ProfileModel({
     required super.id,
     super.fullName,
+    super.email,
+    super.avatarUrl,
     super.role = 'customer',
   });
 
@@ -11,14 +13,16 @@ class ProfileModel extends ProfileEntity {
     final rawId = json['id'];
     final id = rawId?.toString();
     if (id == null || id.isEmpty) {
-      throw FormatException(
-        'ProfileModel.fromJson failed: missing or empty "id" field in json: $json',
+      throw const FormatException(
+        'ProfileModel.fromJson failed: missing or empty "id" field.',
       );
     }
 
     return ProfileModel(
       id: id,
       fullName: json['full_name']?.toString(),
+      email: json['email']?.toString(),
+      avatarUrl: json['avatar_url']?.toString(),
       role: json['role']?.toString() ?? 'customer',
     );
   }

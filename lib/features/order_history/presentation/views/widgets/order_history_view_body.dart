@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 
 class OrderHistoryViewBody extends StatelessWidget {
@@ -9,7 +10,7 @@ class OrderHistoryViewBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'سجل الطلبات',
+        AppStrings.orderHistory,
         style: TextStyles.bold24.copyWith(color: AppColors.primaryDarkColor),
       ),
     );

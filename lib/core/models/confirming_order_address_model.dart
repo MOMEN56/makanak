@@ -1,4 +1,4 @@
-﻿import 'package:makanak/core/utils/app_strings.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 
 class ConfirmingOrderAddressModel {
   const ConfirmingOrderAddressModel({
@@ -21,9 +21,8 @@ class ConfirmingOrderAddressModel {
     final street = json['street']?.toString().trim() ?? '';
     final floor = json['floor']?.toString().trim() ?? '';
     final apartmentNumber = json['apartment_number']?.toString().trim() ?? '';
-    final building = json['building']?.toString().trim() ?? '';
+    final building = json['building_number']?.toString().trim() ?? '';
     final detailsParts = [
-      if (street.isNotEmpty) street,
       if (building.isNotEmpty) '${AppStrings.buildingNumber} $building',
       if (floor.isNotEmpty) '${AppStrings.floor} $floor',
       if (apartmentNumber.isNotEmpty)
@@ -36,7 +35,18 @@ class ConfirmingOrderAddressModel {
       phone: json['phone_number']?.toString() ?? '',
       details: detailsParts.join('، '),
       notes: json['address_notes']?.toString() ?? '',
-      isDefault: json['is_default'] as bool? ?? false,
+      isDefault: _readBool(json['is_default'], defaultValue: false),
     );
+  }
+
+  static bool _readBool(Object? value, {bool defaultValue = true}) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+
+    final normalized = value?.toString().toLowerCase().trim();
+    if (normalized == 'true' || normalized == '1') return true;
+    if (normalized == 'false' || normalized == '0') return false;
+
+    return defaultValue;
   }
 }

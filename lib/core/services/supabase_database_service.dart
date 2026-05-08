@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:makanak/core/errors/database_exception.dart';
 import 'package:makanak/core/utils/address_form_validator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -35,6 +36,15 @@ class SupabaseDatabaseService {
     } catch (_) {
       throw const DatabaseException('Unexpected database error');
     }
+  }
+
+  void _logPostgrestException(String operation, PostgrestException error) {
+    if (!kDebugMode) return;
+
+    debugPrint(
+      'Supabase $operation failed: '
+      'code=${error.code}, message=${error.message}, details=${error.details}',
+    );
   }
 
   Future<List<Map<String, dynamic>>> fetchVisibleProductsByShopId(
@@ -124,7 +134,7 @@ class SupabaseDatabaseService {
         params: {
           'p_street': street.trim(),
           'p_floor': floor.trim(),
-          'p_building': building.trim(),
+          'p_building_number': building.trim(),
           'p_apartment_number': apartmentNumber.trim(),
           'p_address_notes': notes.trim(),
           'p_phone_number': normalizedPhone,
@@ -133,6 +143,7 @@ class SupabaseDatabaseService {
 
       return Map<String, dynamic>.from(data as Map);
     } on PostgrestException catch (e) {
+      _logPostgrestException('addUserAddress', e);
       throw DatabaseException(e.message, code: e.code);
     } catch (_) {
       throw const DatabaseException('Unexpected database error');

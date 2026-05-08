@@ -1,11 +1,13 @@
+import 'package:makanak/core/utils/app_strings.dart';
+
 String? validateAuthFullName(String? value) {
   final fullName = value?.trim() ?? '';
   if (fullName.isEmpty) {
-    return 'من فضلك أدخلي الاسم الكامل.';
+    return AppStrings.authFullNameRequired;
   }
 
   if (fullName.length < 3) {
-    return 'الاسم الكامل يجب أن يكون 3 أحرف على الأقل.';
+    return AppStrings.authFullNameTooShort;
   }
 
   return null;
@@ -14,12 +16,12 @@ String? validateAuthFullName(String? value) {
 String? validateAuthEmail(String? value) {
   final email = value?.trim() ?? '';
   if (email.isEmpty) {
-    return 'من فضلك أدخلي البريد الإلكتروني.';
+    return AppStrings.authEmailRequired;
   }
 
   const emailPattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$';
   if (!RegExp(emailPattern).hasMatch(email)) {
-    return 'صيغة البريد الإلكتروني غير صحيحة.';
+    return AppStrings.authEmailInvalid;
   }
 
   return null;
@@ -27,11 +29,11 @@ String? validateAuthEmail(String? value) {
 
 String? validateAuthPassword(String? value) {
   if ((value ?? '').isEmpty) {
-    return 'من فضلك أدخلي كلمة المرور.';
+    return AppStrings.authPasswordRequired;
   }
 
   if ((value ?? '').length < 8) {
-    return 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
+    return AppStrings.authPasswordTooShort;
   }
 
   return null;
@@ -39,11 +41,11 @@ String? validateAuthPassword(String? value) {
 
 String? validateAuthConfirmPassword(String? value, String password) {
   if ((value ?? '').isEmpty) {
-    return 'من فضلك أكدي كلمة المرور.';
+    return AppStrings.authConfirmPasswordRequired;
   }
 
   if (value != password) {
-    return 'كلمتا المرور غير متطابقتين.';
+    return AppStrings.authPasswordsDoNotMatch;
   }
 
   return null;

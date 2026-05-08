@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 
 class AuthGoogleButton extends StatelessWidget {
@@ -52,7 +53,7 @@ class AuthGoogleButton extends StatelessWidget {
                     ),
                     const Gap(12),
                     Text(
-                      'المتابعة بحساب Google',
+                      AppStrings.authGoogleContinue,
                       style: TextStyles.medium12.copyWith(
                         color: AppColors.shopNameColor,
                       ),
