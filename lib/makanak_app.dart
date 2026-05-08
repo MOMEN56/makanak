@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +24,10 @@ class MakanakApp extends StatelessWidget {
       child: BlocListener<AuthCubit, AuthState>(
         listenWhen: _shouldReturnToAuthGate,
         listener: (context, state) {
+          if (state is AuthUnauthenticated && !state.hasMessage) {
+            unawaited(resetAuthenticatedSessionState());
+          }
+
           _navigatorKey.currentState?.popUntil((route) => route.isFirst);
         },
         child: MaterialApp(

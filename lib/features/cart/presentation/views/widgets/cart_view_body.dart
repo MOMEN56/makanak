@@ -93,79 +93,100 @@ class _CartViewBodyState extends State<CartViewBody> {
               return CustomLoadingIndicator(color: primaryColor);
             }
 
-            final cartProduct = cartState.product;
-            final itemCount = cartProduct == null ? 0 : cartState.quantity;
+            final cartItems = cartState.items;
 
             return SafeArea(
-          bottom: widget.bottomContentPadding == 0,
-          child: Padding(
-            padding: AppResponsive.all(context, AppSpacing.screenEdge),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CartHeaderWidget(
-                  primaryColor: primaryColor,
-                      itemCount: itemCount,
+              bottom: widget.bottomContentPadding == 0,
+              child: Padding(
+                padding: AppResponsive.all(context, AppSpacing.screenEdge),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CartHeaderWidget(
+                      primaryColor: primaryColor,
+                      itemCount: cartState.itemCount,
                       onBack: _goBack,
                     ),
-                const Gap(20),
-                CartStepIndicator(
-                  currentStep: 0,
-                  primaryColor: primaryColor,
+                    const Gap(20),
+                    CartStepIndicator(
+                      currentStep: 0,
+                      primaryColor: primaryColor,
                       showAddressStep: !addressState.hasSavedAddress,
-                ),
-                const Gap(12),
-                Expanded(
-                  child:
-                      cartProduct == null
-                          ? Center(
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 250,
-                                  width: 250,
-                                  child: Image.asset(
-                                    Assets.assetsIconsEmptyCartIcon,
-                                  ),
+                    ),
+                    const Gap(12),
+                    Expanded(
+                      child:
+                          cartItems.isEmpty
+                              ? Center(
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      height: 250,
+                                      width: 250,
+                                      child: Image.asset(
+                                        Assets.assetsIconsEmptyCartIcon,
+                                      ),
+                                    ),
+                                    const StateMessage(
+                                      message: AppStrings.cartEmpty,
+                                    ),
+                                  ],
                                 ),
-                                const StateMessage(
-                                  message: AppStrings.cartEmpty,
-                                ),
-                              ],
-                            ),
-                          )
-                          : ListView(
-                            children: [
-                              CartItemCard(
-                                product: cartProduct,
-                                quantity: cartState.quantity,
-                                primaryColor: primaryColor,
-                                onRemove: context.read<CartCubit>().removeItem,
-                                onQuantityChanged:
-                                    context.read<CartCubit>().updateQuantity,
+                              )
+                              : ListView(
+                                children:
+                                    cartItems.map((item) {
+                                      final productId = item.product.id;
+
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 12,
+                                        ),
+                                        child: CartItemCard(
+                                          product: item.product,
+                                          quantity: item.quantity,
+                                          primaryColor: primaryColor,
+                                          onRemove:
+                                              productId == null ||
+                                                      productId.isEmpty
+                                                  ? null
+                                                  : () => context
+                                                      .read<CartCubit>()
+                                                      .removeItem(productId),
+                                          onQuantityChanged:
+                                              productId == null ||
+                                                      productId.isEmpty
+                                                  ? null
+                                                  : (quantity) => context
+                                                      .read<CartCubit>()
+                                                      .updateQuantity(
+                                                        productId,
+                                                        quantity,
+                                                      ),
+                                        ),
+                                      );
+                                    }).toList(),
                               ),
-                            ],
-                          ),
-                ),
-                if (cartProduct != null) ...[
-                  const Gap(12),
-                  CustomButton(
-                    hint: AppStrings.continueText,
-                    color: primaryColor,
+                    ),
+                    if (cartItems.isNotEmpty) ...[
+                      const Gap(12),
+                      CustomButton(
+                        hint: AppStrings.continueText,
+                        color: primaryColor,
                         onTap:
                             () => _goToNextStep(
                               cartState,
                               addressState,
                               primaryColor,
                             ),
-                    hasShadowEffect: false,
-                  ),
-                  SizedBox(height: widget.bottomContentPadding),
-                ],
-              ],
-            ),
-          ),
-        );
+                        hasShadowEffect: false,
+                      ),
+                      SizedBox(height: widget.bottomContentPadding),
+                    ],
+                  ],
+                ),
+              ),
+            );
           },
         );
       },

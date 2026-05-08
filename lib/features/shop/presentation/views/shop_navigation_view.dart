@@ -59,7 +59,7 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<CartCubit>.value(value: getIt<CartCubit>()),
-        BlocProvider<AddressCubit>.value(value: getIt<AddressCubit>()),
+        BlocProvider<AddressCubit>(create: (_) => getIt<AddressCubit>()),
       ],
       child: Scaffold(
         backgroundColor: AppColors.greyBackground,
@@ -88,7 +88,7 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
               end: 20,
               bottom: 25,
               child: BlocSelector<CartCubit, CartState, int>(
-                selector: (state) => state.product == null ? 0 : state.quantity,
+                selector: (state) => state.itemCount,
                 builder: (context, cartCount) {
                   return LiquidGlassBottomNavigation(
                     currentIndex: _currentIndex,

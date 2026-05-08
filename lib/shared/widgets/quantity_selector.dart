@@ -77,6 +77,7 @@ class _QuantitySelectorState extends State<QuantitySelector> {
       child: Padding(
         padding: widget.padding,
         child: Row(
+          textDirection: TextDirection.ltr,
           mainAxisSize: MainAxisSize.min,
           children: [
             _QuantityButton(

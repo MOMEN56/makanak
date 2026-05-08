@@ -2,11 +2,11 @@ import 'package:makanak/features/shop/domain/entities/product_entity.dart';
 
 class ProductModel extends ProductEntity {
   const ProductModel({
-    super.id,
+    required super.id,
     super.shopId = '',
     required super.name,
-    super.description,
-    super.imageUrl,
+    super.description = '',
+    super.imageUrl = '',
     required super.price,
     super.inStock = true,
     super.stockQuantity = 0,
@@ -15,10 +15,10 @@ class ProductModel extends ProductEntity {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json['id']?.toString(),
+      id: json['id']?.toString() ?? '',
       shopId: json['shop_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      description: json['description']?.toString(),
+      description: json['description']?.toString() ?? '',
       imageUrl: json['image_url']?.toString() ?? '',
       price: _readInt(json['price']),
       inStock: _readBool(json['in_stock']),

@@ -12,7 +12,10 @@ class ConfirmingOrderView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ConfirmingOrderViewBody(cartArguments: cartArguments),
+      body: ConfirmingOrderViewBody(
+        cartArguments: cartArguments,
+        showAddressStep: false,
+      ),
     );
   }
 }

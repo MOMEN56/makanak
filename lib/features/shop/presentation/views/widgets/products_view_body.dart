@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
+import 'package:makanak/features/shop/presentation/actions/add_product_to_cart_action.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_state.dart';
-import 'package:makanak/features/shop/presentation/actions/add_product_to_cart_action.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/fiilter_items_widgets.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/products_list.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
@@ -35,8 +36,8 @@ class ProductsViewBody extends StatefulWidget {
 }
 
 class _ProductsViewBodyState extends State<ProductsViewBody> {
-  ProductModel? _selectedProduct;
-  int _selectedQuantity = 1;
+  final Map<String, _SelectedCartProduct> _selectedProducts = {};
+  int _resetSelectionSignal = 0;
 
   void _onPriceSortChanged(BuildContext context, ProductPriceSort priceSort) {
     context.read<ProductsCubit>().changePriceSort(
@@ -46,30 +47,49 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
   }
 
   void _onProductSelected(ProductModel product, int quantity) {
+    final productKey = _productKey(product);
     setState(() {
-      _selectedProduct = quantity > 0 ? product : null;
-      _selectedQuantity = quantity;
+      if (quantity < 1) {
+        _selectedProducts.remove(productKey);
+        return;
+      }
+
+      _selectedProducts[productKey] = _SelectedCartProduct(
+        product: product,
+        quantity: quantity,
+      );
     });
   }
 
-  void _showAddedSnackBar() {
-    final product = _selectedProduct;
-    if (product == null) return;
+  void _addSelectedProductsToCart() {
+    if (_selectedProducts.isEmpty) return;
 
-    AddProductToCartAction.run(
-      context: context,
-      product: product,
-      primaryColor: AppColors.primaryColor,
-      shopModel: widget.shopModel,
-      quantity: _selectedQuantity,
-      onProductAdded: widget.onProductAdded,
-    );
+    for (final item in _selectedProducts.values) {
+      AddProductToCartAction.run(
+        context: context,
+        product: item.product,
+        primaryColor: AppColors.primaryColor,
+        shopModel: widget.shopModel,
+        quantity: item.quantity,
+      );
+    }
+
+    widget.onProductAdded?.call();
+
+    setState(() {
+      _selectedProducts.clear();
+      _resetSelectionSignal++;
+    });
+  }
+
+  String _productKey(ProductModel product) {
+    return product.id ?? '${product.shopId}-${product.name}';
   }
 
   @override
   Widget build(BuildContext context) {
     const shopPrimaryColor = AppColors.primaryColor;
-    final hasSelectedProduct = _selectedProduct != null;
+    final hasSelectedProducts = _selectedProducts.isNotEmpty;
 
     return SafeArea(
       child: Padding(
@@ -102,8 +122,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
               children: [
                 Expanded(
                   child: SearchTextField(
-                    hintText:
-                        '\u0646\u0641\u0633\u0643 \u062a\u062c\u064a\u0628 \u0627\u064a\u0647\u061f',
+                    hintText: AppStrings.productSearchHint,
                     onChanged: (value) {
                       context.read<ProductsCubit>().searchProducts(
                         widget.shopModel.id ?? '',
@@ -136,6 +155,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
                     ProductsSuccess(:final products) => ProductsList(
                       products: products,
                       primaryColor: shopPrimaryColor,
+                      resetSelectionSignal: _resetSelectionSignal,
                       shopModel: widget.shopModel,
                       onProductSelected: _onProductSelected,
                       onCartRequested: widget.onCartRequested,
@@ -155,11 +175,11 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
             ),
             const Gap(16),
             CustomButton(
-              hint: '\u0627\u0636\u0641 \u0644\u0644\u0633\u0644\u0629',
-              onTap: hasSelectedProduct ? _showAddedSnackBar : null,
-              hasShadowEffect: hasSelectedProduct,
+              hint: AppStrings.addToCart,
+              onTap: hasSelectedProducts ? _addSelectedProductsToCart : null,
+              hasShadowEffect: hasSelectedProducts,
               color:
-                  hasSelectedProduct
+                  hasSelectedProducts
                       ? shopPrimaryColor
                       : AppColors.searchFieldBackground,
             ),
@@ -169,4 +189,11 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
       ),
     );
   }
+}
+
+class _SelectedCartProduct {
+  const _SelectedCartProduct({required this.product, required this.quantity});
+
+  final ProductModel product;
+  final int quantity;
 }

@@ -8,55 +8,63 @@ import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 
 class CartCubit extends Cubit<CartState> {
-  CartCubit(this._cartRepository) : super(const CartInitial());
+  CartCubit(this._cartRepository, {required String userId})
+    : _userId = userId,
+      super(CartInitial());
 
   final CartRepository _cartRepository;
+  final String _userId;
 
   Future<void> restoreSavedCart({String? shopId}) async {
-    final savedCart = await CartLocalStorage.loadProduct();
-    if (savedCart == null || isClosed) return;
-
-    if (shopId != null &&
-        shopId.isNotEmpty &&
-        savedCart.product.shopId != shopId) {
-      await CartLocalStorage.clear();
-      return;
-    }
+    final savedCart = await CartLocalStorage.loadProducts(userId: _userId);
+    final shopCart = _mergeCartItems(
+      _cartItemsForShop(savedCart, shopId),
+      _cartItemsForShop(state.items, shopId),
+    );
+    if (shopCart.isEmpty || isClosed) return;
 
     emit(
-      CartInitial(
-        product: savedCart.product,
-        quantity: savedCart.quantity < 1 ? 1 : savedCart.quantity,
-        shippingPrice: savedCart.shippingPrice,
-      ),
+      CartInitial(items: shopCart, shippingPrice: shopCart.first.shippingPrice),
     );
   }
 
   void addProduct(CartViewArguments arguments) {
-    final currentProduct = state.product;
     final incomingProduct = arguments.product;
     if (incomingProduct == null) return;
 
-    final currentProductId = currentProduct?.id;
     final incomingProductId = incomingProduct.id;
-    final isSameProduct =
-        currentProductId != null &&
-        currentProductId.isNotEmpty &&
-        currentProductId == incomingProductId;
-    final updatedQuantity =
-        isSameProduct ? state.quantity + arguments.quantity : arguments.quantity;
+    if (incomingProductId == null || incomingProductId.isEmpty) return;
+
+    final currentItems = List<CartLocalData>.of(state.items);
+    final existingIndex = currentItems.indexWhere(
+      (item) => item.product.id == incomingProductId,
+    );
+    final existingQuantity =
+        existingIndex == -1 ? 0 : currentItems[existingIndex].quantity;
+    final updatedQuantity = existingQuantity + arguments.quantity;
     final safeQuantity = updatedQuantity < 1 ? 1 : updatedQuantity;
+    final updatedItem = CartLocalData(
+      product: incomingProduct,
+      quantity: safeQuantity,
+      shippingPrice: arguments.shippingPrice,
+    );
+
+    if (existingIndex == -1) {
+      currentItems.add(updatedItem);
+    } else {
+      currentItems[existingIndex] = updatedItem;
+    }
 
     emit(
       CartInitial(
-        product: incomingProduct,
-        quantity: safeQuantity,
+        items: currentItems,
         shippingPrice: arguments.shippingPrice,
       ),
     );
 
     unawaited(
       CartLocalStorage.saveProduct(
+        userId: _userId,
         product: incomingProduct,
         quantity: safeQuantity,
         shippingPrice: arguments.shippingPrice,
@@ -67,28 +75,25 @@ class CartCubit extends Cubit<CartState> {
   void initializeCart(CartViewArguments? arguments) {
     if (arguments == null) return;
 
-    final currentProductId = state.product?.id;
-    final incomingProductId = arguments.product?.id;
-    final isSameInitializedProduct =
-        currentProductId != null &&
-        currentProductId.isNotEmpty &&
-        currentProductId == incomingProductId;
-
-    if (isSameInitializedProduct) {
-      emit(
-        CartInitial(
-          product: state.product,
-          quantity: arguments.quantity,
-          shippingPrice: arguments.shippingPrice,
-        ),
-      );
+    final incomingProduct = arguments.product;
+    final incomingProductId = incomingProduct?.id;
+    if (incomingProduct == null ||
+        incomingProductId == null ||
+        incomingProductId.isEmpty ||
+        state.items.any((item) => item.product.id == incomingProductId)) {
       return;
     }
 
     emit(
       CartInitial(
-        product: arguments.product,
-        quantity: arguments.quantity,
+        items: [
+          ...state.items,
+          CartLocalData(
+            product: incomingProduct,
+            quantity: arguments.quantity < 1 ? 1 : arguments.quantity,
+            shippingPrice: arguments.shippingPrice,
+          ),
+        ],
         shippingPrice: arguments.shippingPrice,
       ),
     );
@@ -119,66 +124,107 @@ class CartCubit extends Cubit<CartState> {
     if (isClosed) return;
 
     result.fold((failure) => emit(_errorFromState(failure.message)), (_) {
-      unawaited(CartLocalStorage.clear());
+      unawaited(
+        CartLocalStorage.removeProduct(userId: _userId, productId: productId),
+      );
       emit(
         CartOrderSubmitted(
-          product: state.product,
-          quantity: state.quantity,
+          items: state.items,
           shippingPrice: state.shippingPrice,
         ),
       );
     });
   }
 
-  void updateQuantity(int quantity) {
+  void updateQuantity(String productId, int quantity) {
+    if (productId.isEmpty) return;
+
     final safeQuantity = quantity < 1 ? 1 : quantity;
-    emit(
-      CartInitial(
-        product: state.product,
+    var shippingPrice = state.shippingPrice;
+    final updatedItems =
+        state.items.map((item) {
+          if (item.product.id != productId) return item;
+
+          shippingPrice = item.shippingPrice;
+          return CartLocalData(
+            product: item.product,
+            quantity: safeQuantity,
+            shippingPrice: item.shippingPrice,
+          );
+        }).toList();
+
+    emit(CartInitial(items: updatedItems, shippingPrice: state.shippingPrice));
+
+    unawaited(
+      CartLocalStorage.updateProductQuantity(
+        userId: _userId,
+        productId: productId,
         quantity: safeQuantity,
-        shippingPrice: state.shippingPrice,
+        shippingPrice: shippingPrice,
       ),
     );
-
-    final product = state.product;
-    if (product != null) {
-      unawaited(
-        CartLocalStorage.saveProduct(
-          product: product,
-          quantity: safeQuantity,
-          shippingPrice: state.shippingPrice,
-        ),
-      );
-    }
   }
 
-  void removeItem() {
-    emit(CartInitial(shippingPrice: state.shippingPrice));
-    unawaited(CartLocalStorage.clear());
+  void removeItem(String productId) {
+    if (productId.isEmpty) return;
+    final updatedItems =
+        state.items.where((item) => item.product.id != productId).toList();
+
+    emit(CartInitial(items: updatedItems, shippingPrice: state.shippingPrice));
+
+    unawaited(
+      CartLocalStorage.removeProduct(userId: _userId, productId: productId),
+    );
   }
 
   void clearProductFromOtherShop(String? shopId) {
     if (shopId == null || shopId.isEmpty) return;
-    final product = state.product;
-    if (product == null || product.shopId == shopId) return;
+    final shopItems = _cartItemsForShop(state.items, shopId);
+    if (shopItems.length == state.items.length) return;
 
-    removeItem();
+    emit(CartInitial(items: shopItems, shippingPrice: state.shippingPrice));
   }
 
   CartLoading _loadingFromState() {
-    return CartLoading(
-      product: state.product,
-      quantity: state.quantity,
-      shippingPrice: state.shippingPrice,
-    );
+    return CartLoading(items: state.items, shippingPrice: state.shippingPrice);
   }
 
   CartError _errorFromState(String message) {
     return CartError(
       message,
-      product: state.product,
-      quantity: state.quantity,
+      items: state.items,
       shippingPrice: state.shippingPrice,
     );
+  }
+
+  List<CartLocalData> _cartItemsForShop(
+    List<CartLocalData> cart,
+    String? shopId,
+  ) {
+    if (shopId == null || shopId.isEmpty) return cart;
+
+    return cart.where((item) => item.product.shopId == shopId).toList();
+  }
+
+  List<CartLocalData> _mergeCartItems(
+    List<CartLocalData> savedItems,
+    List<CartLocalData> currentItems,
+  ) {
+    final mergedItems = List<CartLocalData>.of(savedItems);
+
+    for (final currentItem in currentItems) {
+      final productId = currentItem.product.id;
+      final existingIndex = mergedItems.indexWhere(
+        (item) => item.product.id == productId,
+      );
+
+      if (existingIndex == -1) {
+        mergedItems.add(currentItem);
+      } else {
+        mergedItems[existingIndex] = currentItem;
+      }
+    }
+
+    return mergedItems;
   }
 }

@@ -25,7 +25,6 @@ class AddProductToCartAction {
         shopModel: shopModel,
       ),
     );
-
     onProductAdded?.call();
   }
 }

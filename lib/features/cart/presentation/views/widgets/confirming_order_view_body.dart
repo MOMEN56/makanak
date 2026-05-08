@@ -20,9 +20,14 @@ import 'package:makanak/shared/views/add_address_view.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 
 class ConfirmingOrderViewBody extends StatefulWidget {
-  const ConfirmingOrderViewBody({super.key, this.cartArguments});
+  const ConfirmingOrderViewBody({
+    super.key,
+    this.cartArguments,
+    this.showAddressStep = false,
+  });
 
   final CartViewArguments? cartArguments;
+  final bool showAddressStep;
 
   @override
   State<ConfirmingOrderViewBody> createState() =>
@@ -157,7 +162,7 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
                     CartStepIndicator(
                       currentStep: 2,
                       primaryColor: primaryColor,
-                      showAddressStep: !addressState.hasSavedAddress,
+                      showAddressStep: widget.showAddressStep,
                     ),
                     const Gap(20),
                     Expanded(

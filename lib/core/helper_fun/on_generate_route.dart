@@ -94,7 +94,11 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
     case ProfileView.routeName:
       return _fadeRoute(
         settings: settings,
-        builder: (_) => const ProfileView(),
+        builder:
+            (_) => BlocProvider<AddressCubit>(
+              create: (_) => getIt<AddressCubit>(),
+              child: const ProfileView(),
+            ),
       );
     case ProductDetailsView.routeName:
       final arguments = settings.arguments;
@@ -171,7 +175,7 @@ class _CartCubitProvider extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<CartCubit>.value(value: getIt<CartCubit>()),
-        BlocProvider<AddressCubit>.value(value: getIt<AddressCubit>()),
+        BlocProvider<AddressCubit>(create: (_) => getIt<AddressCubit>()),
       ],
       child: child,
     );

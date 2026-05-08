@@ -1,26 +1,62 @@
 import 'package:equatable/equatable.dart';
+import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 
 sealed class CartState extends Equatable {
-  const CartState({
-    this.product,
-    this.quantity = 1,
+  CartState({
+    List<CartLocalData> items = const [],
+    ProductModel? product,
+    int quantity = 1,
     this.shippingPrice = 35,
-  });
+  }) : items = List.unmodifiable(
+         _resolveItems(
+           items: items,
+           product: product,
+           quantity: quantity,
+           shippingPrice: shippingPrice,
+         ),
+       );
 
-  final ProductModel? product;
-  final int quantity;
+  final List<CartLocalData> items;
   final int shippingPrice;
 
-  int get itemsSubtotal => product == null ? 0 : product!.price * quantity;
+  ProductModel? get product => items.isEmpty ? null : items.first.product;
+  int get quantity => items.isEmpty ? 1 : items.first.quantity;
+  int get itemCount => items.fold(0, (total, item) => total + item.quantity);
+  int get itemsSubtotal {
+    return items.fold(
+      0,
+      (total, item) => total + (item.product.price * item.quantity),
+    );
+  }
+
   int get orderTotal => itemsSubtotal + shippingPrice;
 
   @override
-  List<Object?> get props => [product, quantity, shippingPrice];
+  List<Object?> get props => [items, shippingPrice];
+
+  static List<CartLocalData> _resolveItems({
+    required List<CartLocalData> items,
+    required ProductModel? product,
+    required int quantity,
+    required int shippingPrice,
+  }) {
+    if (items.isNotEmpty) return items;
+    if (product == null) return const [];
+
+    return [
+      CartLocalData(
+        product: product,
+        quantity: quantity,
+        shippingPrice: shippingPrice,
+      ),
+    ];
+  }
 }
 
 class CartInitial extends CartState {
-  const CartInitial({
+  CartInitial({
+    super.items,
     super.product,
     super.quantity,
     super.shippingPrice,
@@ -28,7 +64,8 @@ class CartInitial extends CartState {
 }
 
 class CartLoading extends CartState {
-  const CartLoading({
+  CartLoading({
+    super.items,
     super.product,
     super.quantity,
     super.shippingPrice,
@@ -36,7 +73,8 @@ class CartLoading extends CartState {
 }
 
 class CartOrderSubmitted extends CartState {
-  const CartOrderSubmitted({
+  CartOrderSubmitted({
+    super.items,
     super.product,
     super.quantity,
     super.shippingPrice,
@@ -44,8 +82,9 @@ class CartOrderSubmitted extends CartState {
 }
 
 class CartError extends CartState {
-  const CartError(
+  CartError(
     this.message, {
+    super.items,
     super.product,
     super.quantity,
     super.shippingPrice,

@@ -38,6 +38,7 @@ class ProductDetailsViewBody extends StatefulWidget {
 
 class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   late int _quantity;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -46,7 +47,11 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   }
 
   void _onAddButtonTap() {
+    if (!mounted || _isDisposed) return;
+
     final quantity = _quantity < 1 ? 1 : _quantity;
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     AddProductToCartAction.run(
       context: context,
@@ -65,22 +70,32 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
       ),
       badgeText: AppStrings.cart,
       backgroundColor: widget.primaryColor,
-      onBadgeTap: () => _openCart(quantity),
+      onBadgeTap:
+          () => _openCart(
+            quantity: quantity,
+            navigator: navigator,
+            scaffoldMessenger: scaffoldMessenger,
+          ),
     );
   }
 
-  void _openCart(int quantity) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  void _openCart({
+    required int quantity,
+    required NavigatorState navigator,
+    required ScaffoldMessengerState scaffoldMessenger,
+  }) {
+    if (!mounted || _isDisposed) return;
+
+    scaffoldMessenger.hideCurrentSnackBar();
 
     final onCartRequested = widget.onCartRequested;
     if (onCartRequested != null) {
       onCartRequested();
-      Navigator.maybePop(context);
+      if (mounted) navigator.maybePop();
       return;
     }
 
-    Navigator.pushNamed(
-      context,
+    navigator.pushNamed(
       CartView.routeName,
       arguments: CartViewArguments(
         product: widget.product,
@@ -89,6 +104,12 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
         shopModel: widget.shopModel,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 
   @override

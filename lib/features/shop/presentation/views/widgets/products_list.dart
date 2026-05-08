@@ -12,6 +12,7 @@ class ProductsList extends StatefulWidget {
     super.key,
     required this.products,
     required this.primaryColor,
+    required this.resetSelectionSignal,
     this.shopModel,
     this.onProductSelected,
     this.onCartRequested,
@@ -20,6 +21,7 @@ class ProductsList extends StatefulWidget {
 
   final List<ProductModel> products;
   final Color primaryColor;
+  final int resetSelectionSignal;
   final ShopModel? shopModel;
   final void Function(ProductModel product, int quantity)? onProductSelected;
   final VoidCallback? onCartRequested;
@@ -31,6 +33,14 @@ class ProductsList extends StatefulWidget {
 
 class _ProductsListState extends State<ProductsList> {
   final Map<String, int> _quantities = {};
+
+  @override
+  void didUpdateWidget(covariant ProductsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.resetSelectionSignal == oldWidget.resetSelectionSignal) return;
+
+    _quantities.clear();
+  }
 
   String _productKey(ProductModel product, int index) {
     return product.id ?? '${product.shopId}-${product.name}-$index';
@@ -72,6 +82,7 @@ class _ProductsListState extends State<ProductsList> {
           product: product,
           quantity: quantity,
           primaryColor: widget.primaryColor,
+          resetSignal: widget.resetSelectionSignal,
           onTap: () async {
             FocusManager.instance.primaryFocus?.unfocus();
             await Navigator.pushNamed(

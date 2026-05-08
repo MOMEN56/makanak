@@ -12,6 +12,7 @@ class ProductCard extends StatefulWidget {
     required this.product,
     required this.quantity,
     required this.primaryColor,
+    required this.resetSignal,
     this.onTap,
     this.onQuantityChanged,
   });
@@ -19,6 +20,7 @@ class ProductCard extends StatefulWidget {
   final ProductModel product;
   final int quantity;
   final Color primaryColor;
+  final int resetSignal;
   final VoidCallback? onTap;
   final ValueChanged<int>? onQuantityChanged;
 
@@ -28,31 +30,44 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   late bool _showQuantitySelector;
+  late int _quantity;
 
   @override
   void initState() {
     super.initState();
-    _showQuantitySelector = widget.quantity > 0;
+    _quantity = widget.quantity;
+    _showQuantitySelector = _quantity > 0;
   }
 
   @override
   void didUpdateWidget(covariant ProductCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.quantity > 0 != _showQuantitySelector) {
-      _showQuantitySelector = widget.quantity > 0;
+    if (widget.resetSignal != oldWidget.resetSignal) {
+      _showQuantitySelector = false;
+      _quantity = 0;
+      return;
+    }
+
+    if (widget.quantity != oldWidget.quantity) {
+      _quantity = widget.quantity;
+      _showQuantitySelector = _quantity > 0;
     }
   }
 
   void _showSelector() {
-    setState(() => _showQuantitySelector = true);
-    widget.onQuantityChanged?.call(1);
+    setState(() {
+      _quantity = 1;
+      _showQuantitySelector = true;
+    });
+    widget.onQuantityChanged?.call(_quantity);
   }
 
   void _onQuantityChanged(int quantity) {
-    if (quantity == 0) {
-      setState(() => _showQuantitySelector = false);
-    }
-    widget.onQuantityChanged?.call(quantity);
+    setState(() {
+      _quantity = quantity;
+      _showQuantitySelector = quantity > 0;
+    });
+    widget.onQuantityChanged?.call(_quantity);
   }
 
   @override
@@ -122,7 +137,7 @@ class _ProductCardState extends State<ProductCard> {
                         _showQuantitySelector
                             ? QuantitySelector(
                               key: const ValueKey('quantity-selector'),
-                              initialQuantity: widget.quantity,
+                              initialQuantity: _quantity,
                               minQuantity: 0,
                               color: widget.primaryColor,
                               buttonSize: 28,
