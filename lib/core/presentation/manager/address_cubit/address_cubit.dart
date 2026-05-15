@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
 import 'package:makanak/core/models/address_form_draft_model.dart';
-import 'package:makanak/core/models/confirming_order_address_model.dart';
+import 'package:makanak/core/models/user_address_model.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_state.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
 import 'package:makanak/core/utils/address_form_validator.dart';
@@ -124,7 +124,7 @@ class AddressCubit extends Cubit<AddressState> {
         final updatedAddresses =
             state.addresses
                 .map(
-                  (item) => ConfirmingOrderAddressModel(
+                  (item) => UserAddressModel(
                     id: item.id,
                     title: item.title,
                     phone: item.phone,
@@ -205,7 +205,7 @@ class AddressCubit extends Cubit<AddressState> {
     );
   }
 
-  void _emitAddressState(List<ConfirmingOrderAddressModel> addresses) {
+  void _emitAddressState(List<UserAddressModel> addresses) {
     emit(
       AddressChecked(
         addresses.isNotEmpty,
@@ -217,7 +217,7 @@ class AddressCubit extends Cubit<AddressState> {
   }
 
   void _emitAddressesLoaded(
-    List<ConfirmingOrderAddressModel> addresses, {
+    List<UserAddressModel> addresses, {
     int? selectedAddressIndex,
   }) {
     emit(
@@ -232,7 +232,7 @@ class AddressCubit extends Cubit<AddressState> {
     );
   }
 
-  int _defaultAddressIndex(List<ConfirmingOrderAddressModel> addresses) {
+  int _defaultAddressIndex(List<UserAddressModel> addresses) {
     if (addresses.isEmpty) return 0;
     final defaultIndex = addresses.indexWhere((address) => address.isDefault);
     return defaultIndex < 0 ? 0 : defaultIndex;
@@ -240,7 +240,7 @@ class AddressCubit extends Cubit<AddressState> {
 
   int _validatedAddressIndex(
     int selectedAddressIndex,
-    List<ConfirmingOrderAddressModel> addresses,
+    List<UserAddressModel> addresses,
   ) {
     if (addresses.isEmpty) return 0;
     if (selectedAddressIndex < 0 || selectedAddressIndex >= addresses.length) {

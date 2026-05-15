@@ -1,7 +1,8 @@
+import 'package:equatable/equatable.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 
-class ConfirmingOrderAddressModel {
-  const ConfirmingOrderAddressModel({
+class UserAddressModel extends Equatable {
+  const UserAddressModel({
     required this.id,
     required this.title,
     required this.phone,
@@ -17,7 +18,7 @@ class ConfirmingOrderAddressModel {
   final String notes;
   final bool isDefault;
 
-  factory ConfirmingOrderAddressModel.fromJson(Map<String, dynamic> json) {
+  factory UserAddressModel.fromJson(Map<String, dynamic> json) {
     final street = json['street']?.toString().trim() ?? '';
     final floor = json['floor']?.toString().trim() ?? '';
     final apartmentNumber = json['apartment_number']?.toString().trim() ?? '';
@@ -29,11 +30,11 @@ class ConfirmingOrderAddressModel {
         '${AppStrings.apartmentNumber} $apartmentNumber',
     ];
 
-    return ConfirmingOrderAddressModel(
+    return UserAddressModel(
       id: json['id']?.toString() ?? '',
       title: street.isEmpty ? AppStrings.deliveryAddress : street,
       phone: json['phone_number']?.toString() ?? '',
-      details: detailsParts.join('، '),
+      details: detailsParts.join(', '),
       notes: json['address_notes']?.toString() ?? '',
       isDefault: _readBool(json['is_default'], defaultValue: false),
     );
@@ -49,4 +50,7 @@ class ConfirmingOrderAddressModel {
 
     return defaultValue;
   }
+
+  @override
+  List<Object?> get props => [id, title, phone, details, notes, isDefault];
 }

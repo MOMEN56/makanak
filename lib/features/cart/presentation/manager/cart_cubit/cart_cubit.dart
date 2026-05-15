@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
+import 'package:makanak/features/cart/domain/entities/create_order_item.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 
@@ -56,10 +57,7 @@ class CartCubit extends Cubit<CartState> {
     }
 
     emit(
-      CartInitial(
-        items: currentItems,
-        shippingPrice: arguments.shippingPrice,
-      ),
+      CartInitial(items: currentItems, shippingPrice: arguments.shippingPrice),
     );
 
     unawaited(
@@ -100,9 +98,28 @@ class CartCubit extends Cubit<CartState> {
   }
 
   Future<void> createOrder({required String addressId}) async {
-    final product = state.product;
-    final productId = product?.id;
-    if (product == null || productId == null || productId.isEmpty) {
+    final items = state.items;
+    if (items.isEmpty) {
+      emit(_errorFromState(AppStrings.invalidProduct));
+      return;
+    }
+
+    final firstProduct = items.first.product;
+    final shopId = firstProduct.shopId;
+    final orderItems = items
+        .map(
+          (item) => CreateOrderItem(
+            productId: item.product.id ?? '',
+            quantity: item.quantity,
+          ),
+        )
+        .where((item) => item.productId.trim().isNotEmpty)
+        .toList(growable: false);
+
+    final hasMixedShops = items.any((item) => item.product.shopId != shopId);
+    if (shopId.trim().isEmpty ||
+        hasMixedShops ||
+        orderItems.length != items.length) {
       emit(_errorFromState(AppStrings.invalidProduct));
       return;
     }
@@ -114,26 +131,25 @@ class CartCubit extends Cubit<CartState> {
 
     emit(_loadingFromState());
     final result = await _cartRepository.createOrder(
-      shopId: product.shopId,
-      productId: productId,
+      shopId: shopId,
       addressId: addressId,
-      quantity: state.quantity,
-      itemsTotal: state.itemsSubtotal,
       shippingPrice: state.shippingPrice,
+      items: orderItems,
     );
     if (isClosed) return;
 
-    result.fold((failure) => emit(_errorFromState(failure.message)), (_) {
-      unawaited(
-        CartLocalStorage.removeProduct(userId: _userId, productId: productId),
-      );
-      emit(
-        CartOrderSubmitted(
-          items: state.items,
-          shippingPrice: state.shippingPrice,
-        ),
-      );
-    });
+    await result.fold<Future<void>>(
+      (failure) async {
+        emit(_errorFromState(failure.message));
+      },
+      (_) async {
+        final submittedShippingPrice = state.shippingPrice;
+        await CartLocalStorage.clearCart(userId: _userId);
+        if (isClosed) return;
+
+        emit(CartOrderSubmitted(shippingPrice: submittedShippingPrice));
+      },
+    );
   }
 
   void updateQuantity(String productId, int quantity) {

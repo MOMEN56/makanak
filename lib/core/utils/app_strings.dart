@@ -59,6 +59,37 @@ class AppStrings {
 
   static const home = 'الرئيسية';
   static const orderHistory = 'سجل الطلبات';
+  static const orderHistorySubtitle =
+      'كل طلباتك السابقة في مكان واحد مع حالة الطلب وتفاصيله.';
+  static const orderHistoryOverviewTitle = 'ملخص الطلبات';
+  static const orderHistoryOverviewSubtitle =
+      'راجعي إجمالي طلباتك والمدفوعات بسرعة.';
+  static const orderHistoryOrdersCount = 'عدد الطلبات';
+  static const orderHistoryDeliveredCount = 'تم توصيله';
+  static const orderLatestOrders = 'آخر الطلبات';
+  static const orderHistorySectionSubtitle =
+      'اسحبي يمين ويسار لعرض الطلبات واضغطي على أي طلب للتفاصيل.';
+  static const orderHistoryEmpty = 'لا توجد طلبات سابقة حتى الآن.';
+  static const orderHistoryLoadError =
+      'تعذر تحميل الطلبات الآن. حاول مرة أخرى بعد قليل.';
+  static const orderDetails = 'تفاصيل الطلب';
+  static const orderDetailsUnavailable = 'بيانات الطلب غير متاحة';
+  static const orderItems = 'المنتجات';
+  static const orderItemsLabel = 'عدد المنتجات';
+  static const orderDate = 'تاريخ الطلب';
+  static const orderDateUnavailable = 'تاريخ غير متاح';
+  static const orderStatus = 'الحالة';
+  static const paymentMethod = 'طريقة الدفع';
+  static const orderPaymentMethodUnavailable = 'غير محدد';
+  static const orderTotalPaid = 'إجمالي المدفوع';
+  static const orderUnitPrice = 'سعر القطعة';
+  static const orderQuantityLabel = 'الكمية';
+  static const orderProductTotal = 'إجمالي المنتج';
+  static const orderViewDetails = 'عرض التفاصيل';
+  static const orderStatusDelivered = 'تم التوصيل';
+  static const orderStatusOutForDelivery = 'خرج للتوصيل';
+  static const orderStatusRejected = 'رفض';
+
   static const shopsHeaderTitle = 'نفسك في إيه؟';
   static const shopsSearchHint = 'ابحث عن المكان اللي نفسك فيه..';
   static const shopsEmptySearch = 'لا توجد محلات بهذا الاسم.';
@@ -179,4 +210,16 @@ class AppStrings {
       'تمت إضافة$quantityText $productName إلى';
 
   static String priceInEgyptianPounds(int price) => '$price جنيه';
+
+  static String orderNumberLabel(String orderId) {
+    final normalizedId = orderId.trim();
+    if (normalizedId.isEmpty) return 'طلب';
+
+    final shortId =
+        normalizedId.length <= 8 ? normalizedId : normalizedId.substring(0, 8);
+
+    return 'طلب #$shortId';
+  }
+
+  static String orderItemsCount(int count) => 'عدد المنتجات: $count';
 }

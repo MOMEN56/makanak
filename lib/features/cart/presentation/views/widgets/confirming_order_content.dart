@@ -5,7 +5,7 @@ import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/shared/widgets/address_card_widget.dart';
 import 'package:makanak/shared/widgets/add_address_button.dart';
-import 'package:makanak/features/cart/presentation/views/widgets/order_summary_card_widget.dart';
+import 'package:makanak/shared/widgets/order_summary_card_widget.dart';
 import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
@@ -40,7 +40,9 @@ class ConfirmingOrderContent extends StatelessWidget {
     if (addressState.addresses.isEmpty) {
       return Column(
         children: [
-          const Expanded(child: StateMessage(message: AppStrings.noSavedAddresses)),
+          const Expanded(
+            child: StateMessage(message: AppStrings.noSavedAddresses),
+          ),
           AddAddressButton(onTap: isLoading ? null : onAddAddress),
         ],
       );

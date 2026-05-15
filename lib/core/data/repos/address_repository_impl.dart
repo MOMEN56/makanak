@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
 import 'package:makanak/core/errors/database_exception.dart';
 import 'package:makanak/core/errors/failures.dart';
-import 'package:makanak/core/models/confirming_order_address_model.dart';
+import 'package:makanak/core/models/user_address_model.dart';
 import 'package:makanak/core/services/supabase_database_service.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 
@@ -12,11 +12,10 @@ class AddressRepositoryImpl implements AddressRepository {
   final SupabaseDatabaseService _databaseService;
 
   @override
-  Future<Either<Failure, List<ConfirmingOrderAddressModel>>>
-  fetchUserAddresses() async {
+  Future<Either<Failure, List<UserAddressModel>>> fetchUserAddresses() async {
     try {
       final data = await _databaseService.fetchUserAddresses();
-      final addresses = data.map(ConfirmingOrderAddressModel.fromJson).toList();
+      final addresses = data.map(UserAddressModel.fromJson).toList();
       return right(addresses);
     } on DatabaseException {
       return left(const Failure(AppStrings.addressLoadError));
@@ -26,7 +25,7 @@ class AddressRepositoryImpl implements AddressRepository {
   }
 
   @override
-  Future<Either<Failure, ConfirmingOrderAddressModel>> saveAddress({
+  Future<Either<Failure, UserAddressModel>> saveAddress({
     required String street,
     required String floor,
     required String building,
@@ -43,7 +42,7 @@ class AddressRepositoryImpl implements AddressRepository {
         notes: notes,
         phoneNumber: phoneNumber,
       );
-      return right(ConfirmingOrderAddressModel.fromJson(data));
+      return right(UserAddressModel.fromJson(data));
     } on DatabaseException {
       return left(const Failure(AppStrings.addressSaveError));
     } catch (_) {

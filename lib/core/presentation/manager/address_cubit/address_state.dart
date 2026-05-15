@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:makanak/core/models/address_form_draft_model.dart';
-import 'package:makanak/core/models/confirming_order_address_model.dart';
+import 'package:makanak/core/models/user_address_model.dart';
 
 sealed class AddressState extends Equatable {
   const AddressState({
@@ -9,7 +9,7 @@ sealed class AddressState extends Equatable {
     this.draft = const AddressFormDraft(),
   });
 
-  final List<ConfirmingOrderAddressModel> addresses;
+  final List<UserAddressModel> addresses;
   final int selectedAddressIndex;
   final AddressFormDraft draft;
 
@@ -59,7 +59,7 @@ class AddressesLoaded extends AddressState {
     super.draft,
   }) : super(addresses: loadedAddresses);
 
-  final List<ConfirmingOrderAddressModel> loadedAddresses;
+  final List<UserAddressModel> loadedAddresses;
 
   @override
   List<Object?> get props => [...super.props, loadedAddresses];

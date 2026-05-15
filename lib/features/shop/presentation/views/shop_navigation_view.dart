@@ -18,9 +18,17 @@ import 'package:makanak/features/shop/presentation/views/products_view.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 
 class ShopNavigationView extends StatefulWidget {
-  const ShopNavigationView({super.key, required this.shopModel});
+  const ShopNavigationView({
+    super.key,
+    required this.shopModel,
+    this.initialIndex = homeTabIndex,
+  });
+
+  static const homeTabIndex = 0;
+  static const orderHistoryTabIndex = 2;
 
   final ShopModel shopModel;
+  final int initialIndex;
 
   @override
   State<ShopNavigationView> createState() => _ShopNavigationViewState();
@@ -49,6 +57,7 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
   @override
   void initState() {
     super.initState();
+    _currentIndex = _validatedInitialIndex(widget.initialIndex);
     final cartCubit = getIt<CartCubit>();
     cartCubit.clearProductFromOtherShop(widget.shopModel.id);
     unawaited(cartCubit.restoreSavedCart(shopId: widget.shopModel.id));
@@ -77,7 +86,10 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
                     onCartRequested: () => _selectTab(1),
                     onProductAdded: _animateCartTab,
                   ),
-                  CartNavigationTab(onBack: () => _selectTab(0)),
+                  CartNavigationTab(
+                    shopModel: widget.shopModel,
+                    onBack: () => _selectTab(0),
+                  ),
                   const OrderHistoryView(),
                   const ProfileView(),
                 ],
@@ -116,5 +128,13 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
     setState(() {
       _cartAnimationTrigger++;
     });
+  }
+
+  int _validatedInitialIndex(int index) {
+    if (index < 0 || index >= _items.length) {
+      return ShopNavigationView.homeTabIndex;
+    }
+
+    return index;
   }
 }

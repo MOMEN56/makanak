@@ -7,8 +7,8 @@ import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/shop/presentation/views/products_view.dart';
+import 'package:makanak/features/shop/presentation/views/shop_navigation_view.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
-import 'package:makanak/features/shops/presentation/views/shops_view.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 
 class SubmitOrderViewBody extends StatefulWidget {
@@ -30,7 +30,15 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
     return widget.cartArguments?.primaryColor ?? AppColors.primaryColor;
   }
 
-  ShopModel? get _shopModel => widget.cartArguments?.shopModel;
+  ShopModel? get _shopModel {
+    final shopModel = widget.cartArguments?.shopModel;
+    if (shopModel != null) return shopModel;
+
+    final shopId = widget.cartArguments?.product?.shopId.trim() ?? '';
+    if (shopId.isEmpty) return null;
+
+    return ShopModel(id: shopId, name: '', category: '');
+  }
 
   @override
   void initState() {
@@ -39,7 +47,10 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
       if (!mounted) return;
       setState(() => _showCheck = true);
     });
-    _redirectTimer = Timer(const Duration(seconds: 6), _goToShopProducts);
+    _redirectTimer = Timer(
+      const Duration(seconds: 5),
+      _goToScreenAfterConfirmingOrder,
+    );
   }
 
   @override
@@ -49,18 +60,13 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
     super.dispose();
   }
 
-  void _goToShopProducts() {
+  void _goToScreenAfterConfirmingOrder() {
     if (!mounted || _didNavigate) return;
     _didNavigate = true;
     _redirectTimer?.cancel();
 
     final shopModel = _shopModel;
     if (shopModel == null) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        ShopsView.routeName,
-        (route) => false,
-      );
       return;
     }
 
@@ -69,6 +75,28 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
       ProductsView.routeName,
       (route) => false,
       arguments: shopModel,
+    );
+  }
+
+  void _goToOrderHistory() {
+    if (!mounted || _didNavigate) return;
+
+    final shopModel = _shopModel;
+    if (shopModel == null) return;
+
+    _didNavigate = true;
+    _redirectTimer?.cancel();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => ShopNavigationView(
+              shopModel: shopModel,
+              initialIndex: ShopNavigationView.orderHistoryTabIndex,
+            ),
+      ),
+      (route) => false,
     );
   }
 
@@ -109,7 +137,7 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
             ),
             CustomButton(
               hint: AppStrings.trackOrder,
-              onTap: _goToShopProducts,
+              onTap: _goToOrderHistory,
               hasShadowEffect: true,
               color: primaryColor,
             ),

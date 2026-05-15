@@ -13,6 +13,8 @@ import 'package:makanak/features/cart/presentation/views/add_user_address_view.d
 import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/submit_order_view.dart';
+import 'package:makanak/features/order_history/data/models/order_model.dart';
+import 'package:makanak/features/order_history/presentation/views/order_details_view.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
 import 'package:makanak/features/profile/presentation/views/profile_view.dart';
 import 'package:makanak/features/shop/presentation/views/product_details_view.dart';
@@ -90,6 +92,21 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return _fadeRoute(
         settings: settings,
         builder: (_) => const OrderHistoryView(),
+      );
+    case OrderDetailsView.routeName:
+      final arguments = settings.arguments;
+      if (arguments is OrderModel) {
+        return _fadeRoute(
+          settings: settings,
+          builder: (_) => OrderDetailsView(order: arguments),
+        );
+      }
+      return _fadeRoute(
+        settings: settings,
+        builder:
+            (_) => const Scaffold(
+              body: Center(child: Text(AppStrings.orderDetailsUnavailable)),
+            ),
       );
     case ProfileView.routeName:
       return _fadeRoute(

@@ -3,8 +3,8 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
-import 'package:makanak/core/models/confirming_order_address_model.dart';
-import 'package:makanak/features/cart/presentation/views/widgets/confirming_card_widget.dart';
+import 'package:makanak/core/models/user_address_model.dart';
+import 'package:makanak/shared/widgets/confirming_card_widget.dart';
 
 class AddressCard extends StatelessWidget {
   const AddressCard({
@@ -15,7 +15,7 @@ class AddressCard extends StatelessWidget {
     this.primaryColor = AppColors.primaryColor,
   });
 
-  final ConfirmingOrderAddressModel address;
+  final UserAddressModel address;
   final bool canChangeAddress;
   final VoidCallback onChangeAddress;
   final Color primaryColor;

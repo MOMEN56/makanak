@@ -179,26 +179,66 @@ class SupabaseDatabaseService {
 
   Future<Map<String, dynamic>> createOrder({
     required String shopId,
-    required String productId,
     required String addressId,
-    required int quantity,
-    required int itemsTotal,
     required int shippingPrice,
+    required List<Map<String, dynamic>> items,
   }) async {
     try {
       final data = await _client.rpc(
         'create_order',
         params: {
           'p_shop_id': shopId,
-          'p_product_id': productId,
           'p_address_id': addressId,
-          'p_quantity': quantity,
-          'p_items_total': itemsTotal,
           'p_shipping_price': shippingPrice,
+          'p_order_details': items,
         },
       );
 
       return Map<String, dynamic>.from(data as Map);
+    } on PostgrestException catch (e) {
+      throw DatabaseException(e.message, code: e.code);
+    } catch (_) {
+      throw const DatabaseException('Unexpected database error');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchUserOrders() async {
+    try {
+      final userId = _client.auth.currentSession?.user.id.trim();
+      if (userId == null || userId.isEmpty) {
+        throw const DatabaseException('User is not authenticated');
+      }
+
+      final data = await _client
+          .from('orders')
+          .select('''
+            *,
+            product:products(
+              id,
+              shop_id,
+              name,
+              description,
+              image_url,
+              price,
+              in_stock,
+              stock_quantity,
+              is_visible
+            ),
+            user_address:user_addresses(
+              id,
+              street,
+              floor,
+              building_number,
+              apartment_number,
+              address_notes,
+              phone_number,
+              is_default
+            )
+            ''')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(data);
     } on PostgrestException catch (e) {
       throw DatabaseException(e.message, code: e.code);
     } catch (_) {

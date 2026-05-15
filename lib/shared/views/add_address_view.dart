@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
-import 'package:makanak/shared/views/widgets/add_address_view_body.dart';
+import 'package:makanak/shared/widgets/add_address_view_body.dart';
 
 class AddAddressView extends StatelessWidget {
   const AddAddressView({super.key});

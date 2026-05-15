@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
-import 'package:makanak/features/cart/presentation/views/widgets/confirming_card_widget.dart';
+import 'package:makanak/shared/widgets/confirming_card_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/confirming_order_row_widget.dart';
 
 class OrderSummaryCard extends StatelessWidget {

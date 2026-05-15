@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
-import 'package:makanak/core/models/confirming_order_address_model.dart';
+import 'package:makanak/core/models/user_address_model.dart';
 
 class SelectableAddressCard extends StatelessWidget {
   const SelectableAddressCard({
@@ -14,7 +14,7 @@ class SelectableAddressCard extends StatelessWidget {
     this.onSetAsMain,
   });
 
-  final ConfirmingOrderAddressModel address;
+  final UserAddressModel address;
   final bool isSelected;
   final Color primaryColor;
   final VoidCallback? onSetAsMain;

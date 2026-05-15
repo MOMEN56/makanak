@@ -1,12 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:makanak/core/errors/failures.dart';
-import 'package:makanak/core/models/confirming_order_address_model.dart';
+import 'package:makanak/core/models/user_address_model.dart';
 
 abstract class AddressRepository {
-  Future<Either<Failure, List<ConfirmingOrderAddressModel>>>
-  fetchUserAddresses();
+  Future<Either<Failure, List<UserAddressModel>>> fetchUserAddresses();
 
-  Future<Either<Failure, ConfirmingOrderAddressModel>> saveAddress({
+  Future<Either<Failure, UserAddressModel>> saveAddress({
     required String street,
     required String floor,
     required String building,

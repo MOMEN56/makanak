@@ -13,6 +13,9 @@ import 'package:makanak/features/cart/data/repos/cart_repository_impl.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:makanak/features/order_history/data/repos/order_history_repository_impl.dart';
+import 'package:makanak/features/order_history/domain/repos/order_history_repository.dart';
+import 'package:makanak/features/order_history/presentation/manager/order_history_cubit/order_history_cubit.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/data/repos/products_repo_impl.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
@@ -67,6 +70,10 @@ void setupServiceLocator() {
     () => AddressRepositoryImpl(getIt<SupabaseDatabaseService>()),
   );
 
+  getIt.registerLazySingleton<OrderHistoryRepository>(
+    () => OrderHistoryRepositoryImpl(getIt<SupabaseDatabaseService>()),
+  );
+
   getIt.registerFactory<ShopsCubit>(() => ShopsCubit(getIt<ShopsRepo>()));
 
   getIt.registerFactory<ProductsCubit>(
@@ -86,6 +93,10 @@ void setupServiceLocator() {
   getIt.registerFactory<AddressCubit>(
     () =>
         AddressCubit(getIt<AddressRepository>(), getIt<SupabaseAuthService>()),
+  );
+
+  getIt.registerFactory<OrderHistoryCubit>(
+    () => OrderHistoryCubit(getIt<OrderHistoryRepository>()),
   );
 }
 

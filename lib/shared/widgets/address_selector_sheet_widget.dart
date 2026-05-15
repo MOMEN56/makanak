@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
-import 'package:makanak/core/models/confirming_order_address_model.dart';
+import 'package:makanak/core/models/user_address_model.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/selectable_address_card_widget.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 
@@ -17,7 +17,7 @@ class AddressSelectorSheet extends StatefulWidget {
     required this.onMainAddressSelected,
   });
 
-  final List<ConfirmingOrderAddressModel> addresses;
+  final List<UserAddressModel> addresses;
   final int selectedIndex;
   final ValueChanged<int> onAddressSelected;
   final Color primaryColor;
