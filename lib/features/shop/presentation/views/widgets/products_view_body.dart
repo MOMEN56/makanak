@@ -14,6 +14,7 @@ import 'package:makanak/features/shop/presentation/views/widgets/products_grid_s
 import 'package:makanak/features/shop/presentation/views/widgets/products_list.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
+import 'package:makanak/shared/widgets/network_image_with_placeholder.dart';
 import 'package:makanak/shared/widgets/search_text_field.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
@@ -99,9 +100,17 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 25,
-                  backgroundImage: NetworkImage(widget.shopModel.imageUrl),
+                ClipOval(
+                  child: NetworkImageWithPlaceholder(
+                    imageUrl: widget.shopModel.imageUrl,
+                    height: 50,
+                    width: 50,
+                    cacheWidth: 200,
+                    cacheHeight: 200,
+                    placeholderIcon: Icons.storefront_outlined,
+                    placeholderColor: AppColors.greyBackground,
+                    iconColor: AppColors.shopCategoryIconColor,
+                  ),
                 ),
                 const Gap(12),
                 Expanded(

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 
@@ -9,6 +10,7 @@ class NetworkImageWithPlaceholder extends StatelessWidget {
     this.width,
     this.fit = BoxFit.cover,
     this.cacheWidth,
+    this.cacheHeight,
     this.filterQuality = FilterQuality.low,
     this.placeholderIcon = Icons.image_not_supported_outlined,
     this.placeholderColor = AppColors.white,
@@ -21,6 +23,7 @@ class NetworkImageWithPlaceholder extends StatelessWidget {
   final double? width;
   final BoxFit fit;
   final int? cacheWidth;
+  final int? cacheHeight;
   final FilterQuality filterQuality;
   final IconData placeholderIcon;
   final Color placeholderColor;
@@ -38,14 +41,26 @@ class NetworkImageWithPlaceholder extends StatelessWidget {
               color: placeholderColor,
               iconColor: iconColor,
             )
-            : Image.network(
-              imageUrl,
+            : CachedNetworkImage(
+              imageUrl: imageUrl,
               height: height,
               width: width,
               fit: fit,
-              cacheWidth: cacheWidth,
+              memCacheWidth: cacheWidth,
+              memCacheHeight: cacheHeight,
+              maxWidthDiskCache: cacheWidth,
+              maxHeightDiskCache: cacheHeight,
               filterQuality: filterQuality,
-              errorBuilder: (_, __, ___) {
+              placeholder: (_, __) {
+                return _ImagePlaceholder(
+                  height: height,
+                  width: width,
+                  icon: placeholderIcon,
+                  color: placeholderColor,
+                  iconColor: iconColor,
+                );
+              },
+              errorWidget: (_, __, ___) {
                 return _ImagePlaceholder(
                   height: height,
                   width: width,

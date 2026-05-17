@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/assets.dart';
@@ -18,13 +19,25 @@ class ProfileAvatar extends StatelessWidget {
         color: AppColors.shopCategoryIconBackground,
         child:
             resolvedAvatarUrl == null || resolvedAvatarUrl.isEmpty
-                ? Image.asset(Assets.assetsIconsDefaultUserImage)
-                : Image.network(
-                  resolvedAvatarUrl,
+                ? Image.asset(
+                  Assets.assetsIconsDefaultUserImage,
                   fit: BoxFit.cover,
-                  errorBuilder:
-                      (_, _, _) =>
-                          Image.asset(Assets.assetsIconsDefaultUserImage),
+                )
+                : CachedNetworkImage(
+                  imageUrl: resolvedAvatarUrl,
+                  fit: BoxFit.cover,
+                  memCacheWidth: 160,
+                  maxWidthDiskCache: 160,
+                  placeholder:
+                      (_, __) => Image.asset(
+                        Assets.assetsIconsDefaultUserImage,
+                        fit: BoxFit.cover,
+                      ),
+                  errorWidget:
+                      (_, __, ___) => Image.asset(
+                        Assets.assetsIconsDefaultUserImage,
+                        fit: BoxFit.cover,
+                      ),
                 ),
       ),
     );
