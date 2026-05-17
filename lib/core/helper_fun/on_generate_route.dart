@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
@@ -11,6 +13,7 @@ import 'package:makanak/features/auth/presentation/views/sign_up_view.dart';
 import 'package:makanak/features/bottom_navigation/presentation/views/bottom_navigation_view.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit_registry.dart';
 import 'package:makanak/features/cart/presentation/views/add_user_address_view.dart';
 import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
@@ -46,7 +49,11 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return _fadeRoute(
         settings: settings,
         builder:
-            (_) => _CartCubitProvider(
+            (_) => _CartFlowProviders(
+              shopId:
+                  arguments is CartViewArguments
+                      ? _shopIdFromCartArguments(arguments)
+                      : null,
               child: CartView(
                 cartArguments:
                     arguments is CartViewArguments ? arguments : null,
@@ -58,7 +65,11 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return _fadeRoute(
         settings: settings,
         builder:
-            (_) => _CartCubitProvider(
+            (_) => _CartFlowProviders(
+              shopId:
+                  arguments is CartViewArguments
+                      ? _shopIdFromCartArguments(arguments)
+                      : null,
               child: AddUserAddressView(
                 cartArguments:
                     arguments is CartViewArguments ? arguments : null,
@@ -70,7 +81,11 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return _fadeRoute(
         settings: settings,
         builder:
-            (_) => _CartCubitProvider(
+            (_) => _CartFlowProviders(
+              shopId:
+                  arguments is CartViewArguments
+                      ? _shopIdFromCartArguments(arguments)
+                      : null,
               child: ConfirmingOrderView(
                 cartArguments:
                     arguments is CartViewArguments ? arguments : null,
@@ -82,11 +97,8 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return _fadeRoute(
         settings: settings,
         builder:
-            (_) => _CartCubitProvider(
-              child: SubmitOrderView(
-                cartArguments:
-                    arguments is CartViewArguments ? arguments : null,
-              ),
+            (_) => SubmitOrderView(
+              cartArguments: arguments is CartViewArguments ? arguments : null,
             ),
       );
     case ShopsView.routeName:
@@ -142,6 +154,7 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
           settings: settings,
           builder:
               (_) => _CartCubitProvider(
+                shopId: _shopIdFromProductDetailsArguments(arguments),
                 child: ProductDetailsView(
                   product: arguments.product,
                   primaryColor: arguments.primaryColor,
@@ -184,6 +197,28 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
   }
 }
 
+String? _shopIdFromCartArguments(CartViewArguments? arguments) {
+  final shopId =
+      arguments?.shopModel?.id?.trim() ?? arguments?.product?.shopId.trim();
+  if (shopId == null || shopId.isEmpty) {
+    return null;
+  }
+
+  return shopId;
+}
+
+String? _shopIdFromProductDetailsArguments(
+  ProductDetailsViewArguments arguments,
+) {
+  final shopId =
+      arguments.shopModel?.id?.trim() ?? arguments.product.shopId.trim();
+  if (shopId.isEmpty) {
+    return null;
+  }
+
+  return shopId;
+}
+
 Route<dynamic> _fadeRoute({
   required RouteSettings settings,
   required WidgetBuilder builder,
@@ -200,18 +235,42 @@ Route<dynamic> _fadeRoute({
 }
 
 class _CartCubitProvider extends StatelessWidget {
-  const _CartCubitProvider({required this.child});
+  const _CartCubitProvider({required this.child, this.shopId});
 
   final Widget child;
+  final String? shopId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<CartCubit>.value(
+      value: _currentUserCartCubit(shopId),
+      child: child,
+    );
+  }
+}
+
+class _CartFlowProviders extends StatelessWidget {
+  const _CartFlowProviders({required this.child, this.shopId});
+
+  final Widget child;
+  final String? shopId;
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<CartCubit>.value(value: getIt<CartCubit>()),
+        BlocProvider<CartCubit>.value(value: _currentUserCartCubit(shopId)),
         BlocProvider<AddressCubit>(create: (_) => getIt<AddressCubit>()),
       ],
       child: child,
     );
   }
+}
+
+CartCubit _currentUserCartCubit(String? shopId) {
+  final cubit = getIt<CartCubitRegistry>().forUser(
+    requireAuthenticatedUserId(),
+  );
+  unawaited(cubit.restoreSavedCart(shopId: shopId));
+  return cubit;
 }

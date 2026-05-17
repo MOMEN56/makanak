@@ -12,6 +12,7 @@ import 'package:makanak/features/bottom_navigation/presentation/views/widgets/ca
 import 'package:makanak/features/bottom_navigation/presentation/views/widgets/liquid_glass_bottom_navigation.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit_registry.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
 import 'package:makanak/features/profile/presentation/views/profile_view.dart';
 import 'package:makanak/features/shop/presentation/views/products_view.dart';
@@ -37,6 +38,7 @@ class ShopNavigationView extends StatefulWidget {
 class _ShopNavigationViewState extends State<ShopNavigationView> {
   int _currentIndex = 0;
   int _cartAnimationTrigger = 0;
+  late final CartCubit _cartCubit;
 
   static const _items = [
     BottomNavigationItemData(icon: Icons.home_rounded, label: AppStrings.home),
@@ -58,16 +60,18 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
   void initState() {
     super.initState();
     _currentIndex = _validatedInitialIndex(widget.initialIndex);
-    final cartCubit = getIt<CartCubit>();
-    cartCubit.clearProductFromOtherShop(widget.shopModel.id);
-    unawaited(cartCubit.restoreSavedCart(shopId: widget.shopModel.id));
+    _cartCubit = getIt<CartCubitRegistry>().forUser(
+      requireAuthenticatedUserId(),
+    );
+    _cartCubit.clearProductFromOtherShop(widget.shopModel.id);
+    unawaited(_cartCubit.restoreSavedCart(shopId: widget.shopModel.id));
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<CartCubit>.value(value: getIt<CartCubit>()),
+        BlocProvider<CartCubit>.value(value: _cartCubit),
         BlocProvider<AddressCubit>(create: (_) => getIt<AddressCubit>()),
       ],
       child: Scaffold(

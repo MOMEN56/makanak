@@ -16,6 +16,7 @@ import 'package:makanak/features/cart/data/repos/cart_repository_impl.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit_registry.dart';
 import 'package:makanak/features/notifications/data/repos/notifications_repository.dart';
 import 'package:makanak/features/notifications/data/repos/notifications_repository_impl.dart';
 import 'package:makanak/features/order_history/data/repos/order_history_repository_impl.dart';
@@ -112,12 +113,13 @@ void setupServiceLocator() {
     () => AdminSendNotificationCubit(getIt<ManualNotificationService>()),
   );
 
-  getIt.registerLazySingleton<CartCubit>(
-    () => CartCubit(
-      getIt<CartRepository>(),
-      userId: _currentAuthenticatedUserId(),
-    ),
-    dispose: (cubit) => cubit.close(),
+  getIt.registerFactoryParam<CartCubit, String, void>(
+    (userId, _) => CartCubit(getIt<CartRepository>(), userId: userId),
+  );
+
+  getIt.registerLazySingleton<CartCubitRegistry>(
+    () => CartCubitRegistry((userId) => getIt<CartCubit>(param1: userId)),
+    dispose: (registry) => registry.disposeAll(),
   );
 
   getIt.registerFactory<AddressCubit>(
@@ -132,14 +134,10 @@ void setupServiceLocator() {
 
 Future<void> resetAuthenticatedSessionState() async {
   await CartLocalStorage.clearLegacyCart();
-
-  if (getIt.isRegistered<CartCubit>() &&
-      getIt.checkLazySingletonInstanceExists<CartCubit>()) {
-    await getIt.resetLazySingleton<CartCubit>();
-  }
+  await getIt<CartCubitRegistry>().disposeAll();
 }
 
-String _currentAuthenticatedUserId() {
+String requireAuthenticatedUserId() {
   final userId = getIt<SupabaseAuthService>().currentSession?.user.id.trim();
   if (userId == null || userId.isEmpty) {
     throw StateError('CartCubit can only be created after sign in.');
