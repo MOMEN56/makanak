@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/shared/widgets/shimmer/app_shimmer.dart';
 import 'package:makanak/shared/widgets/skeletons/shop_card_skeleton.dart';
@@ -10,23 +11,14 @@ class ShopsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = AppResponsive.spacing(context, 16);
-
     return SliverPadding(
       padding: AppResponsive.symmetric(context, horizontal: 24),
-      sliver: SliverList(
-        delegate: SliverChildListDelegate.fixed([
-          AppShimmer(
-            child: Column(
-              children: [
-                for (var index = 0; index < _itemCount; index++) ...[
-                  const ShopCardSkeleton(),
-                  if (index != _itemCount - 1) SizedBox(height: spacing),
-                ],
-              ],
-            ),
-          ),
-        ]),
+      sliver: SliverList.separated(
+        itemCount: _itemCount,
+        itemBuilder:
+            (context, index) => const AppShimmer(child: ShopCardSkeleton()),
+        separatorBuilder:
+            (context, index) => Gap(AppResponsive.spacing(context, 16)),
       ),
     );
   }

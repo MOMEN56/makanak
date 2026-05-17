@@ -16,7 +16,8 @@ class ShopsList extends StatelessWidget {
       padding: AppResponsive.symmetric(context, horizontal: 24),
       sliver: SliverList.separated(
         itemCount: shops.length,
-        separatorBuilder: (context, index) => const Gap(16),
+        separatorBuilder:
+            (context, index) => Gap(AppResponsive.spacing(context, 16)),
         itemBuilder: (context, index) {
           final shop = shops[index];
 

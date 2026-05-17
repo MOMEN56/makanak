@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 
 class EmptyOrderHistoryState extends StatelessWidget {
-  const EmptyOrderHistoryState();
+  const EmptyOrderHistoryState({super.key});
 
   @override
   Widget build(BuildContext context) {

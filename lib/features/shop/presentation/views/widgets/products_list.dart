@@ -3,6 +3,7 @@ import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/assets.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/presentation/views/product_details_view.dart';
+import 'package:makanak/features/shop/presentation/views/widgets/products_grid_delegate.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/product_card.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/message_emoji_widget.dart';
@@ -68,12 +69,7 @@ class _ProductsListState extends State<ProductsList> {
       padding: EdgeInsets.zero,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       itemCount: widget.products.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 0.68,
-      ),
+      gridDelegate: buildProductsGridDelegate(context),
       itemBuilder: (context, index) {
         final product = widget.products[index];
         final quantity = _quantityFor(product, index);

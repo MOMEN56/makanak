@@ -20,6 +20,12 @@ class ShopsViewBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ShopsCubit, ShopsState>(
       builder: (context, state) {
+        final shouldShowListSpacing = switch (state) {
+          ShopsInitial() || ShopsLoading() => true,
+          ShopsSuccess(:final shops) => shops.isNotEmpty,
+          ShopsFailure() => false,
+        };
+
         return KeyboardDismissOnTap(
           child: CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -32,7 +38,7 @@ class ShopsViewBody extends StatelessWidget {
                   ),
                 ),
               ),
-              if (state case ShopsSuccess(:final shops) when shops.isNotEmpty)
+              if (shouldShowListSpacing)
                 SliverToBoxAdapter(
                   child: Gap(AppResponsive.spacing(context, 8)),
                 ),

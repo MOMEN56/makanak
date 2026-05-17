@@ -16,11 +16,16 @@ class AppShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shimmerDirection =
+        Directionality.of(context) == TextDirection.rtl
+            ? ShimmerDirection.rtl
+            : ShimmerDirection.ltr;
+
     return RepaintBoundary(
       child: Shimmer.fromColors(
         baseColor: baseColor,
         highlightColor: highlightColor,
-        direction: ShimmerDirection.ltr,
+        direction: shimmerDirection,
         period: const Duration(milliseconds: 1400),
         child: child,
       ),

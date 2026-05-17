@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:makanak/core/utils/app_responsive.dart';
+import 'package:gap/gap.dart';
 import 'package:makanak/shared/widgets/confirming_card_widget.dart';
 import 'package:makanak/shared/widgets/shimmer/shimmer_box.dart';
 import 'package:makanak/shared/widgets/shimmer/shimmer_circle.dart';
@@ -9,54 +9,41 @@ class AddressCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConfirmingCard(
+    return const ConfirmingCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              ShimmerCircle(size: AppResponsive.width(context, 22)),
-              SizedBox(width: AppResponsive.spacing(context, 8)),
-              const Expanded(child: _HeaderLineSkeleton()),
-              SizedBox(width: AppResponsive.spacing(context, 12)),
-              ShimmerBox(
-                width: AppResponsive.width(context, 96),
-                height: AppResponsive.height(context, 32),
-                radius: 999,
-              ),
+              ShimmerCircle(size: 22),
+              Gap(8),
+              Expanded(child: _HeaderLineSkeleton()),
+              Gap(12),
+              ShimmerBox(width: 96, height: 32, radius: 999),
             ],
           ),
-          SizedBox(height: AppResponsive.spacing(context, 12)),
+          Gap(12),
           FractionallySizedBox(
             widthFactor: 0.44,
             alignment: Alignment.centerLeft,
-            child: ShimmerBox(
-              height: AppResponsive.height(context, 16),
-              radius: 999,
-            ),
+            child: ShimmerBox(height: 14, radius: 999),
           ),
-          SizedBox(height: AppResponsive.spacing(context, 8)),
+          Gap(6),
           FractionallySizedBox(
             widthFactor: 0.84,
             alignment: Alignment.centerLeft,
-            child: ShimmerBox(
-              height: AppResponsive.height(context, 14),
-              radius: 999,
-            ),
+            child: ShimmerBox(height: 14, radius: 999),
           ),
-          SizedBox(height: AppResponsive.spacing(context, 6)),
+          Gap(6),
           FractionallySizedBox(
             widthFactor: 0.66,
             alignment: Alignment.centerLeft,
-            child: ShimmerBox(
-              height: AppResponsive.height(context, 14),
-              radius: 999,
-            ),
+            child: ShimmerBox(height: 14, radius: 999),
           ),
-          SizedBox(height: AppResponsive.spacing(context, 10)),
-          const _AddressMetaSkeleton(widthFactor: 0.52),
-          SizedBox(height: AppResponsive.spacing(context, 6)),
-          const _AddressMetaSkeleton(widthFactor: 0.70),
+          Gap(8),
+          _AddressMetaSkeleton(widthFactor: 0.52),
+          Gap(6),
+          _AddressMetaSkeleton(widthFactor: 0.70),
         ],
       ),
     );
@@ -68,13 +55,10 @@ class _HeaderLineSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FractionallySizedBox(
+    return const FractionallySizedBox(
       widthFactor: 0.38,
       alignment: Alignment.centerLeft,
-      child: ShimmerBox(
-        height: AppResponsive.height(context, 16),
-        radius: 999,
-      ),
+      child: ShimmerBox(height: 16, radius: 999),
     );
   }
 }
@@ -88,16 +72,13 @@ class _AddressMetaSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        ShimmerCircle(size: AppResponsive.width(context, 18)),
-        SizedBox(width: AppResponsive.spacing(context, 6)),
+        const ShimmerCircle(size: 18),
+        const Gap(6),
         Expanded(
           child: FractionallySizedBox(
             widthFactor: widthFactor,
             alignment: Alignment.centerLeft,
-            child: ShimmerBox(
-              height: AppResponsive.height(context, 12),
-              radius: 999,
-            ),
+            child: ShimmerBox(height: 12, radius: 999),
           ),
         ),
       ],

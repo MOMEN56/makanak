@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
-import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/shared/widgets/shimmer/shimmer_box.dart';
 
 class ProductCardSkeleton extends StatelessWidget {
@@ -8,7 +7,7 @@ class ProductCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardRadius = AppResponsive.radius(context, 8);
+    const cardRadius = 8.0;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -31,33 +30,23 @@ class ProductCardSkeleton extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: AppResponsive.fromLTRB(context, 8, 8, 8, 10),
+              padding: const EdgeInsets.only(left: 4, right: 8, bottom: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  FractionallySizedBox(
+                  const FractionallySizedBox(
                     widthFactor: 0.82,
                     alignment: Alignment.centerLeft,
-                    child: ShimmerBox(
-                      height: AppResponsive.height(context, 18),
-                      radius: 999,
-                    ),
+                    child: ShimmerBox(height: 18, radius: 999),
                   ),
-                  SizedBox(height: AppResponsive.spacing(context, 8)),
-                  FractionallySizedBox(
+                  const SizedBox(height: 8),
+                  const FractionallySizedBox(
                     widthFactor: 0.45,
                     alignment: Alignment.centerLeft,
-                    child: ShimmerBox(
-                      height: AppResponsive.height(context, 14),
-                      radius: 999,
-                    ),
+                    child: ShimmerBox(height: 14, radius: 999),
                   ),
-                  SizedBox(height: AppResponsive.spacing(context, 10)),
-                  ShimmerBox(
-                    width: AppResponsive.width(context, 36),
-                    height: AppResponsive.height(context, 36),
-                    radius: cardRadius,
-                  ),
+                  const SizedBox(height: 10),
+                  const ShimmerBox(width: 36, height: 36, radius: cardRadius),
                 ],
               ),
             ),

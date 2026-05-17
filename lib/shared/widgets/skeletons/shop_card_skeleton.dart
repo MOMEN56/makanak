@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
-import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/shared/widgets/shimmer/shimmer_box.dart';
 
 class ShopCardSkeleton extends StatelessWidget {
@@ -8,12 +8,7 @@ class ShopCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardRadius = AppResponsive.radius(context, 16);
-    final imageRadius = AppResponsive.radius(context, 12);
-    final imageHeight = AppResponsive.height(context, 140);
-    final iconSize = AppResponsive.width(context, 48);
-    final spacing12 = AppResponsive.spacing(context, 12);
-    final spacing16 = AppResponsive.spacing(context, 16);
+    const cardRadius = 16.0;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -21,28 +16,21 @@ class ShopCardSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(cardRadius),
       ),
       child: Padding(
-        padding: AppResponsive.all(context, 15),
+        padding: const EdgeInsets.all(15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ShimmerBox(height: imageHeight, radius: imageRadius),
-            SizedBox(height: spacing16),
+            const ShimmerBox(height: 140, radius: 12),
+            const Gap(16),
             Row(
               children: [
-                ShimmerBox(
-                  width: iconSize,
-                  height: iconSize,
-                  radius: AppResponsive.radius(context, 16),
-                ),
-                SizedBox(width: spacing12),
+                const ShimmerBox(width: 48, height: 48, radius: 16),
+                const Gap(12),
                 const Expanded(child: _ShopCardTextSkeleton()),
               ],
             ),
-            SizedBox(height: spacing16),
-            ShimmerBox(
-              height: AppResponsive.height(context, 52),
-              radius: cardRadius,
-            ),
+            const Gap(16),
+            const ShimmerBox(height: 52, radius: cardRadius),
           ],
         ),
       ),
@@ -55,25 +43,19 @@ class _ShopCardTextSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FractionallySizedBox(
           widthFactor: 0.62,
           alignment: Alignment.centerLeft,
-          child: ShimmerBox(
-            height: AppResponsive.height(context, 18),
-            radius: 999,
-          ),
+          child: ShimmerBox(height: 18, radius: 999),
         ),
-        SizedBox(height: AppResponsive.spacing(context, 8)),
+        Gap(8),
         FractionallySizedBox(
           widthFactor: 0.42,
           alignment: Alignment.centerLeft,
-          child: ShimmerBox(
-            height: AppResponsive.height(context, 12),
-            radius: 999,
-          ),
+          child: ShimmerBox(height: 12, radius: 999),
         ),
       ],
     );

@@ -6,7 +6,7 @@ import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/order_history/data/models/order_model.dart';
 
 class OrderDetailsHeader extends StatelessWidget {
-  const OrderDetailsHeader({required this.order});
+  const OrderDetailsHeader({super.key, required this.order});
 
   final OrderModel order;
 
