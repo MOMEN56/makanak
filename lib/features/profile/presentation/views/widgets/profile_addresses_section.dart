@@ -4,12 +4,12 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_state.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/features/profile/presentation/views/widgets/profile_addresses_skeleton.dart';
 import 'package:makanak/features/profile/presentation/views/widgets/empty_addresses.dart';
 import 'package:makanak/shared/views/add_address_view.dart';
 import 'package:makanak/shared/widgets/add_address_button.dart';
 import 'package:makanak/shared/widgets/address_card_widget.dart';
 import 'package:makanak/shared/widgets/address_selector_sheet_widget.dart';
-import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
 
 class ProfileAddressesSection extends StatelessWidget {
   const ProfileAddressesSection({super.key, required this.onError});
@@ -37,7 +37,7 @@ class ProfileAddressesSection extends StatelessWidget {
         final isLoading = state is AddressLoading;
 
         if (isLoading && state.addresses.isEmpty) {
-          return const CustomLoadingIndicator();
+          return const ProfileAddressesSkeleton();
         }
 
         if (state.addresses.isEmpty) {

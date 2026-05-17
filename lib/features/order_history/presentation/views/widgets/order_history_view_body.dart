@@ -12,7 +12,7 @@ import 'package:makanak/features/order_history/presentation/manager/order_histor
 import 'package:makanak/features/order_history/presentation/views/order_details_view.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/empty_order_history_state.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_history_card.dart';
-import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
+import 'package:makanak/features/order_history/presentation/views/widgets/order_history_skeleton.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class OrderHistoryViewBody extends StatelessWidget {
@@ -23,7 +23,7 @@ class OrderHistoryViewBody extends StatelessWidget {
     return BlocBuilder<OrderHistoryCubit, OrderHistoryState>(
       builder: (context, state) {
         if (state is OrderHistoryInitial || state is OrderHistoryLoading) {
-          return const CustomLoadingIndicator(color: AppColors.primaryColor);
+          return const OrderHistorySkeleton();
         }
 
         if (state is OrderHistoryFailure) {

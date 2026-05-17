@@ -15,9 +15,9 @@ import 'package:makanak/features/cart/presentation/views/add_user_address_view.d
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_header_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_item_card.dart';
+import 'package:makanak/features/cart/presentation/views/widgets/cart_skeleton.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_indicator.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
-import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class CartViewBody extends StatefulWidget {
@@ -90,7 +90,9 @@ class _CartViewBodyState extends State<CartViewBody> {
           builder: (context, addressState) {
             if (addressState is AddressLoading &&
                 addressState.addresses.isEmpty) {
-              return CustomLoadingIndicator(color: primaryColor);
+              return CartSkeleton(
+                bottomContentPadding: widget.bottomContentPadding,
+              );
             }
 
             final cartItems = cartState.items;

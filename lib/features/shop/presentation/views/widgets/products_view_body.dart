@@ -10,10 +10,10 @@ import 'package:makanak/features/shop/presentation/actions/add_product_to_cart_a
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_state.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/fiilter_items_widgets.dart';
+import 'package:makanak/features/shop/presentation/views/widgets/products_grid_skeleton.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/products_list.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
-import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
 import 'package:makanak/shared/widgets/search_text_field.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
@@ -151,7 +151,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
                 builder: (context, state) {
                   return switch (state) {
                     ProductsInitial() ||
-                    ProductsLoading() => const CustomLoadingIndicator(),
+                    ProductsLoading() => const ProductsGridSkeleton(),
                     ProductsSuccess(:final products) => ProductsList(
                       products: products,
                       primaryColor: shopPrimaryColor,

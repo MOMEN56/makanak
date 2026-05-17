@@ -1,0 +1,29 @@
+import 'package:flutter/material.dart';
+import 'package:makanak/core/utils/app_colors.dart';
+import 'package:shimmer/shimmer.dart';
+
+class AppShimmer extends StatelessWidget {
+  const AppShimmer({
+    super.key,
+    required this.child,
+    this.baseColor = AppColors.searchFieldBackground,
+    this.highlightColor = AppColors.greyBackground,
+  });
+
+  final Widget child;
+  final Color baseColor;
+  final Color highlightColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        direction: ShimmerDirection.ltr,
+        period: const Duration(milliseconds: 1400),
+        child: child,
+      ),
+    );
+  }
+}

@@ -8,7 +8,7 @@ import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_cu
 import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_state.dart';
 import 'package:makanak/features/shops/presentation/views/widgets/shops_header.dart';
 import 'package:makanak/features/shops/presentation/views/widgets/shops_list.dart';
-import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
+import 'package:makanak/features/shops/presentation/views/widgets/shops_skeleton.dart';
 import 'package:makanak/shared/widgets/keyboard_dismiss_on_tap.dart';
 import 'package:makanak/shared/widgets/message_emoji_widget.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
@@ -32,11 +32,12 @@ class ShopsViewBody extends StatelessWidget {
                   ),
                 ),
               ),
-              switch (state) {
-                ShopsInitial() || ShopsLoading() => const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: CustomLoadingIndicator(),
+              if (state case ShopsSuccess(:final shops) when shops.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Gap(AppResponsive.spacing(context, 8)),
                 ),
+              switch (state) {
+                ShopsInitial() || ShopsLoading() => const ShopsSkeleton(),
                 ShopsSuccess(:final shops) =>
                   shops.isEmpty
                       ? const SliverFillRemaining(
