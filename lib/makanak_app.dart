@@ -5,14 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:makanak/core/helper_fun/on_generate_route.dart';
+import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_colors.dart';
+import 'package:makanak/core/utils/app_navigator_key.dart';
+import 'package:makanak/core/utils/app_route_tracker.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
-
-final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
 class MakanakApp extends StatelessWidget {
   const MakanakApp({super.key});
@@ -24,14 +25,24 @@ class MakanakApp extends StatelessWidget {
       child: BlocListener<AuthCubit, AuthState>(
         listenWhen: _shouldReturnToAuthGate,
         listener: (context, state) {
+          final pushNotificationService = getIt<PushNotificationService>();
+
           if (state is AuthUnauthenticated && !state.hasMessage) {
+            pushNotificationService.resetNavigationReadiness();
             unawaited(resetAuthenticatedSessionState());
           }
 
-          _navigatorKey.currentState?.popUntil((route) => route.isFirst);
+          appNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+
+          if (state is AuthAuthenticated) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              unawaited(pushNotificationService.markNavigationReady());
+            });
+          }
         },
         child: MaterialApp(
-          navigatorKey: _navigatorKey,
+          navigatorKey: appNavigatorKey,
+          navigatorObservers: [appRouteObserver],
           title: AppStrings.appTitle,
           debugShowCheckedModeBanner: false,
           locale: const Locale('ar'),

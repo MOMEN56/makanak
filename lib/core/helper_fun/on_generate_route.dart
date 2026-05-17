@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_strings.dart';
+import 'package:makanak/features/admin_notifications/presentation/manager/admin_send_notification_cubit/admin_send_notification_cubit.dart';
+import 'package:makanak/features/admin_notifications/presentation/views/admin_send_notification_view.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
 import 'package:makanak/features/auth/presentation/views/sign_in_view.dart';
 import 'package:makanak/features/auth/presentation/views/sign_up_view.dart';
@@ -13,6 +15,7 @@ import 'package:makanak/features/cart/presentation/views/add_user_address_view.d
 import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/submit_order_view.dart';
+import 'package:makanak/features/notifications/presentation/views/notifications_history_view.dart';
 import 'package:makanak/features/order_history/data/models/order_model.dart';
 import 'package:makanak/features/order_history/presentation/views/order_details_view.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
@@ -92,6 +95,20 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return _fadeRoute(
         settings: settings,
         builder: (_) => const OrderHistoryView(),
+      );
+    case NotificationsHistoryView.routeName:
+      return _fadeRoute(
+        settings: settings,
+        builder: (_) => const NotificationsHistoryView(),
+      );
+    case AdminSendNotificationView.routeName:
+      return _fadeRoute(
+        settings: settings,
+        builder:
+            (_) => BlocProvider<AdminSendNotificationCubit>(
+              create: (_) => getIt<AdminSendNotificationCubit>(),
+              child: const AdminSendNotificationView(),
+            ),
       );
     case OrderDetailsView.routeName:
       final arguments = settings.arguments;

@@ -7,6 +7,30 @@ class SupabaseDatabaseService {
   const SupabaseDatabaseService(this._client);
 
   static const int defaultFetchLimit = 30;
+  static const String _userOrderSelect = '''
+            *,
+            product:products(
+              id,
+              shop_id,
+              name,
+              description,
+              image_url,
+              price,
+              in_stock,
+              stock_quantity,
+              is_visible
+            ),
+            user_address:user_addresses(
+              id,
+              street,
+              floor,
+              building_number,
+              apartment_number,
+              address_notes,
+              phone_number,
+              is_default
+            )
+            ''';
 
   final SupabaseClient _client;
 
@@ -45,6 +69,17 @@ class SupabaseDatabaseService {
       'Supabase $operation failed: '
       'code=${error.code}, message=${error.message}, details=${error.details}',
     );
+  }
+
+  void _logUnexpectedException(
+    String operation,
+    Object error,
+    StackTrace stackTrace,
+  ) {
+    if (!kDebugMode) return;
+
+    debugPrint('Supabase $operation failed unexpectedly: $error');
+    debugPrint('$stackTrace');
   }
 
   Future<List<Map<String, dynamic>>> fetchVisibleProductsByShopId(
@@ -113,8 +148,10 @@ class SupabaseDatabaseService {
 
       return Map<String, dynamic>.from(data);
     } on PostgrestException catch (e) {
+      _logPostgrestException('upsertProfile', e);
       throw DatabaseException(e.message, code: e.code);
-    } catch (_) {
+    } catch (e, stackTrace) {
+      _logUnexpectedException('upsertProfile', e, stackTrace);
       throw const DatabaseException('Unexpected database error');
     }
   }
@@ -177,14 +214,14 @@ class SupabaseDatabaseService {
     }
   }
 
-  Future<Map<String, dynamic>> createOrder({
+  Future<void> createOrder({
     required String shopId,
     required String addressId,
     required int shippingPrice,
     required List<Map<String, dynamic>> items,
   }) async {
     try {
-      final data = await _client.rpc(
+      await _client.rpc(
         'create_order',
         params: {
           'p_shop_id': shopId,
@@ -193,11 +230,11 @@ class SupabaseDatabaseService {
           'p_order_details': items,
         },
       );
-
-      return Map<String, dynamic>.from(data as Map);
     } on PostgrestException catch (e) {
+      _logPostgrestException('createOrder', e);
       throw DatabaseException(e.message, code: e.code);
-    } catch (_) {
+    } catch (e, stackTrace) {
+      _logUnexpectedException('createOrder', e, stackTrace);
       throw const DatabaseException('Unexpected database error');
     }
   }
@@ -211,35 +248,74 @@ class SupabaseDatabaseService {
 
       final data = await _client
           .from('orders')
-          .select('''
-            *,
-            product:products(
-              id,
-              shop_id,
-              name,
-              description,
-              image_url,
-              price,
-              in_stock,
-              stock_quantity,
-              is_visible
-            ),
-            user_address:user_addresses(
-              id,
-              street,
-              floor,
-              building_number,
-              apartment_number,
-              address_notes,
-              phone_number,
-              is_default
-            )
-            ''')
+          .select(_userOrderSelect)
           .eq('user_id', userId)
           .order('created_at', ascending: false);
 
       return List<Map<String, dynamic>>.from(data);
     } on PostgrestException catch (e) {
+      throw DatabaseException(e.message, code: e.code);
+    } catch (_) {
+      throw const DatabaseException('Unexpected database error');
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchUserOrderById(String orderId) async {
+    try {
+      final userId = _client.auth.currentSession?.user.id.trim();
+      final normalizedOrderId = orderId.trim();
+      if (userId == null || userId.isEmpty) {
+        throw const DatabaseException('User is not authenticated');
+      }
+      if (normalizedOrderId.isEmpty) {
+        return null;
+      }
+
+      final data =
+          await _client
+              .from('orders')
+              .select(_userOrderSelect)
+              .eq('user_id', userId)
+              .eq('id', normalizedOrderId)
+              .maybeSingle();
+
+      if (data == null) {
+        return null;
+      }
+
+      return Map<String, dynamic>.from(data);
+    } on PostgrestException catch (e) {
+      throw DatabaseException(e.message, code: e.code);
+    } catch (_) {
+      throw const DatabaseException('Unexpected database error');
+    }
+  }
+
+  Future<void> upsertUserPushToken({
+    required String token,
+    required String platform,
+  }) async {
+    try {
+      await _client.rpc(
+        'upsert_user_push_token',
+        params: {'p_token': token.trim(), 'p_platform': platform.trim()},
+      );
+    } on PostgrestException catch (e) {
+      _logPostgrestException('upsertUserPushToken', e);
+      throw DatabaseException(e.message, code: e.code);
+    } catch (_) {
+      throw const DatabaseException('Unexpected database error');
+    }
+  }
+
+  Future<void> deleteUserPushToken({required String token}) async {
+    try {
+      await _client.rpc(
+        'delete_user_push_token',
+        params: {'p_token': token.trim()},
+      );
+    } on PostgrestException catch (e) {
+      _logPostgrestException('deleteUserPushToken', e);
       throw DatabaseException(e.message, code: e.code);
     } catch (_) {
       throw const DatabaseException('Unexpected database error');

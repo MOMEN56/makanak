@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
+import 'package:makanak/core/utils/order_status_presenter.dart';
 import 'package:makanak/features/order_history/data/models/order_model.dart';
 import 'package:makanak/shared/widgets/confirming_card_widget.dart';
 
@@ -23,7 +24,7 @@ class OrderDetailsInfoCard extends StatelessWidget {
           const Gap(12),
           _OrderDetailsInfoRow(
             label: AppStrings.orderStatus,
-            value: order.status,
+            value: OrderStatusPresenter.label(order.status),
           ),
           const Gap(12),
           _OrderDetailsInfoRow(

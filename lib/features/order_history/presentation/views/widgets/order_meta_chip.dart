@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
-import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
+import 'package:makanak/core/utils/order_status_presenter.dart';
 
 class OrderMetaChip extends StatelessWidget {
   const OrderMetaChip({
@@ -60,10 +60,11 @@ class OrderStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = _resolveStyle(status);
+    final normalizedStatus = OrderStatusPresenter.normalize(status);
+    final style = _resolveStyle(normalizedStatus);
 
     return OrderMetaChip(
-      label: status,
+      label: OrderStatusPresenter.label(status),
       backgroundColor: style.backgroundColor,
       foregroundColor: style.textColor,
       maxTextWidth: maxTextWidth,
@@ -71,32 +72,35 @@ class OrderStatusBadge extends StatelessWidget {
     );
   }
 
-  _OrderStatusStyle _resolveStyle(String status) {
-    if (status.contains(AppStrings.orderStatusDelivered)) {
-      return const _OrderStatusStyle(
-        backgroundColor: Color(0xffEAF8EF),
-        textColor: Color(0xff2F8F4E),
-      );
+  _OrderStatusStyle _resolveStyle(String normalizedStatus) {
+    switch (normalizedStatus) {
+      case OrderStatusPresenter.deliveredKey:
+        return const _OrderStatusStyle(
+          backgroundColor: Color(0xffEAF8EF),
+          textColor: Color(0xff2F8F4E),
+        );
+      case OrderStatusPresenter.preparingKey:
+        return const _OrderStatusStyle(
+          backgroundColor: Color(0xffEEF4FF),
+          textColor: Color(0xff2D5BBA),
+        );
+      case OrderStatusPresenter.outForDeliveryKey:
+        return const _OrderStatusStyle(
+          backgroundColor: Color(0xffFFF5E5),
+          textColor: Color(0xffC77A12),
+        );
+      case OrderStatusPresenter.rejectedKey:
+        return const _OrderStatusStyle(
+          backgroundColor: Color(0xffFFF0F0),
+          textColor: Color(0xffD85B5B),
+        );
+      case OrderStatusPresenter.pendingKey:
+      default:
+        return const _OrderStatusStyle(
+          backgroundColor: AppColors.searchFieldBackground,
+          textColor: AppColors.primaryDarkColor,
+        );
     }
-
-    if (status.contains(AppStrings.orderStatusOutForDelivery)) {
-      return const _OrderStatusStyle(
-        backgroundColor: Color(0xffFFF5E5),
-        textColor: Color(0xffC77A12),
-      );
-    }
-
-    if (status.contains(AppStrings.orderStatusRejected)) {
-      return const _OrderStatusStyle(
-        backgroundColor: Color(0xffFFF0F0),
-        textColor: Color(0xffD85B5B),
-      );
-    }
-
-    return const _OrderStatusStyle(
-      backgroundColor: AppColors.searchFieldBackground,
-      textColor: AppColors.primaryDarkColor,
-    );
   }
 }
 

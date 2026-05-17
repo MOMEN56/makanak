@@ -4,6 +4,7 @@ import 'package:makanak/core/errors/database_exception.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/services/google_sign_in_service.dart';
+import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
 import 'package:makanak/core/services/supabase_database_service.dart';
 import 'package:makanak/features/auth/data/models/profile_model.dart';
@@ -18,11 +19,13 @@ class AuthRepoImpl implements AuthRepo {
     this._authService,
     this._databaseService,
     this._googleSignInService,
+    this._pushNotificationService,
   );
 
   final SupabaseAuthService _authService;
   final SupabaseDatabaseService _databaseService;
   final GoogleSignInService _googleSignInService;
+  final PushNotificationService _pushNotificationService;
 
   @override
   Stream<supa.AuthState> authStateChanges() => _authService.onAuthStateChange;
@@ -209,6 +212,10 @@ class AuthRepoImpl implements AuthRepo {
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
+      try {
+        await _pushNotificationService.detachCurrentDevice();
+      } catch (_) {}
+
       await _authService.signOut();
       await _googleSignInService.signOut();
       return right(null);

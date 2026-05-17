@@ -31,32 +31,40 @@ class OrderHeroCard extends StatelessWidget {
           ),
         );
 
-        final content = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        final content = Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              AppStrings.orderTotalPaid,
-              style: TextStyles.medium12.copyWith(
-                color: AppColors.white.withValues(alpha: 0.86),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.orderTotalPaid,
+                  style: TextStyles.medium12.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.86),
+                  ),
+                ),
+                const Gap(6),
+                Text(
+                  AppStrings.priceInEgyptianPounds(order.totalPaid),
+                  style: TextStyles.bold24.copyWith(
+                    color: AppColors.white,
+                    height: 1.1,
+                  ),
+                ),
+              ],
             ),
-            const Gap(6),
-            Text(
-              AppStrings.priceInEgyptianPounds(order.totalPaid),
-              style: TextStyles.bold24.copyWith(
-                color: AppColors.white,
-                height: 1.1,
-              ),
-            ),
-            const Gap(14),
-            OrderMetaChip(
-              label: AppStrings.orderItemsCount(order.totalItemsCount),
-              backgroundColor: AppColors.white.withValues(alpha: 0.16),
-              foregroundColor: AppColors.white,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                OrderMetaChip(
+                  label: AppStrings.orderItemsCount(order.totalItemsCount),
+                  backgroundColor: AppColors.white.withValues(alpha: 0.16),
+                  foregroundColor: AppColors.white,
+                ),
+              ],
             ),
           ],
         );
-
         return Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(

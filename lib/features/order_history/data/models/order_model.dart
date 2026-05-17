@@ -14,7 +14,7 @@ class OrderModel extends Equatable {
     required this.orderTotal,
     required this.status,
     required this.createdAt,
-    this.paymentMethod,
+    this.rejectionReason,
     this.address,
   });
 
@@ -29,7 +29,7 @@ class OrderModel extends Equatable {
   final int orderTotal;
   final String status;
   final DateTime? createdAt;
-  final String? paymentMethod;
+  final String? rejectionReason;
   final UserAddressModel? address;
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -51,9 +51,18 @@ class OrderModel extends Equatable {
       orderTotal:
           _readNullableInt(json['order_total']) ??
           (resolvedItemsTotal + resolvedShippingPrice),
-      status: json['status']?.toString().trim() ?? '',
+      status: _normalizeStatus(json['status']),
       createdAt: _readDateTime(json['created_at']),
-      paymentMethod: _readNullableText(json['payment_method']),
+      rejectionReason: _readNullableText(
+        json['rejection_reason'] ??
+            json['rejectionReason'] ??
+            json['cancellation_reason'] ??
+            json['cancellationReason'] ??
+            json['cancel_reason'] ??
+            json['cancelReason'] ??
+            json['rejected_reason'] ??
+            json['rejectedReason'],
+      ),
       address:
           addressMap.isEmpty ? null : UserAddressModel.fromJson(addressMap),
     );
@@ -141,6 +150,35 @@ class OrderModel extends Equatable {
     return DateTime.tryParse(rawDate)?.toLocal();
   }
 
+  static String _normalizeStatus(Object? value) {
+    final status = value?.toString().trim() ?? '';
+
+    switch (status) {
+      case 'pending':
+      case 'قيد المراجعة':
+      case 'تحت المراجعة':
+        return 'تحت المراجعة';
+      case 'accepted':
+      case 'تم القبول ويتم التحضير':
+      case 'يتم تحضيره':
+        return 'يتم تحضيره';
+      case 'out_for_delivery':
+      case 'خرج للتوصيل':
+        return 'خرج للتوصيل';
+      case 'delivered':
+      case 'تم التوصيل':
+      case 'تم توصيله':
+        return 'تم توصيله';
+      case 'rejected':
+      case 'تم رفض':
+      case 'تم الرفض':
+      case 'ملغي':
+        return 'ملغي';
+      default:
+        return status;
+    }
+  }
+
   @override
   List<Object?> get props => [
     id,
@@ -152,7 +190,7 @@ class OrderModel extends Equatable {
     orderTotal,
     status,
     createdAt,
-    paymentMethod,
+    rejectionReason,
     address,
   ];
 }

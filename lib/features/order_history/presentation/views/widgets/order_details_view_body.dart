@@ -10,6 +10,7 @@ import 'package:makanak/features/order_history/data/models/order_model.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_details_header.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_details_info_card.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_details_product_card.dart';
+import 'package:makanak/features/order_history/presentation/views/widgets/order_delivery_status_stepper.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_hero_card.dart';
 import 'package:makanak/shared/widgets/address_card_widget.dart';
 
@@ -25,6 +26,11 @@ class OrderDetailsViewBody extends StatelessWidget {
         padding: AppResponsive.all(context, AppSpacing.screenEdge),
         children: [
           OrderDetailsHeader(order: order),
+          const Gap(20),
+          OrderDeliveryStatusStepper(
+            currentStatus: order.status,
+            cancellationReason: order.rejectionReason,
+          ),
           const Gap(20),
           OrderHeroCard(order: order),
           const Gap(20),

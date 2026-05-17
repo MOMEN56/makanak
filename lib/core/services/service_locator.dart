@@ -2,10 +2,13 @@ import 'package:get_it/get_it.dart';
 import 'package:makanak/core/data/repos/address_repository_impl.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
+import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/google_sign_in_service.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
 import 'package:makanak/core/services/supabase_client_service.dart';
 import 'package:makanak/core/services/supabase_database_service.dart';
+import 'package:makanak/features/admin_notifications/data/services/manual_notification_service.dart';
+import 'package:makanak/features/admin_notifications/presentation/manager/admin_send_notification_cubit/admin_send_notification_cubit.dart';
 import 'package:makanak/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:makanak/features/auth/domain/repos/auth_repo.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
@@ -13,6 +16,8 @@ import 'package:makanak/features/cart/data/repos/cart_repository_impl.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:makanak/features/notifications/data/repos/notifications_repository.dart';
+import 'package:makanak/features/notifications/data/repos/notifications_repository_impl.dart';
 import 'package:makanak/features/order_history/data/repos/order_history_repository_impl.dart';
 import 'package:makanak/features/order_history/domain/repos/order_history_repository.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_history_cubit/order_history_cubit.dart';
@@ -44,6 +49,26 @@ void setupServiceLocator() {
     () => SupabaseAuthService(getIt<SupabaseClient>()),
   );
 
+  getIt.registerLazySingleton<ManualNotificationService>(
+    () => ManualNotificationService(getIt<SupabaseClient>()),
+  );
+
+  getIt.registerLazySingleton<PushNotificationService>(
+    () => PushNotificationService(
+      getIt<SupabaseDatabaseService>(),
+      getIt<SupabaseClient>(),
+    ),
+    dispose: (service) => service.dispose(),
+  );
+
+  getIt.registerLazySingleton<NotificationsRepository>(
+    () => SupabaseNotificationsRepository(
+      getIt<SupabaseClient>(),
+      getIt<PushNotificationService>(),
+    ),
+    dispose: (repository) => repository.dispose(),
+  );
+
   getIt.registerLazySingleton<GoogleSignInService>(GoogleSignInService.new);
 
   getIt.registerLazySingleton<AuthRepo>(
@@ -51,6 +76,7 @@ void setupServiceLocator() {
       getIt<SupabaseAuthService>(),
       getIt<SupabaseDatabaseService>(),
       getIt<GoogleSignInService>(),
+      getIt<PushNotificationService>(),
     ),
   );
 
@@ -81,6 +107,10 @@ void setupServiceLocator() {
   );
 
   getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepo>()));
+
+  getIt.registerFactory<AdminSendNotificationCubit>(
+    () => AdminSendNotificationCubit(getIt<ManualNotificationService>()),
+  );
 
   getIt.registerLazySingleton<CartCubit>(
     () => CartCubit(

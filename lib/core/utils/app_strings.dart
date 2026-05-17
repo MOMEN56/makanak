@@ -59,6 +59,38 @@ class AppStrings {
 
   static const home = 'الرئيسية';
   static const orderHistory = 'سجل الطلبات';
+  static const adminNotificationViewTitle = 'إرسال إشعار داخلي';
+  static const adminNotificationViewSubtitle =
+      'هذه شاشة داخلية للإدارة لإرسال إشعارات يدوية للمستخدمين المسجلين فقط.';
+  static const adminNotificationFormTitle = 'بيانات الإشعار';
+  static const adminNotificationFormSubtitle =
+      'اتركي معرف المستخدم فارغًا لإرسال الإشعار لكل المستخدمين.';
+  static const adminNotificationTitleLabel = 'عنوان الإشعار';
+  static const adminNotificationTitleHint = 'مثال: عرض جديد';
+  static const adminNotificationBodyLabel = 'محتوى الإشعار';
+  static const adminNotificationBodyHint = 'مثال: خصم خاص لفترة محدودة';
+  static const adminNotificationUserIdLabel = 'معرف المستخدم';
+  static const adminNotificationUserIdHint =
+      'اختياري - للإرسال إلى مستخدم واحد';
+  static const adminNotificationSendButton = 'إرسال الإشعار';
+  static const adminNotificationSending = 'جارٍ إرسال الإشعار...';
+  static const adminNotificationSuccess = 'تم إرسال الإشعار بنجاح';
+  static const adminNotificationTitleRequired = 'عنوان الإشعار مطلوب';
+  static const adminNotificationBodyRequired = 'محتوى الإشعار مطلوب';
+  static const adminNotificationUserIdRequired = 'معرف المستخدم مطلوب';
+  static const adminNotificationAuthRequired =
+      'يجب تسجيل الدخول بحساب إداري قبل إرسال الإشعار.';
+  static const adminNotificationPermissionError =
+      'حسابك الحالي غير مصرح له بإرسال الإشعارات.';
+  static const adminNotificationInvalidPayload =
+      'بيانات الإشعار غير مكتملة. راجعي العنوان والمحتوى ثم حاولي مرة أخرى.';
+  static const adminNotificationServerError =
+      'خدمة الإشعارات غير متاحة الآن. حاولي مرة أخرى بعد قليل.';
+  static const adminNotificationSendError =
+      'تعذر إرسال الإشعار الآن. حاولي مرة أخرى بعد قليل.';
+  static const adminNotificationAccessDenied = 'هذه الشاشة مخصصة للإدارة فقط.';
+  static const adminNotificationAccessHint =
+      'لن يتم إرسال أي إشعارات من هذه الشاشة إلا بحساب يحمل دور admin.';
   static const orderHistorySubtitle =
       'كل طلباتك السابقة في مكان واحد مع حالة الطلب وتفاصيله.';
   static const orderHistoryOverviewTitle = 'ملخص الطلبات';
@@ -79,6 +111,8 @@ class AppStrings {
   static const orderDate = 'تاريخ الطلب';
   static const orderDateUnavailable = 'تاريخ غير متاح';
   static const orderStatus = 'الحالة';
+  static const orderStatusPending = 'قيد المراجعة';
+  static const orderStatusUpdateTitle = 'تحديث الطلب';
   static const paymentMethod = 'طريقة الدفع';
   static const orderPaymentMethodUnavailable = 'غير محدد';
   static const orderTotalPaid = 'إجمالي المدفوع';
@@ -210,6 +244,9 @@ class AppStrings {
       'تمت إضافة$quantityText $productName إلى';
 
   static String priceInEgyptianPounds(int price) => '$price جنيه';
+
+  static String orderStatusUpdated(String status) =>
+      'تم تحديث حالة طلبك إلى $status';
 
   static String orderNumberLabel(String orderId) {
     final normalizedId = orderId.trim();
