@@ -6,7 +6,7 @@ import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/services/google_sign_in_service.dart';
 import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
-import 'package:makanak/core/services/supabase_database_service.dart';
+import 'package:makanak/features/auth/data/data_sources/profile_remote_data_source.dart';
 import 'package:makanak/features/auth/data/models/profile_model.dart';
 import 'package:makanak/features/auth/data/utils/auth_error_mapper.dart';
 import 'package:makanak/features/auth/data/utils/auth_logger.dart';
@@ -17,13 +17,13 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 class AuthRepoImpl implements AuthRepo {
   const AuthRepoImpl(
     this._authService,
-    this._databaseService,
+    this._profileRemoteDataSource,
     this._googleSignInService,
     this._pushNotificationService,
   );
 
   final SupabaseAuthService _authService;
-  final SupabaseDatabaseService _databaseService;
+  final ProfileRemoteDataSource _profileRemoteDataSource;
   final GoogleSignInService _googleSignInService;
   final PushNotificationService _pushNotificationService;
 
@@ -172,9 +172,8 @@ class AuthRepoImpl implements AuthRepo {
   }) async {
     try {
       final user = session.user;
-      final existingProfileData = await _databaseService.fetchProfileById(
-        user.id,
-      );
+      final existingProfileData = await _profileRemoteDataSource
+          .fetchProfileById(user.id);
       final existingProfile =
           existingProfileData == null
               ? null
@@ -188,7 +187,7 @@ class AuthRepoImpl implements AuthRepo {
         role: existingProfile?.role ?? 'customer',
       );
 
-      final upsertedProfileData = await _databaseService.upsertProfile(
+      final upsertedProfileData = await _profileRemoteDataSource.upsertProfile(
         profile.toJson(),
       );
       final persistedProfile = ProfileModel.fromJson(upsertedProfileData);

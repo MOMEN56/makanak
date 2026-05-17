@@ -10,7 +10,8 @@ import 'package:makanak/core/services/NotificationService/notification_navigatio
 import 'package:makanak/core/services/NotificationService/notification_navigator.dart';
 import 'package:makanak/core/services/NotificationService/notification_payload_parser.dart';
 import 'package:makanak/core/services/NotificationService/push_token_manager.dart';
-import 'package:makanak/core/services/supabase_database_service.dart';
+import 'package:makanak/features/notifications/data/data_sources/push_token_remote_data_source.dart';
+import 'package:makanak/features/order_history/data/data_sources/orders_remote_data_source.dart';
 import 'package:makanak/core/utils/app_navigator_key.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -45,7 +46,8 @@ bool get _supportsRemotePushNotifications =>
 
 class PushNotificationService {
   factory PushNotificationService(
-    SupabaseDatabaseService databaseService,
+    PushTokenRemoteDataSource pushTokenRemoteDataSource,
+    OrdersRemoteDataSource ordersRemoteDataSource,
     SupabaseClient client, {
     FirebaseMessaging? firebaseMessaging,
     FlutterLocalNotificationsPlugin? localNotifications,
@@ -60,7 +62,7 @@ class PushNotificationService {
     final tokenManager =
         pushTokenManager ??
         PushTokenManager(
-          databaseService,
+          pushTokenRemoteDataSource,
           client,
           messagingFactory: messagingFactory,
           log: _debugLog,
@@ -68,7 +70,7 @@ class PushNotificationService {
     final navigator =
         notificationNavigator ??
         NotificationNavigator(
-          databaseService,
+          ordersRemoteDataSource,
           client,
           parser,
           navigatorKey: appNavigatorKey,

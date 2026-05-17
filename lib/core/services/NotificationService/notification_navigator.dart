@@ -6,7 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:makanak/core/services/NotificationService/notification_event.dart';
 import 'package:makanak/core/services/NotificationService/notification_navigation_service.dart';
 import 'package:makanak/core/services/NotificationService/notification_payload_parser.dart';
-import 'package:makanak/core/services/supabase_database_service.dart';
+import 'package:makanak/features/order_history/data/data_sources/orders_remote_data_source.dart';
 import 'package:makanak/features/order_history/data/models/order_model.dart';
 import 'package:makanak/features/order_history/presentation/views/order_details_view.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
@@ -14,7 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotificationNavigator {
   NotificationNavigator(
-    this._databaseService,
+    this._ordersRemoteDataSource,
     this._client,
     this._payloadParser, {
     required GlobalKey<NavigatorState> navigatorKey,
@@ -29,7 +29,7 @@ class NotificationNavigator {
        _log = log,
        _onNotificationEvent = onNotificationEvent;
 
-  final SupabaseDatabaseService _databaseService;
+  final OrdersRemoteDataSource _ordersRemoteDataSource;
   final SupabaseClient _client;
   final NotificationPayloadParser _payloadParser;
   final GlobalKey<NavigatorState> _navigatorKey;
@@ -142,7 +142,9 @@ class NotificationNavigator {
     }
 
     try {
-      final orderData = await _databaseService.fetchUserOrderById(orderId);
+      final orderData = await _ordersRemoteDataSource.fetchUserOrderById(
+        orderId,
+      );
       if (orderData == null) {
         return null;
       }

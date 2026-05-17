@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
 import 'package:makanak/core/errors/failures.dart';
-import 'package:makanak/core/services/supabase_database_service.dart';
 import 'package:makanak/core/utils/app_strings.dart';
+import 'package:makanak/features/shop/data/data_sources/products_remote_data_source.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 
 class ProductsRepoImpl implements ProductsRepo {
-  const ProductsRepoImpl(this._databaseService);
+  const ProductsRepoImpl(this._remoteDataSource);
 
-  final SupabaseDatabaseService _databaseService;
+  final ProductsRemoteDataSource _remoteDataSource;
 
   @override
   Future<Either<Failure, List<ProductModel>>> fetchProductsByShopId(
@@ -17,7 +17,7 @@ class ProductsRepoImpl implements ProductsRepo {
     ProductPriceSort priceSort = ProductPriceSort.none,
   }) async {
     try {
-      final productsData = await _databaseService.fetchVisibleProductsByShopId(
+      final productsData = await _remoteDataSource.fetchVisibleProductsByShopId(
         shopId,
         query: query,
         priceAscending: switch (priceSort) {

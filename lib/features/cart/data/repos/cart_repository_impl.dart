@@ -1,15 +1,15 @@
 import 'package:dartz/dartz.dart';
 import 'package:makanak/core/errors/database_exception.dart';
 import 'package:makanak/core/errors/failures.dart';
-import 'package:makanak/core/services/supabase_database_service.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/domain/entities/create_order_item.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
+import 'package:makanak/features/order_history/data/data_sources/orders_remote_data_source.dart';
 
 class CartRepositoryImpl implements CartRepository {
-  const CartRepositoryImpl(this._databaseService);
+  const CartRepositoryImpl(this._remoteDataSource);
 
-  final SupabaseDatabaseService _databaseService;
+  final OrdersRemoteDataSource _remoteDataSource;
 
   @override
   Future<Either<Failure, void>> createOrder({
@@ -19,7 +19,7 @@ class CartRepositoryImpl implements CartRepository {
     required List<CreateOrderItem> items,
   }) async {
     try {
-      await _databaseService.createOrder(
+      await _remoteDataSource.createOrder(
         shopId: shopId,
         addressId: addressId,
         shippingPrice: shippingPrice,

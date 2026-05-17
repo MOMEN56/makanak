@@ -1,6 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:makanak/core/services/supabase_database_service.dart';
+import 'package:makanak/features/notifications/data/data_sources/push_token_remote_data_source.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PushTokenManager {
@@ -8,7 +8,7 @@ class PushTokenManager {
   static const Duration _tokenRetryDelay = Duration(seconds: 2);
 
   PushTokenManager(
-    this._databaseService,
+    this._remoteDataSource,
     this._client, {
     FirebaseMessaging Function()? messagingFactory,
     required void Function(
@@ -20,7 +20,7 @@ class PushTokenManager {
   }) : _messagingFactory = messagingFactory ?? _defaultMessagingFactory,
        _log = log;
 
-  final SupabaseDatabaseService _databaseService;
+  final PushTokenRemoteDataSource _remoteDataSource;
   final SupabaseClient _client;
   final FirebaseMessaging Function() _messagingFactory;
   final void Function(String message, {Object? error, StackTrace? stackTrace})
@@ -65,7 +65,7 @@ class PushTokenManager {
       return;
     }
 
-    await _databaseService.upsertUserPushToken(
+    await _remoteDataSource.upsertUserPushToken(
       token: token,
       platform: _pushPlatform,
     );
@@ -88,10 +88,10 @@ class PushTokenManager {
     }
 
     if (previousToken != null && previousToken != normalizedToken) {
-      await _databaseService.deleteUserPushToken(token: previousToken);
+      await _remoteDataSource.deleteUserPushToken(token: previousToken);
     }
 
-    await _databaseService.upsertUserPushToken(
+    await _remoteDataSource.upsertUserPushToken(
       token: normalizedToken,
       platform: _pushPlatform,
     );
@@ -108,7 +108,7 @@ class PushTokenManager {
       return;
     }
 
-    await _databaseService.deleteUserPushToken(token: token);
+    await _remoteDataSource.deleteUserPushToken(token: token);
     _lastSyncedToken = null;
   }
 
