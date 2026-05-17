@@ -6,6 +6,13 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
 
   static const int defaultFetchLimit = 30;
 
+  String _escapeWildcards(String value) {
+    return value
+        .replaceAll('\\', '\\\\')
+        .replaceAll('%', r'\%')
+        .replaceAll('_', r'\_');
+  }
+
   Future<List<Map<String, dynamic>>> fetchVisibleProductsByShopId(
     String shopId, {
     String query = '',
@@ -23,7 +30,8 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
           .eq('is_visible', true);
 
       if (normalizedQuery.isNotEmpty) {
-        request = request.ilike('name', '%$normalizedQuery%');
+        final escapedQuery = _escapeWildcards(normalizedQuery);
+        request = request.ilike('name', '%$escapedQuery%');
       }
 
       final orderedRequest =
@@ -34,9 +42,18 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
 
       return List<Map<String, dynamic>>.from(data);
     } on PostgrestException catch (error) {
-      throw databaseException(error);
-    } catch (_) {
-      throw unexpectedDatabaseException();
+      throw databaseException(
+        error,
+        operation: 'fetchVisibleProductsByShopId',
+        log: true,
+      );
+    } catch (error, stackTrace) {
+      throw unexpectedDatabaseException(
+        operation: 'fetchVisibleProductsByShopId',
+        error: error,
+        stackTrace: stackTrace,
+        log: true,
+      );
     }
   }
 }

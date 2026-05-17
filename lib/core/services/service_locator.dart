@@ -134,7 +134,6 @@ void _registerNotificationsFeature() {
   getIt.registerLazySingleton<PushNotificationService>(
     () => PushNotificationService(
       getIt<PushTokenRemoteDataSource>(),
-      getIt<OrdersRemoteDataSource>(),
       getIt<SupabaseClient>(),
     ),
     dispose: (service) => service.dispose(),

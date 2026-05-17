@@ -12,22 +12,25 @@ class ShopsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Center(
-          child: Text(
-            AppStrings.shopsHeaderTitle,
-            style: TextStyles.extraBold30.copyWith(
-              color: AppColors.primaryColor,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        children: [
+          Center(
+            child: Text(
+              AppStrings.shopsHeaderTitle,
+              style: TextStyles.extraBold30.copyWith(
+                color: AppColors.primaryColor,
+              ),
             ),
           ),
-        ),
-        const Gap(16),
-        SearchTextField(
-          hintText: AppStrings.shopsSearchHint,
-          onChanged: onSearchChanged,
-        ),
-      ],
+          const Gap(16),
+          SearchTextField(
+            hintText: AppStrings.shopsSearchHint,
+            onChanged: onSearchChanged,
+          ),
+        ],
+      ),
     );
   }
 }

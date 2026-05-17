@@ -7,35 +7,22 @@ import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/services/NotificationService/notification_event.dart';
 import 'package:makanak/core/services/NotificationService/notification_navigation_service.dart';
 import 'package:makanak/core/services/NotificationService/notification_payload_parser.dart';
-import 'package:makanak/features/order_history/data/data_sources/orders_remote_data_source.dart';
-import 'package:makanak/features/order_history/data/models/order_model.dart';
 import 'package:makanak/features/order_history/presentation/views/order_details_view.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotificationNavigator {
   NotificationNavigator(
-    this._ordersRemoteDataSource,
     this._client,
     this._payloadParser, {
     required GlobalKey<NavigatorState> navigatorKey,
-    required void Function(
-      String message, {
-      Object? error,
-      StackTrace? stackTrace,
-    })
-    log,
     void Function(NotificationEvent event)? onNotificationEvent,
   }) : _navigatorKey = navigatorKey,
-       _log = log,
        _onNotificationEvent = onNotificationEvent;
 
-  final OrdersRemoteDataSource _ordersRemoteDataSource;
   final SupabaseClient _client;
   final NotificationPayloadParser _payloadParser;
   final GlobalKey<NavigatorState> _navigatorKey;
-  final void Function(String message, {Object? error, StackTrace? stackTrace})
-  _log;
   final void Function(NotificationEvent event)? _onNotificationEvent;
 
   bool _isNavigationReady = false;
@@ -121,47 +108,20 @@ class NotificationNavigator {
       return;
     }
 
-    final order = await _resolveOrderFromNotification(data);
+    final orderId = _payloadParser.readText(data, 'order_id')?.trim();
     if (resetStack) {
       navigator.popUntil((route) => route.isFirst);
     }
 
-    if (order != null) {
+    if (orderId != null && orderId.isNotEmpty) {
       navigator.pushNamed(
         OrderDetailsView.routeName,
-        arguments: OrderDetailsRouteArguments(orderId: order.id),
+        arguments: OrderDetailsRouteArguments(orderId: orderId),
       );
       return;
     }
 
     navigator.pushNamed(OrderHistoryView.routeName);
-  }
-
-  Future<OrderModel?> _resolveOrderFromNotification(
-    Map<String, dynamic> data,
-  ) async {
-    final orderId = _payloadParser.readText(data, 'order_id');
-    if (orderId == null) {
-      return null;
-    }
-
-    try {
-      final orderData = await _ordersRemoteDataSource.fetchUserOrderById(
-        orderId,
-      );
-      if (orderData == null) {
-        return null;
-      }
-
-      return OrderModel.fromJson(orderData);
-    } catch (error, stackTrace) {
-      _log(
-        'Failed to resolve notification order before navigation.',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return null;
-    }
   }
 
   void _emitNotificationEvent(NotificationEvent? event) {

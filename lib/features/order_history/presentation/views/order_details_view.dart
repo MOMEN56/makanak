@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_cubit.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_state.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_details_view_body.dart';
@@ -15,29 +14,26 @@ class OrderDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<OrderDetailsCubit>()..fetchOrder(orderId),
-      child: Scaffold(
-        body: BlocBuilder<OrderDetailsCubit, OrderDetailsState>(
-          builder: (context, state) {
-            return switch (state) {
-              OrderDetailsInitial() || OrderDetailsLoading() => const Center(
-                child: CircularProgressIndicator.adaptive(),
+    return Scaffold(
+      body: BlocBuilder<OrderDetailsCubit, OrderDetailsState>(
+        buildWhen: (previous, current) => previous.runtimeType != current.runtimeType,
+        builder: (context, state) {
+          return switch (state) {
+            OrderDetailsInitial() || OrderDetailsLoading() => const Center(
+              child: CircularProgressIndicator.adaptive(),
+            ),
+            OrderDetailsSuccess(:final order) => OrderDetailsViewBody(
+              order: order,
+            ),
+            OrderDetailsFailure(:final message) => SafeArea(
+              child: StateMessage(
+                message: message,
+                onRetry:
+                    () => context.read<OrderDetailsCubit>().fetchOrder(orderId),
               ),
-              OrderDetailsSuccess(:final order) => OrderDetailsViewBody(
-                order: order,
-              ),
-              OrderDetailsFailure(:final message) => SafeArea(
-                child: StateMessage(
-                  message: message,
-                  onRetry:
-                      () =>
-                          context.read<OrderDetailsCubit>().fetchOrder(orderId),
-                ),
-              ),
-            };
-          },
-        ),
+            ),
+          };
+        },
       ),
     );
   }

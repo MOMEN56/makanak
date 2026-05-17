@@ -35,12 +35,57 @@ class OrdersRemoteDataSource extends SupabaseRemoteDataSource {
     required int shippingPrice,
     required List<Map<String, dynamic>> items,
   }) async {
+    final normalizedShopId = shopId.trim();
+    if (normalizedShopId.isEmpty) {
+      throw ArgumentError.value(shopId, 'shopId', 'Shop id cannot be empty.');
+    }
+
+    final normalizedAddressId = addressId.trim();
+    if (normalizedAddressId.isEmpty) {
+      throw ArgumentError.value(
+        addressId,
+        'addressId',
+        'Address id cannot be empty.',
+      );
+    }
+
+    if (shippingPrice < 0) {
+      throw ArgumentError.value(
+        shippingPrice,
+        'shippingPrice',
+        'Shipping price cannot be negative.',
+      );
+    }
+
+    if (items.isEmpty) {
+      throw ArgumentError.value(
+        items,
+        'items',
+        'Order items must not be empty.',
+      );
+    }
+
+    for (final item in items) {
+      final productId = item['productId'];
+      final quantity = item['quantity'];
+      if (productId is! String || productId.trim().isEmpty) {
+        throw ArgumentError(
+          'Each item must contain a non-empty string productId.',
+        );
+      }
+      if (quantity is! int || quantity <= 0) {
+        throw ArgumentError(
+          'Each item must contain a positive integer quantity.',
+        );
+      }
+    }
+
     try {
       await client.rpc(
         'create_order',
         params: {
-          'p_shop_id': shopId,
-          'p_address_id': addressId,
+          'p_shop_id': normalizedShopId,
+          'p_address_id': normalizedAddressId,
           'p_shipping_price': shippingPrice,
           'p_order_details': items,
         },
@@ -67,9 +112,14 @@ class OrdersRemoteDataSource extends SupabaseRemoteDataSource {
 
       return List<Map<String, dynamic>>.from(data);
     } on PostgrestException catch (error) {
-      throw databaseException(error);
-    } catch (_) {
-      throw unexpectedDatabaseException();
+      throw databaseException(error, operation: 'fetchUserOrders', log: true);
+    } catch (error, stackTrace) {
+      throw unexpectedDatabaseException(
+        operation: 'fetchUserOrders',
+        error: error,
+        stackTrace: stackTrace,
+        log: true,
+      );
     }
   }
 
@@ -94,9 +144,18 @@ class OrdersRemoteDataSource extends SupabaseRemoteDataSource {
 
       return Map<String, dynamic>.from(data);
     } on PostgrestException catch (error) {
-      throw databaseException(error);
-    } catch (_) {
-      throw unexpectedDatabaseException();
+      throw databaseException(
+        error,
+        operation: 'fetchUserOrderById',
+        log: true,
+      );
+    } catch (error, stackTrace) {
+      throw unexpectedDatabaseException(
+        operation: 'fetchUserOrderById',
+        error: error,
+        stackTrace: stackTrace,
+        log: true,
+      );
     }
   }
 }

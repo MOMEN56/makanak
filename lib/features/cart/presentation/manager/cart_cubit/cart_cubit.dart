@@ -15,8 +15,14 @@ class CartCubit extends Cubit<CartState> {
 
   final CartRepository _cartRepository;
   final String _userId;
+  String? _lastRestoredShopId;
+  bool _isInitialized = false;
 
   Future<void> restoreSavedCart({String? shopId}) async {
+    if (_isInitialized && _lastRestoredShopId == shopId) return;
+    _isInitialized = true;
+    _lastRestoredShopId = shopId;
+
     final savedCart = await CartLocalStorage.loadProducts(userId: _userId);
     final shopCart = _mergeCartItems(
       _cartItemsForShop(savedCart, shopId),
@@ -146,6 +152,8 @@ class CartCubit extends Cubit<CartState> {
         final submittedShippingPrice = state.shippingPrice;
         await CartLocalStorage.clearCart(userId: _userId);
         if (isClosed) return;
+
+        _isInitialized = false;
 
         emit(CartOrderSubmitted(shippingPrice: submittedShippingPrice));
       },

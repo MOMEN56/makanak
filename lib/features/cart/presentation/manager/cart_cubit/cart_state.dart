@@ -32,6 +32,10 @@ sealed class CartState extends Equatable {
 
   int get orderTotal => itemsSubtotal + shippingPrice;
 
+  /// Used for optimized [BlocSelector] to detect composition changes
+  /// without quantity-driven rebuilds.
+  List<String> get itemIds => items.map((i) => i.product.id ?? '').toList();
+
   @override
   List<Object?> get props => [items, shippingPrice];
 

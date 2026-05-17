@@ -5,16 +5,12 @@ sealed class OrderDetailsState extends Equatable {
   const OrderDetailsState();
 
   @override
-  List<Object?> get props => const [];
+  List<Object?> get props => [];
 }
 
-class OrderDetailsInitial extends OrderDetailsState {
-  const OrderDetailsInitial();
-}
+class OrderDetailsInitial extends OrderDetailsState {}
 
-class OrderDetailsLoading extends OrderDetailsState {
-  const OrderDetailsLoading();
-}
+class OrderDetailsLoading extends OrderDetailsState {}
 
 class OrderDetailsSuccess extends OrderDetailsState {
   const OrderDetailsSuccess(this.order);

@@ -21,6 +21,7 @@ import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/submit_order_view.dart';
 import 'package:makanak/features/notifications/presentation/views/notifications_history_view.dart';
+import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_cubit.dart';
 import 'package:makanak/features/order_history/presentation/views/order_details_view.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
 import 'package:makanak/features/profile/presentation/views/profile_view.dart';
@@ -49,15 +50,13 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       if (arguments != null && arguments is! CartViewArguments) {
         return _invalidRoute(settings, AppStrings.routeDataUnavailable);
       }
+      final cartArgs = arguments as CartViewArguments?;
       return _fadeRoute(
         settings: settings,
         builder:
             (_) => _CartFlowProviders(
-              shopId: arguments is CartViewArguments ? arguments.shopId : null,
-              child: CartView(
-                cartArguments:
-                    arguments is CartViewArguments ? arguments : null,
-              ),
+              shopId: cartArgs?.shopId,
+              child: CartView(cartArguments: cartArgs),
             ),
       );
     case AddUserAddressView.routeName:
@@ -65,15 +64,13 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       if (arguments != null && arguments is! CartViewArguments) {
         return _invalidRoute(settings, AppStrings.routeDataUnavailable);
       }
+      final cartArgs = arguments as CartViewArguments?;
       return _fadeRoute(
         settings: settings,
         builder:
             (_) => _CartFlowProviders(
-              shopId: arguments is CartViewArguments ? arguments.shopId : null,
-              child: AddUserAddressView(
-                cartArguments:
-                    arguments is CartViewArguments ? arguments : null,
-              ),
+              shopId: cartArgs?.shopId,
+              child: AddUserAddressView(cartArguments: cartArgs),
             ),
       );
     case ConfirmingOrderView.routeName:
@@ -81,15 +78,13 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       if (arguments != null && arguments is! CartViewArguments) {
         return _invalidRoute(settings, AppStrings.routeDataUnavailable);
       }
+      final cartArgs = arguments as CartViewArguments?;
       return _fadeRoute(
         settings: settings,
         builder:
             (_) => _CartFlowProviders(
-              shopId: arguments is CartViewArguments ? arguments.shopId : null,
-              child: ConfirmingOrderView(
-                cartArguments:
-                    arguments is CartViewArguments ? arguments : null,
-              ),
+              shopId: cartArgs?.shopId,
+              child: ConfirmingOrderView(cartArguments: cartArgs),
             ),
       );
     case SubmitOrderView.routeName:
@@ -130,7 +125,14 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       if (arguments is OrderDetailsRouteArguments && arguments.isValid) {
         return _fadeRoute(
           settings: settings,
-          builder: (_) => OrderDetailsView(orderId: arguments.orderId),
+          builder:
+              (_) => BlocProvider<OrderDetailsCubit>(
+                create:
+                    (_) =>
+                        getIt<OrderDetailsCubit>()
+                          ..fetchOrder(arguments.orderId),
+                child: OrderDetailsView(orderId: arguments.orderId),
+              ),
         );
       }
       return _invalidRoute(settings, AppStrings.orderDetailsUnavailable);
@@ -192,7 +194,7 @@ Route<dynamic> _invalidRoute(RouteSettings settings, String message) {
     settings: settings,
     builder:
         (context) => RouteErrorView(
-          message: message,
+          message: '$message (${settings.name})',
           actionLabel: AppStrings.home,
           onActionPressed:
               () => Navigator.of(context).pushNamedAndRemoveUntil(

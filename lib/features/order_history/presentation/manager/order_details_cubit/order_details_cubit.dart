@@ -4,31 +4,30 @@ import 'package:makanak/features/order_history/domain/repos/order_history_reposi
 import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_state.dart';
 
 class OrderDetailsCubit extends Cubit<OrderDetailsState> {
-  OrderDetailsCubit(this._repository) : super(const OrderDetailsInitial());
+  OrderDetailsCubit(this._repository) : super(OrderDetailsInitial());
 
   final OrderHistoryRepository _repository;
 
   Future<void> fetchOrder(String orderId) async {
-    final normalizedOrderId = orderId.trim();
-    if (normalizedOrderId.isEmpty) {
+    if (orderId.trim().isEmpty) {
       emit(const OrderDetailsFailure(AppStrings.orderDetailsUnavailable));
       return;
     }
 
-    emit(const OrderDetailsLoading());
+    emit(OrderDetailsLoading());
 
-    final result = await _repository.fetchOrderById(normalizedOrderId);
+    final result = await _repository.fetchOrderById(orderId);
     if (isClosed) return;
 
-    result.fold((failure) => emit(OrderDetailsFailure(failure.message)), (
-      order,
-    ) {
-      if (order == null) {
-        emit(const OrderDetailsFailure(AppStrings.orderDetailsUnavailable));
-        return;
-      }
-
-      emit(OrderDetailsSuccess(order));
-    });
+    result.fold(
+      (failure) => emit(OrderDetailsFailure(failure.message)),
+      (order) {
+        if (order == null) {
+          emit(const OrderDetailsFailure(AppStrings.orderDetailsUnavailable));
+        } else {
+          emit(OrderDetailsSuccess(order));
+        }
+      },
+    );
   }
 }
