@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/services/NotificationService/notification_event.dart';
 import 'package:makanak/core/services/NotificationService/notification_navigation_service.dart';
 import 'package:makanak/core/services/NotificationService/notification_payload_parser.dart';
@@ -126,7 +127,10 @@ class NotificationNavigator {
     }
 
     if (order != null) {
-      navigator.pushNamed(OrderDetailsView.routeName, arguments: order);
+      navigator.pushNamed(
+        OrderDetailsView.routeName,
+        arguments: OrderDetailsRouteArguments(orderId: order.id),
+      );
       return;
     }
 

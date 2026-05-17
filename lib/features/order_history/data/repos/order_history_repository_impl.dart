@@ -23,4 +23,20 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepository {
       return left(const Failure(AppStrings.orderHistoryLoadError));
     }
   }
+
+  @override
+  Future<Either<Failure, OrderModel?>> fetchOrderById(String orderId) async {
+    try {
+      final data = await _remoteDataSource.fetchUserOrderById(orderId);
+      if (data == null) {
+        return right(null);
+      }
+
+      return right(OrderModel.fromJson(data));
+    } on DatabaseException {
+      return left(const Failure(AppStrings.orderDetailsLoadError));
+    } catch (_) {
+      return left(const Failure(AppStrings.orderDetailsLoadError));
+    }
+  }
 }

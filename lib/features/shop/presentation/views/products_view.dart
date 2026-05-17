@@ -13,7 +13,7 @@ class ProductsView extends StatelessWidget {
     required this.shopModel,
     this.bottomContentPadding = 0,
     this.onCartRequested,
-    this.onProductAdded,
+    this.initialNavigationIndex = 0,
   });
 
   static const String routeName = 'products_list';
@@ -21,14 +21,17 @@ class ProductsView extends StatelessWidget {
   final ShopModel shopModel;
   final double bottomContentPadding;
   final VoidCallback? onCartRequested;
-  final VoidCallback? onProductAdded;
+  final int initialNavigationIndex;
 
-  bool get _isInsideShopNavigation => onProductAdded != null;
+  bool get _isInsideShopNavigation => onCartRequested != null;
 
   @override
   Widget build(BuildContext context) {
     if (!_isInsideShopNavigation) {
-      return ShopNavigationView(shopModel: shopModel);
+      return ShopNavigationView(
+        shopModel: shopModel,
+        initialIndex: initialNavigationIndex,
+      );
     }
 
     return BlocProvider(
@@ -39,7 +42,6 @@ class ProductsView extends StatelessWidget {
             shopModel: shopModel,
             bottomContentPadding: bottomContentPadding,
             onCartRequested: onCartRequested,
-            onProductAdded: onProductAdded,
           ),
         ),
       ),

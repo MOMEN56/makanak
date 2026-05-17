@@ -39,6 +39,9 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
   int _currentIndex = 0;
   int _cartAnimationTrigger = 0;
   late final CartCubit _cartCubit;
+  late final StreamSubscription<CartState> _cartSubscription;
+  int _lastCartItemCount = 0;
+  bool _isRestoringCart = true;
 
   static const _items = [
     BottomNavigationItemData(icon: Icons.home_rounded, label: AppStrings.home),
@@ -64,7 +67,17 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
       requireAuthenticatedUserId(),
     );
     _cartCubit.clearProductFromOtherShop(widget.shopModel.id);
-    unawaited(_cartCubit.restoreSavedCart(shopId: widget.shopModel.id));
+    _lastCartItemCount = _cartCubit.state.itemCount;
+    _cartSubscription = _cartCubit.stream.listen(_handleCartStateChanged);
+    unawaited(_restoreSavedCart());
+  }
+
+  Future<void> _restoreSavedCart() async {
+    await _cartCubit.restoreSavedCart(shopId: widget.shopModel.id);
+    if (!mounted) return;
+
+    _lastCartItemCount = _cartCubit.state.itemCount;
+    _isRestoringCart = false;
   }
 
   @override
@@ -88,7 +101,6 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
                         AppSpacing
                             .buttonBottomExtraGapWithLiquidGlassNavigation,
                     onCartRequested: () => _selectTab(1),
-                    onProductAdded: _animateCartTab,
                   ),
                   CartNavigationTab(
                     shopModel: widget.shopModel,
@@ -134,11 +146,29 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
     });
   }
 
+  void _handleCartStateChanged(CartState state) {
+    final nextItemCount = state.itemCount;
+    if (!_isRestoringCart &&
+        _currentIndex != 1 &&
+        nextItemCount > _lastCartItemCount &&
+        mounted) {
+      _animateCartTab();
+    }
+
+    _lastCartItemCount = nextItemCount;
+  }
+
   int _validatedInitialIndex(int index) {
     if (index < 0 || index >= _items.length) {
       return ShopNavigationView.homeTabIndex;
     }
 
     return index;
+  }
+
+  @override
+  void dispose() {
+    _cartSubscription.cancel();
+    super.dispose();
   }
 }

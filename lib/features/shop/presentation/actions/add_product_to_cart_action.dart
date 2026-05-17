@@ -14,8 +14,6 @@ class AddProductToCartAction {
     required int quantity,
     required Color primaryColor,
     ShopModel? shopModel,
-    VoidCallback? onProductAdded,
-    Null Function()? onCartRequested,
   }) {
     context.read<CartCubit>().addProduct(
       CartViewArguments(
@@ -25,6 +23,5 @@ class AddProductToCartAction {
         shopModel: shopModel,
       ),
     );
-    onProductAdded?.call();
   }
 }

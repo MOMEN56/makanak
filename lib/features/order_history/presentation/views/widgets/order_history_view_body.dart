@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
@@ -80,7 +81,9 @@ class OrderHistoryViewBody extends StatelessWidget {
                               () => Navigator.pushNamed(
                                 context,
                                 OrderDetailsView.routeName,
-                                arguments: order,
+                                arguments: OrderDetailsRouteArguments(
+                                  orderId: order.id,
+                                ),
                               ),
                         );
                       },

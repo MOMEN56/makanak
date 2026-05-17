@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
+import 'package:makanak/core/routing/app_route_arguments.dart';
+import 'package:makanak/core/routing/route_error_view.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/admin_notifications/presentation/manager/admin_send_notification_cubit/admin_send_notification_cubit.dart';
@@ -19,13 +21,11 @@ import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/submit_order_view.dart';
 import 'package:makanak/features/notifications/presentation/views/notifications_history_view.dart';
-import 'package:makanak/features/order_history/data/models/order_model.dart';
 import 'package:makanak/features/order_history/presentation/views/order_details_view.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
 import 'package:makanak/features/profile/presentation/views/profile_view.dart';
 import 'package:makanak/features/shop/presentation/views/product_details_view.dart';
 import 'package:makanak/features/shop/presentation/views/products_view.dart';
-import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/features/shops/presentation/views/shops_view.dart';
 
 Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -46,14 +46,14 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       );
     case CartView.routeName:
       final arguments = settings.arguments;
+      if (arguments != null && arguments is! CartViewArguments) {
+        return _invalidRoute(settings, AppStrings.routeDataUnavailable);
+      }
       return _fadeRoute(
         settings: settings,
         builder:
             (_) => _CartFlowProviders(
-              shopId:
-                  arguments is CartViewArguments
-                      ? _shopIdFromCartArguments(arguments)
-                      : null,
+              shopId: arguments is CartViewArguments ? arguments.shopId : null,
               child: CartView(
                 cartArguments:
                     arguments is CartViewArguments ? arguments : null,
@@ -62,14 +62,14 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       );
     case AddUserAddressView.routeName:
       final arguments = settings.arguments;
+      if (arguments != null && arguments is! CartViewArguments) {
+        return _invalidRoute(settings, AppStrings.routeDataUnavailable);
+      }
       return _fadeRoute(
         settings: settings,
         builder:
             (_) => _CartFlowProviders(
-              shopId:
-                  arguments is CartViewArguments
-                      ? _shopIdFromCartArguments(arguments)
-                      : null,
+              shopId: arguments is CartViewArguments ? arguments.shopId : null,
               child: AddUserAddressView(
                 cartArguments:
                     arguments is CartViewArguments ? arguments : null,
@@ -78,14 +78,14 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       );
     case ConfirmingOrderView.routeName:
       final arguments = settings.arguments;
+      if (arguments != null && arguments is! CartViewArguments) {
+        return _invalidRoute(settings, AppStrings.routeDataUnavailable);
+      }
       return _fadeRoute(
         settings: settings,
         builder:
             (_) => _CartFlowProviders(
-              shopId:
-                  arguments is CartViewArguments
-                      ? _shopIdFromCartArguments(arguments)
-                      : null,
+              shopId: arguments is CartViewArguments ? arguments.shopId : null,
               child: ConfirmingOrderView(
                 cartArguments:
                     arguments is CartViewArguments ? arguments : null,
@@ -94,6 +94,9 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       );
     case SubmitOrderView.routeName:
       final arguments = settings.arguments;
+      if (arguments != null && arguments is! CartViewArguments) {
+        return _invalidRoute(settings, AppStrings.routeDataUnavailable);
+      }
       return _fadeRoute(
         settings: settings,
         builder:
@@ -124,19 +127,13 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       );
     case OrderDetailsView.routeName:
       final arguments = settings.arguments;
-      if (arguments is OrderModel) {
+      if (arguments is OrderDetailsRouteArguments && arguments.isValid) {
         return _fadeRoute(
           settings: settings,
-          builder: (_) => OrderDetailsView(order: arguments),
+          builder: (_) => OrderDetailsView(orderId: arguments.orderId),
         );
       }
-      return _fadeRoute(
-        settings: settings,
-        builder:
-            (_) => const Scaffold(
-              body: Center(child: Text(AppStrings.orderDetailsUnavailable)),
-            ),
-      );
+      return _invalidRoute(settings, AppStrings.orderDetailsUnavailable);
     case ProfileView.routeName:
       return _fadeRoute(
         settings: settings,
@@ -149,74 +146,61 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
     case ProductDetailsView.routeName:
       final arguments = settings.arguments;
 
-      if (arguments is ProductDetailsViewArguments) {
+      if (arguments is ProductDetailsRouteArguments && arguments.isValid) {
+        final shopId =
+            arguments.shop?.shopId.trim().isNotEmpty == true
+                ? arguments.shop!.shopId
+                : arguments.product.shopId;
+
         return _fadeRoute(
           settings: settings,
           builder:
               (_) => _CartCubitProvider(
-                shopId: _shopIdFromProductDetailsArguments(arguments),
+                shopId: shopId,
                 child: ProductDetailsView(
-                  product: arguments.product,
+                  product: arguments.product.toModel(),
                   primaryColor: arguments.primaryColor,
-                  shopModel: arguments.shopModel,
+                  shopModel: arguments.shop?.toModel(),
                   initialQuantity: arguments.initialQuantity,
-                  onCartRequested: arguments.onCartRequested,
-                  onProductAdded: arguments.onProductAdded,
+                  returnToCartTab: arguments.returnToCartTab,
                 ),
               ),
         );
       }
 
-      return _fadeRoute(
-        settings: settings,
-        builder:
-            (_) => const Scaffold(
-              body: Center(child: Text(AppStrings.productDataUnavailable)),
-            ),
-      );
+      return _invalidRoute(settings, AppStrings.productDataUnavailable);
     case ProductsView.routeName:
-      final shopModel = settings.arguments;
-      if (shopModel is ShopModel) {
+      final arguments = settings.arguments;
+      if (arguments is ProductsRouteArguments && arguments.isValid) {
         return _fadeRoute(
           settings: settings,
-          builder: (_) => ProductsView(shopModel: shopModel),
+          builder:
+              (_) => ProductsView(
+                shopModel: arguments.shop.toModel(),
+                initialNavigationIndex: arguments.initialNavigationIndex,
+              ),
         );
       }
-      return _fadeRoute(
-        settings: settings,
-        builder:
-            (_) => const Scaffold(
-              body: Center(child: Text(AppStrings.shopDataUnavailable)),
-            ),
-      );
+      return _invalidRoute(settings, AppStrings.shopDataUnavailable);
     default:
-      return _fadeRoute(
-        settings: settings,
-        builder: (_) => const AuthGateView(),
-      );
+      return _invalidRoute(settings, AppStrings.routeNotFound);
   }
 }
 
-String? _shopIdFromCartArguments(CartViewArguments? arguments) {
-  final shopId =
-      arguments?.shopModel?.id?.trim() ?? arguments?.product?.shopId.trim();
-  if (shopId == null || shopId.isEmpty) {
-    return null;
-  }
-
-  return shopId;
-}
-
-String? _shopIdFromProductDetailsArguments(
-  ProductDetailsViewArguments arguments,
-) {
-  final shopId =
-      arguments.shopModel?.id?.trim() ?? arguments.product.shopId.trim();
-  if (shopId.isEmpty) {
-    return null;
-  }
-
-  return shopId;
+Route<dynamic> _invalidRoute(RouteSettings settings, String message) {
+  return _fadeRoute(
+    settings: settings,
+    builder:
+        (context) => RouteErrorView(
+          message: message,
+          actionLabel: AppStrings.home,
+          onActionPressed:
+              () => Navigator.of(context).pushNamedAndRemoveUntil(
+                AuthGateView.routeName,
+                (route) => false,
+              ),
+        ),
+  );
 }
 
 Route<dynamic> _fadeRoute({

@@ -24,13 +24,11 @@ class ProductsViewBody extends StatefulWidget {
     required this.shopModel,
     this.bottomContentPadding = 0,
     this.onCartRequested,
-    this.onProductAdded,
   });
 
   final ShopModel shopModel;
   final double bottomContentPadding;
   final VoidCallback? onCartRequested;
-  final VoidCallback? onProductAdded;
 
   @override
   State<ProductsViewBody> createState() => _ProductsViewBodyState();
@@ -74,8 +72,6 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
         quantity: item.quantity,
       );
     }
-
-    widget.onProductAdded?.call();
 
     setState(() {
       _selectedProducts.clear();
@@ -168,7 +164,6 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
                       shopModel: widget.shopModel,
                       onProductSelected: _onProductSelected,
                       onCartRequested: widget.onCartRequested,
-                      onProductAdded: widget.onProductAdded,
                     ),
                     ProductsFailure(:final message) => StateMessage(
                       message: message,

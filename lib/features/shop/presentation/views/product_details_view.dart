@@ -11,8 +11,7 @@ class ProductDetailsView extends StatelessWidget {
     required this.primaryColor,
     this.shopModel,
     this.initialQuantity = 1,
-    this.onCartRequested,
-    this.onProductAdded,
+    this.returnToCartTab = false,
   });
 
   static const String routeName = 'product_details';
@@ -21,8 +20,7 @@ class ProductDetailsView extends StatelessWidget {
   final Color primaryColor;
   final ShopModel? shopModel;
   final int initialQuantity;
-  final VoidCallback? onCartRequested;
-  final VoidCallback? onProductAdded;
+  final bool returnToCartTab;
 
   @override
   Widget build(BuildContext context) {
@@ -33,27 +31,8 @@ class ProductDetailsView extends StatelessWidget {
         primaryColor: primaryColor,
         shopModel: shopModel,
         initialQuantity: initialQuantity,
-        onCartRequested: onCartRequested,
-        onProductAdded: onProductAdded,
+        returnToCartTab: returnToCartTab,
       ),
     );
   }
-}
-
-class ProductDetailsViewArguments {
-  const ProductDetailsViewArguments({
-    required this.product,
-    required this.primaryColor,
-    this.shopModel,
-    this.initialQuantity = 1,
-    this.onCartRequested,
-    this.onProductAdded,
-  });
-
-  final ProductModel product;
-  final Color primaryColor;
-  final ShopModel? shopModel;
-  final int initialQuantity;
-  final VoidCallback? onCartRequested;
-  final VoidCallback? onProductAdded;
 }

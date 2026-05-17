@@ -24,6 +24,7 @@ import 'package:makanak/features/notifications/data/repos/notifications_reposito
 import 'package:makanak/features/order_history/data/data_sources/orders_remote_data_source.dart';
 import 'package:makanak/features/order_history/data/repos/order_history_repository_impl.dart';
 import 'package:makanak/features/order_history/domain/repos/order_history_repository.dart';
+import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_cubit.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_history_cubit/order_history_cubit.dart';
 import 'package:makanak/features/shop/data/data_sources/products_remote_data_source.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
@@ -118,6 +119,10 @@ void _registerOrdersFeature() {
 
   getIt.registerFactory<OrderHistoryCubit>(
     () => OrderHistoryCubit(getIt<OrderHistoryRepository>()),
+  );
+
+  getIt.registerFactory<OrderDetailsCubit>(
+    () => OrderDetailsCubit(getIt<OrderHistoryRepository>()),
   );
 }
 

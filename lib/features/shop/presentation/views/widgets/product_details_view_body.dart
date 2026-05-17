@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
@@ -21,16 +22,14 @@ class ProductDetailsViewBody extends StatefulWidget {
     required this.primaryColor,
     this.shopModel,
     this.initialQuantity = 1,
-    this.onCartRequested,
-    this.onProductAdded,
+    this.returnToCartTab = false,
   });
 
   final ProductModel product;
   final Color primaryColor;
   final ShopModel? shopModel;
   final int initialQuantity;
-  final VoidCallback? onCartRequested;
-  final VoidCallback? onProductAdded;
+  final bool returnToCartTab;
 
   @override
   State<ProductDetailsViewBody> createState() => _ProductDetailsViewBodyState();
@@ -59,7 +58,6 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
       primaryColor: widget.primaryColor,
       shopModel: widget.shopModel,
       quantity: quantity,
-      onProductAdded: widget.onProductAdded,
     );
 
     AppSnackBar.show(
@@ -88,10 +86,8 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
 
     scaffoldMessenger.hideCurrentSnackBar();
 
-    final onCartRequested = widget.onCartRequested;
-    if (onCartRequested != null) {
-      onCartRequested();
-      if (mounted) navigator.maybePop();
+    if (widget.returnToCartTab) {
+      navigator.pop(ProductDetailsRouteResult.openCart);
       return;
     }
 

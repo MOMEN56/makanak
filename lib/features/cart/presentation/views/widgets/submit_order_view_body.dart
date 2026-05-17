@@ -1,14 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
+import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
 import 'package:makanak/features/shop/presentation/views/products_view.dart';
 import 'package:makanak/features/shop/presentation/views/shop_navigation_view.dart';
-import 'package:makanak/features/shops/data/models/shop_model.dart';
+import 'package:makanak/features/shops/presentation/views/shops_view.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 
 class SubmitOrderViewBody extends StatefulWidget {
@@ -30,14 +32,12 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
     return widget.cartArguments?.primaryColor ?? AppColors.primaryColor;
   }
 
-  ShopModel? get _shopModel {
+  ProductsRouteArguments? get _productsRouteArguments {
     final shopModel = widget.cartArguments?.shopModel;
-    if (shopModel != null) return shopModel;
+    if (shopModel == null) return null;
 
-    final shopId = widget.cartArguments?.product?.shopId.trim() ?? '';
-    if (shopId.isEmpty) return null;
-
-    return ShopModel(id: shopId, name: '', category: '');
+    final arguments = ProductsRouteArguments.fromShop(shopModel);
+    return arguments.isValid ? arguments : null;
   }
 
   @override
@@ -65,38 +65,35 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
     _didNavigate = true;
     _redirectTimer?.cancel();
 
-    final shopModel = _shopModel;
-    if (shopModel == null) {
-      return;
-    }
-
     Navigator.pushNamedAndRemoveUntil(
       context,
-      ProductsView.routeName,
+      _productsRouteArguments == null
+          ? ShopsView.routeName
+          : ProductsView.routeName,
       (route) => false,
-      arguments: shopModel,
+      arguments: _productsRouteArguments,
     );
   }
 
   void _goToOrderHistory() {
     if (!mounted || _didNavigate) return;
 
-    final shopModel = _shopModel;
-    if (shopModel == null) return;
-
     _didNavigate = true;
     _redirectTimer?.cancel();
 
-    Navigator.pushAndRemoveUntil(
+    Navigator.pushNamedAndRemoveUntil(
       context,
-      MaterialPageRoute(
-        builder:
-            (_) => ShopNavigationView(
-              shopModel: shopModel,
-              initialIndex: ShopNavigationView.orderHistoryTabIndex,
-            ),
-      ),
+      _productsRouteArguments == null
+          ? OrderHistoryView.routeName
+          : ProductsView.routeName,
       (route) => false,
+      arguments:
+          _productsRouteArguments == null
+              ? null
+              : ProductsRouteArguments(
+                shop: _productsRouteArguments!.shop,
+                initialNavigationIndex: ShopNavigationView.orderHistoryTabIndex,
+              ),
     );
   }
 

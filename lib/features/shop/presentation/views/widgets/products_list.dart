@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/assets.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
@@ -17,7 +18,6 @@ class ProductsList extends StatefulWidget {
     this.shopModel,
     this.onProductSelected,
     this.onCartRequested,
-    this.onProductAdded,
   });
 
   final List<ProductModel> products;
@@ -26,7 +26,6 @@ class ProductsList extends StatefulWidget {
   final ShopModel? shopModel;
   final void Function(ProductModel product, int quantity)? onProductSelected;
   final VoidCallback? onCartRequested;
-  final VoidCallback? onProductAdded;
 
   @override
   State<ProductsList> createState() => _ProductsListState();
@@ -81,19 +80,21 @@ class _ProductsListState extends State<ProductsList> {
           resetSignal: widget.resetSelectionSignal,
           onTap: () async {
             FocusManager.instance.primaryFocus?.unfocus();
-            await Navigator.pushNamed(
+            final result = await Navigator.pushNamed(
               context,
               ProductDetailsView.routeName,
-              arguments: ProductDetailsViewArguments(
+              arguments: ProductDetailsRouteArguments.fromModels(
                 product: product,
                 primaryColor: widget.primaryColor,
                 shopModel: widget.shopModel,
                 initialQuantity: quantity,
-                onCartRequested: widget.onCartRequested,
-                onProductAdded: widget.onProductAdded,
+                returnToCartTab: widget.onCartRequested != null,
               ),
             );
             if (!context.mounted) return;
+            if (result == ProductDetailsRouteResult.openCart) {
+              widget.onCartRequested?.call();
+            }
             FocusManager.instance.primaryFocus?.unfocus();
           },
           onQuantityChanged:

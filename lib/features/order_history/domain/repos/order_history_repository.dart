@@ -4,4 +4,5 @@ import 'package:makanak/features/order_history/data/models/order_model.dart';
 
 abstract class OrderHistoryRepository {
   Future<Either<Failure, List<OrderModel>>> fetchOrders();
+  Future<Either<Failure, OrderModel?>> fetchOrderById(String orderId);
 }

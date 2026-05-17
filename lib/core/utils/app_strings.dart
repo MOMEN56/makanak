@@ -43,6 +43,8 @@ class AppStrings {
   static const trackOrder = 'تتبع طلبي';
   static const shopDataUnavailable = 'بيانات المحل غير متاحة';
   static const productDataUnavailable = 'بيانات المنتج غير متاحة';
+  static const routeDataUnavailable = 'تعذر فتح هذه الشاشة الآن.';
+  static const routeNotFound = 'الصفحة غير متاحة';
   static const requiredFieldMessage = 'هذا الحقل مطلوب';
   static const phoneRequired = 'رقم الهاتف مطلوب';
   static const phoneDigitsOnly = 'رقم الهاتف يجب أن يحتوي على أرقام فقط';
@@ -106,6 +108,8 @@ class AppStrings {
       'تعذر تحميل الطلبات الآن. حاول مرة أخرى بعد قليل.';
   static const orderDetails = 'تفاصيل الطلب';
   static const orderDetailsUnavailable = 'بيانات الطلب غير متاحة';
+  static const orderDetailsLoadError =
+      'تعذر تحميل تفاصيل الطلب الآن. حاول مرة أخرى بعد قليل.';
   static const orderItems = 'المنتجات';
   static const orderItemsLabel = 'عدد المنتجات';
   static const orderDate = 'تاريخ الطلب';
