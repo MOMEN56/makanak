@@ -153,6 +153,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
             const Gap(24),
             Expanded(
               child: BlocBuilder<ProductsCubit, ProductsState>(
+                buildWhen: _shouldRebuildProductsContent,
                 builder: (context, state) {
                   return switch (state) {
                     ProductsInitial() ||
@@ -200,4 +201,23 @@ class _SelectedCartProduct {
 
   final ProductModel product;
   final int quantity;
+}
+
+bool _shouldRebuildProductsContent(
+  ProductsState previous,
+  ProductsState current,
+) {
+  if (previous.runtimeType != current.runtimeType) {
+    return true;
+  }
+
+  if (previous is ProductsSuccess && current is ProductsSuccess) {
+    return previous.products != current.products;
+  }
+
+  if (previous is ProductsFailure && current is ProductsFailure) {
+    return previous.message != current.message;
+  }
+
+  return false;
 }

@@ -116,6 +116,8 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
         CartViewArguments.defaultPrimaryColor;
 
     return BlocConsumer<CartCubit, CartState>(
+      listenWhen: _shouldListenToCartChanges,
+      buildWhen: _shouldRebuildConfirmingCart,
       listener: (context, state) {
         if (state is CartError) {
           _showAddressError(state.message);
@@ -135,6 +137,8 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
       },
       builder: (context, state) {
         return BlocConsumer<AddressCubit, AddressState>(
+          listenWhen: _shouldListenToAddressChanges,
+          buildWhen: _shouldRebuildConfirmingAddress,
           listener: (context, addressState) {
             if (addressState is AddressError) {
               final route = ModalRoute.of(context);
@@ -203,4 +207,31 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
       },
     );
   }
+}
+
+bool _shouldListenToCartChanges(CartState previous, CartState current) {
+  return previous != current &&
+      (current is CartError || current is CartOrderSubmitted);
+}
+
+bool _shouldRebuildConfirmingCart(CartState previous, CartState current) {
+  return previous.runtimeType != current.runtimeType ||
+      previous.items != current.items ||
+      previous.shippingPrice != current.shippingPrice;
+}
+
+bool _shouldListenToAddressChanges(
+  AddressState previous,
+  AddressState current,
+) {
+  return previous != current && current is AddressError;
+}
+
+bool _shouldRebuildConfirmingAddress(
+  AddressState previous,
+  AddressState current,
+) {
+  return previous.runtimeType != current.runtimeType ||
+      previous.addresses != current.addresses ||
+      previous.selectedAddressIndex != current.selectedAddressIndex;
 }

@@ -85,8 +85,10 @@ class _CartViewBodyState extends State<CartViewBody> {
         CartViewArguments.defaultPrimaryColor;
 
     return BlocBuilder<CartCubit, CartState>(
+      buildWhen: _shouldRebuildCartView,
       builder: (context, cartState) {
         return BlocBuilder<AddressCubit, AddressState>(
+          buildWhen: _shouldRebuildCartAddressView,
           builder: (context, addressState) {
             if (addressState is AddressLoading &&
                 addressState.addresses.isEmpty) {
@@ -194,4 +196,19 @@ class _CartViewBodyState extends State<CartViewBody> {
       },
     );
   }
+}
+
+bool _shouldRebuildCartView(CartState previous, CartState current) {
+  return previous.runtimeType != current.runtimeType ||
+      previous.items != current.items ||
+      previous.shippingPrice != current.shippingPrice;
+}
+
+bool _shouldRebuildCartAddressView(
+  AddressState previous,
+  AddressState current,
+) {
+  return previous.runtimeType != current.runtimeType ||
+      previous.addresses != current.addresses ||
+      previous.selectedAddressIndex != current.selectedAddressIndex;
 }

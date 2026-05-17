@@ -19,6 +19,7 @@ class ShopsViewBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ShopsCubit, ShopsState>(
+      buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
         final shouldShowListSpacing = switch (state) {
           ShopsInitial() || ShopsLoading() => true,

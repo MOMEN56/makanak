@@ -18,24 +18,21 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthCubit, AuthState>(
-      buildWhen:
-          (previous, current) =>
-              previous.runtimeType != current.runtimeType ||
-              previous is AuthAuthenticated ||
-              current is AuthAuthenticated ||
-              previous is AuthLoading ||
-              current is AuthLoading,
-      builder: (context, state) {
-        final profile = _resolveProfile(state);
-        final isSigningOut =
-            state is AuthLoading &&
-            state.operation == AuthLoadingOperation.signOut;
-
+    return BlocSelector<AuthCubit, AuthState, _ProfileHeaderViewData>(
+      selector: (state) {
+        return _ProfileHeaderViewData(
+          profile: _resolveProfile(state),
+          isSigningOut:
+              state is AuthLoading &&
+              state.operation == AuthLoadingOperation.signOut,
+        );
+      },
+      builder: (context, data) {
         return ProfileHeader(
-          profile: profile,
-          isSigningOut: isSigningOut,
-          onSignOutTap: isSigningOut ? null : () => _openActionsSheet(context),
+          profile: data.profile,
+          isSigningOut: data.isSigningOut,
+          onSignOutTap:
+              data.isSigningOut ? null : () => _openActionsSheet(context),
         );
       },
     );
@@ -70,4 +67,26 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
 
     return _lastProfile;
   }
+}
+
+class _ProfileHeaderViewData {
+  const _ProfileHeaderViewData({
+    required this.profile,
+    required this.isSigningOut,
+  });
+
+  final ProfileEntity? profile;
+  final bool isSigningOut;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is _ProfileHeaderViewData &&
+        other.profile == profile &&
+        other.isSigningOut == isSigningOut;
+  }
+
+  @override
+  int get hashCode => Object.hash(profile, isSigningOut);
 }

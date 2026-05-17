@@ -22,6 +22,7 @@ class OrderHistoryViewBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OrderHistoryCubit, OrderHistoryState>(
+      buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
         if (state is OrderHistoryInitial || state is OrderHistoryLoading) {
           return const OrderHistorySkeleton();
