@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:makanak/core/errors/database_exception.dart';
-import 'package:makanak/core/services/NotificationService/notification_event.dart';
+import 'package:makanak/core/services/notification_service/notification_event.dart';
 import 'package:makanak/core/services/services.dart';
 import 'package:makanak/features/notifications/data/models/app_notification_model.dart';
 import 'package:makanak/features/notifications/data/repos/notifications_repository.dart';

@@ -1,7 +1,7 @@
 ﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:makanak/core/services/NotificationService/push_notification_service.dart';
+import 'package:makanak/core/services/notification_service/push_notification_service.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/services/supabase_client_service.dart';
 import 'package:makanak/features/notifications/data/repos/notifications_repository.dart';

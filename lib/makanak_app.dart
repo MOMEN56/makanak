@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:makanak/core/helper_fun/on_generate_route.dart';
+import 'package:makanak/core/routing/app_router.dart';
 import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_colors.dart';

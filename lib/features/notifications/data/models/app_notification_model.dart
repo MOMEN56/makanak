@@ -1,4 +1,4 @@
-import 'package:makanak/core/services/NotificationService/notification_event.dart';
+import 'package:makanak/core/services/notification_service/notification_event.dart';
 
 class AppNotificationModel {
   AppNotificationModel({

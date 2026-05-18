@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:makanak/core/services/NotificationService/notification_event.dart';
+import 'package:makanak/core/services/notification_service/notification_event.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/order_status_presenter.dart';
 
