@@ -65,20 +65,27 @@ class OrdersRemoteDataSource extends SupabaseRemoteDataSource {
       );
     }
 
-    for (final item in items) {
-      final productId = item['productId'];
-      final quantity = item['quantity'];
-      if (productId is! String || productId.trim().isEmpty) {
-        throw ArgumentError(
-          'Each item must contain a non-empty string productId.',
-        );
-      }
-      if (quantity is! int || quantity <= 0) {
-        throw ArgumentError(
-          'Each item must contain a positive integer quantity.',
-        );
-      }
-    }
+    final normalizedItems =
+        items.map((item) {
+          final productId = item['product_id'] ?? item['productId'];
+          final quantity = item['quantity'];
+
+          if (productId is! String || productId.trim().isEmpty) {
+            throw ArgumentError(
+              'Each item must contain a non-empty string product_id.',
+            );
+          }
+          if (quantity is! int || quantity <= 0) {
+            throw ArgumentError(
+              'Each item must contain a positive integer quantity.',
+            );
+          }
+
+          return <String, dynamic>{
+            'product_id': productId.trim(),
+            'quantity': quantity,
+          };
+        }).toList(growable: false);
 
     try {
       await client.rpc(
@@ -87,7 +94,7 @@ class OrdersRemoteDataSource extends SupabaseRemoteDataSource {
           'p_shop_id': normalizedShopId,
           'p_address_id': normalizedAddressId,
           'p_shipping_price': shippingPrice,
-          'p_order_details': items,
+          'p_order_details': normalizedItems,
         },
       );
     } on PostgrestException catch (error) {
