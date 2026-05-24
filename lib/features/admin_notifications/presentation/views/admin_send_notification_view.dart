@@ -338,6 +338,7 @@ class _NotificationForm extends StatelessWidget {
                       userId: userIdController.text,
                     );
                   },
+                  preventRapidTaps: true,
                   icon:
                       state.isLoading
                           ? const SizedBox(

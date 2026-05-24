@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 
-class CustomButton extends StatelessWidget {
+class CustomButton extends StatefulWidget {
   const CustomButton({
     super.key,
     required this.hint,
@@ -11,6 +13,8 @@ class CustomButton extends StatelessWidget {
     this.icon,
     this.hasShadowEffect = false,
     this.color,
+    this.preventRapidTaps = false,
+    this.tapCooldown = const Duration(milliseconds: 600),
   });
 
   final String hint;
@@ -18,17 +22,70 @@ class CustomButton extends StatelessWidget {
   final Widget? icon;
   final bool hasShadowEffect;
   final Color? color;
+  final bool preventRapidTaps;
+  final Duration tapCooldown;
+
+  @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton> {
+  Timer? _tapCooldownTimer;
+  bool _isTapLocked = false;
+
+  @override
+  void didUpdateWidget(covariant CustomButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.preventRapidTaps || widget.onTap == null) {
+      _tapCooldownTimer?.cancel();
+      _tapCooldownTimer = null;
+      _isTapLocked = false;
+    }
+  }
+
+  void _handleTap() {
+    final onTap = widget.onTap;
+    if (onTap == null || _isTapLocked) return;
+
+    if (!widget.preventRapidTaps) {
+      onTap();
+      return;
+    }
+
+    setState(() => _isTapLocked = true);
+    _tapCooldownTimer?.cancel();
+    _tapCooldownTimer = Timer(widget.tapCooldown, _unlockTap);
+    onTap();
+  }
+
+  void _unlockTap() {
+    if (!mounted) {
+      _isTapLocked = false;
+      return;
+    }
+
+    setState(() => _isTapLocked = false);
+    _tapCooldownTimer = null;
+  }
+
+  @override
+  void dispose() {
+    _tapCooldownTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final resolvedColor = color ?? AppColors.primaryColor;
+    final resolvedColor = widget.color ?? AppColors.primaryColor;
     final gradientStartColor = AppColors.darkerShade(resolvedColor);
+    final resolvedOnTap =
+        widget.onTap == null || _isTapLocked ? null : _handleTap;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow:
-            hasShadowEffect
+            widget.hasShadowEffect
                 ? [
                   BoxShadow(
                     color: resolvedColor.withValues(alpha: 0.28),
@@ -50,7 +107,7 @@ class CustomButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: onTap,
+          onTap: resolvedOnTap,
           child: Ink(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -66,12 +123,15 @@ class CustomButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  hint,
+                  widget.hint,
                   textAlign: TextAlign.center,
                   style: TextStyles.bold16.copyWith(color: AppColors.white),
                 ),
                 Gap(6),
-                if (icon != null) ...[icon!, const SizedBox(width: 12)],
+                if (widget.icon != null) ...[
+                  widget.icon!,
+                  const SizedBox(width: 12),
+                ],
               ],
             ),
           ),

@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makanak/core/utils/debouncer.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_state.dart';
 
@@ -8,7 +7,9 @@ class ProductsCubit extends Cubit<ProductsState> {
   ProductsCubit(this._productsRepo) : super(const ProductsInitial());
 
   final ProductsRepo _productsRepo;
-  Timer? _searchDebounce;
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 400),
+  );
   String _query = '';
   ProductPriceSort _priceSort = ProductPriceSort.none;
   int _requestId = 0;
@@ -22,16 +23,16 @@ class ProductsCubit extends Cubit<ProductsState> {
     if (nextQuery == _query) return;
 
     _query = nextQuery;
-    _searchDebounce?.cancel();
+    _searchDebouncer.cancel();
     _requestId++;
-    _searchDebounce = Timer(const Duration(milliseconds: 400), () {
+    _searchDebouncer.run(() {
       _fetchProducts(shopId, query: nextQuery, priceSort: _priceSort);
     });
   }
 
   Future<void> changePriceSort(String shopId, ProductPriceSort priceSort) {
     if (priceSort == _priceSort) return Future.value();
-    _searchDebounce?.cancel();
+    _searchDebouncer.cancel();
     return _fetchProducts(shopId, query: _query, priceSort: priceSort);
   }
 
@@ -65,7 +66,7 @@ class ProductsCubit extends Cubit<ProductsState> {
 
   @override
   Future<void> close() {
-    _searchDebounce?.cancel();
+    _searchDebouncer.dispose();
     return super.close();
   }
 }

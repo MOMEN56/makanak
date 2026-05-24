@@ -14,6 +14,8 @@ import 'package:makanak/features/notifications/data/data_sources/push_token_remo
 import 'package:makanak/core/utils/app_navigator_key.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+const _notificationIconName = 'is_stat_notification';
+
 const _orderUpdatesChannel = AndroidNotificationChannel(
   'order_updates',
   'Order Updates',
@@ -26,6 +28,7 @@ const _orderNotificationDetails = NotificationDetails(
     'order_updates',
     'Order Updates',
     channelDescription: 'Notifications about order status changes.',
+    icon: _notificationIconName,
     importance: Importance.max,
     priority: Priority.high,
   ),
@@ -213,8 +216,11 @@ class PushNotificationService {
   }
 
   Future<void> _initializeLocalNotifications() async {
+    const initializationSettingsAndroid = AndroidInitializationSettings(
+      _notificationIconName,
+    );
     const settings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      android: initializationSettingsAndroid,
     );
 
     await _localNotifications.initialize(

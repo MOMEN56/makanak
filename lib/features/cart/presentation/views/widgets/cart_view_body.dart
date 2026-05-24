@@ -177,6 +177,7 @@ class _CartViewBodyState extends State<CartViewBody> {
                       CustomButton(
                         hint: AppStrings.continueText,
                         color: primaryColor,
+                        preventRapidTaps: true,
                         onTap:
                             () => _goToNextStep(
                               cartState,

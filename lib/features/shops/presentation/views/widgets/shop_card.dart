@@ -87,6 +87,7 @@ class ShopCard extends StatelessWidget {
             CustomButton(
               hint: AppStrings.shopCardAction,
               onTap: onShopTap,
+              preventRapidTaps: true,
               //hasShadowEffect: true,
             ),
           ],

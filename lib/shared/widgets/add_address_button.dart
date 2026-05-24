@@ -18,6 +18,7 @@ class AddAddressButton extends StatelessWidget {
     return CustomButton(
       hint: hint,
       color: AppColors.primaryColor,
+      preventRapidTaps: true,
       icon: const Icon(
         Icons.add_location_alt_outlined,
         color: AppColors.white,

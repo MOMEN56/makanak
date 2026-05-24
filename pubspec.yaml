@@ -73,7 +73,7 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#004AAD"
-  image: assets/icons/splash_icon_1152.png
+  image: assets/icons/app_icon.png
   branding: assets/icons/splash_brand_800x320.png
   android: true
   ios: true
@@ -84,7 +84,7 @@ flutter_native_splash:
 
   android_12:
     color: "#004AAD"
-    image: assets/icons/splash_icon_1152.png
+    image: assets/icons/app_icon.png
     branding: assets/icons/splash_brand_800x320.png
 
 flutter_assets:

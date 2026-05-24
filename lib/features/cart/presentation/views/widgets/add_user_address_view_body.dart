@@ -111,9 +111,9 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
             context,
             ConfirmingOrderView.routeName,
             arguments: CartRouteArgumentsBuilder.fromState(
-                state: _cartCubit.state,
-                primaryColor: primaryColor,
-                fallback: widget.cartArguments,
+              state: _cartCubit.state,
+              primaryColor: primaryColor,
+              fallback: widget.cartArguments,
             ),
           );
           return;
@@ -129,8 +129,8 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
             context,
             ConfirmingOrderView.routeName,
             arguments: CartRouteArgumentsBuilder.fromState(
-                state: _cartCubit.state,
-                primaryColor: primaryColor,
+              state: _cartCubit.state,
+              primaryColor: primaryColor,
               fallback: widget.cartArguments,
             ),
           );
@@ -182,6 +182,7 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
                             ? AppStrings.saving
                             : AppStrings.saveAddressAndContinue,
                     onTap: isSavingAddress ? null : _goToConfirmingOrder,
+                    preventRapidTaps: true,
                     hasShadowEffect: false,
                     color: primaryColor,
                   ),

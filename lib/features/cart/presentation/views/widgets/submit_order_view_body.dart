@@ -135,6 +135,7 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
             CustomButton(
               hint: AppStrings.trackOrder,
               onTap: _goToOrderHistory,
+              preventRapidTaps: true,
               hasShadowEffect: true,
               color: primaryColor,
             ),

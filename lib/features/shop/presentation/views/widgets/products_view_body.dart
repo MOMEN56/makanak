@@ -182,6 +182,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
             CustomButton(
               hint: AppStrings.addToCart,
               onTap: hasSelectedProducts ? _addSelectedProductsToCart : null,
+              preventRapidTaps: true,
               hasShadowEffect: hasSelectedProducts,
               color:
                   hasSelectedProducts

@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makanak/core/utils/debouncer.dart';
 import 'package:makanak/features/shops/data/repos/shops_repo.dart';
 import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_state.dart';
 
@@ -8,7 +7,9 @@ class ShopsCubit extends Cubit<ShopsState> {
   ShopsCubit(this._shopsRepo) : super(const ShopsInitial());
 
   final ShopsRepo _shopsRepo;
-  Timer? _searchDebounce;
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 400),
+  );
   String _query = '';
   int _requestId = 0;
 
@@ -21,9 +22,9 @@ class ShopsCubit extends Cubit<ShopsState> {
     if (nextQuery == _query) return;
 
     _query = nextQuery;
-    _searchDebounce?.cancel();
+    _searchDebouncer.cancel();
     _requestId++;
-    _searchDebounce = Timer(const Duration(milliseconds: 400), () {
+    _searchDebouncer.run(() {
       _fetchShops(query: nextQuery);
     });
   }
@@ -49,7 +50,7 @@ class ShopsCubit extends Cubit<ShopsState> {
 
   @override
   Future<void> close() {
-    _searchDebounce?.cancel();
+    _searchDebouncer.dispose();
     return super.close();
   }
 }

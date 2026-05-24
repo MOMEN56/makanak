@@ -17,6 +17,7 @@ class CartCubit extends Cubit<CartState> {
   final String _userId;
   String? _lastRestoredShopId;
   bool _isInitialized = false;
+  bool _isCreatingOrder = false;
 
   Future<void> restoreSavedCart({String? shopId}) async {
     if (_isInitialized && _lastRestoredShopId == shopId) return;
@@ -104,6 +105,8 @@ class CartCubit extends Cubit<CartState> {
   }
 
   Future<void> createOrder({required String addressId}) async {
+    if (_isCreatingOrder) return;
+
     final items = state.items;
     if (items.isEmpty) {
       emit(_errorFromState(AppStrings.invalidProduct));
@@ -135,29 +138,34 @@ class CartCubit extends Cubit<CartState> {
       return;
     }
 
-    emit(_loadingFromState());
-    final result = await _cartRepository.createOrder(
-      shopId: shopId,
-      addressId: addressId,
-      shippingPrice: state.shippingPrice,
-      items: orderItems,
-    );
-    if (isClosed) return;
+    _isCreatingOrder = true;
+    try {
+      emit(_loadingFromState());
+      final result = await _cartRepository.createOrder(
+        shopId: shopId,
+        addressId: addressId,
+        shippingPrice: state.shippingPrice,
+        items: orderItems,
+      );
+      if (isClosed) return;
 
-    await result.fold<Future<void>>(
-      (failure) async {
-        emit(_errorFromState(failure.message));
-      },
-      (_) async {
-        final submittedShippingPrice = state.shippingPrice;
-        await CartLocalStorage.clearCart(userId: _userId);
-        if (isClosed) return;
+      await result.fold<Future<void>>(
+        (failure) async {
+          emit(_errorFromState(failure.message));
+        },
+        (_) async {
+          final submittedShippingPrice = state.shippingPrice;
+          await CartLocalStorage.clearCart(userId: _userId);
+          if (isClosed) return;
 
-        _isInitialized = false;
+          _isInitialized = false;
 
-        emit(CartOrderSubmitted(shippingPrice: submittedShippingPrice));
-      },
-    );
+          emit(CartOrderSubmitted(shippingPrice: submittedShippingPrice));
+        },
+      );
+    } finally {
+      _isCreatingOrder = false;
+    }
   }
 
   void updateQuantity(String productId, int quantity) {

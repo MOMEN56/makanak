@@ -165,6 +165,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
               child: CustomButton(
                 hint: AppStrings.addToCart,
                 onTap: _onAddButtonTap,
+                preventRapidTaps: true,
                 hasShadowEffect: true,
                 color: widget.primaryColor,
               ),

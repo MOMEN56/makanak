@@ -189,6 +189,7 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
                           isLoading
                               ? AppStrings.confirmingOrder
                               : AppStrings.confirmOrder,
+                      preventRapidTaps: true,
                       hasShadowEffect: true,
                       color: primaryColor,
                       onTap:

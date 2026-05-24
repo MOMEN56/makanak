@@ -140,6 +140,7 @@ class _AddressSelectorSheetState extends State<AddressSelectorSheet> {
                   _isSettingMainAddress
                       ? null
                       : () => widget.onAddressSelected(_currentIndex),
+              preventRapidTaps: true,
               color: widget.primaryColor,
               icon: const Icon(
                 Icons.check_rounded,
