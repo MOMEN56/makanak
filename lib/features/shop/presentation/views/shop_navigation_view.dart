@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -138,6 +138,10 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
     setState(() {
       _currentIndex = index;
     });
+
+    if (index == 1) {
+      unawaited(_cartCubit.refreshCartAvailability(shopId: widget.shopModel.id));
+    }
   }
 
   void _animateCartTab() {

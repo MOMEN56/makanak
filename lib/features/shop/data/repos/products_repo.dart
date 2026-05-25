@@ -10,4 +10,8 @@ abstract class ProductsRepo {
     String query = '',
     ProductPriceSort priceSort = ProductPriceSort.none,
   });
+
+  Future<Either<Failure, List<ProductModel>>> fetchProductsByIds(
+    List<String> productIds,
+  );
 }

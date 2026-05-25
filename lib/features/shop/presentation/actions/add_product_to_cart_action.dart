@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
+import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 
 class AddProductToCartAction {
@@ -15,6 +16,10 @@ class AddProductToCartAction {
     required Color primaryColor,
     ShopModel? shopModel,
   }) {
+    if (product.isUnavailableForPurchase) {
+      return;
+    }
+
     context.read<CartCubit>().addProduct(
       CartViewArguments(
         product: product,

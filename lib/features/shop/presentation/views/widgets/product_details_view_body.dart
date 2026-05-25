@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_colors.dart';
@@ -8,6 +8,7 @@ import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
+import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
 import 'package:makanak/features/shop/presentation/actions/add_product_to_cart_action.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/product_details_image.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
@@ -46,7 +47,9 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   }
 
   void _onAddButtonTap() {
-    if (!mounted || _isDisposed) return;
+    if (!mounted || _isDisposed || widget.product.isUnavailableForPurchase) {
+      return;
+    }
 
     final quantity = _quantity < 1 ? 1 : _quantity;
     final navigator = Navigator.of(context);
@@ -111,6 +114,11 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   @override
   Widget build(BuildContext context) {
     final darkerPrimaryColor = AppColors.darkerShade(widget.primaryColor);
+    final isAvailableForPurchase = widget.product.isAvailableForPurchase;
+    final availabilityLabel =
+        widget.product.isOutOfStock
+            ? AppStrings.productOutOfStock
+            : AppStrings.productUnavailableNow;
 
     return Container(
       color: Colors.white,
@@ -127,6 +135,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
               ),
               const Gap(8),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Text(
@@ -136,12 +145,31 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
                       ),
                     ),
                   ),
-                  QuantitySelector(
-                    initialQuantity:
-                        widget.initialQuantity < 1 ? 1 : widget.initialQuantity,
-                    color: widget.primaryColor,
-                    onChanged: (quantity) => _quantity = quantity,
-                  ),
+                  const Gap(12),
+                  if (isAvailableForPurchase)
+                    QuantitySelector(
+                      initialQuantity:
+                          widget.initialQuantity < 1 ? 1 : widget.initialQuantity,
+                      color: widget.primaryColor,
+                      onChanged: (quantity) => _quantity = quantity,
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffFCE8E8),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        availabilityLabel,
+                        style: TextStyles.semiBold14.copyWith(
+                          color: const Color(0xffD85B5B),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               const Gap(20),
@@ -163,11 +191,17 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
                 bottom: AppSpacing.buttonBottomGap,
               ),
               child: CustomButton(
-                hint: AppStrings.addToCart,
-                onTap: _onAddButtonTap,
+                hint:
+                    isAvailableForPurchase
+                        ? AppStrings.addToCart
+                        : availabilityLabel,
+                onTap: isAvailableForPurchase ? _onAddButtonTap : null,
                 preventRapidTaps: true,
-                hasShadowEffect: true,
-                color: widget.primaryColor,
+                hasShadowEffect: isAvailableForPurchase,
+                color:
+                    isAvailableForPurchase
+                        ? widget.primaryColor
+                        : AppColors.searchFieldBackground,
               ),
             ),
           ),

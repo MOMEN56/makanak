@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+﻿import 'package:dartz/dartz.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/shop/data/data_sources/products_remote_data_source.dart';
@@ -26,6 +26,19 @@ class ProductsRepoImpl implements ProductsRepo {
           ProductPriceSort.highToLow => false,
         },
       );
+      final products = productsData.map(ProductModel.fromJson).toList();
+      return right(products);
+    } catch (_) {
+      return left(const Failure(AppStrings.productsLoadError));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ProductModel>>> fetchProductsByIds(
+    List<String> productIds,
+  ) async {
+    try {
+      final productsData = await _remoteDataSource.fetchProductsByIds(productIds);
       final products = productsData.map(ProductModel.fromJson).toList();
       return right(products);
     } catch (_) {

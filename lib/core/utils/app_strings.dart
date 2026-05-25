@@ -25,6 +25,12 @@ class AppStrings {
   static const addressLoadError = 'حدث خطأ أثناء تحميل العناوين';
   static const defaultAddressError = 'حدث خطأ أثناء تحديد العنوان الرئيسي';
   static const orderConfirmError = 'حدث خطأ أثناء تأكيد الطلب';
+  static const productOutOfStock = 'نفد من المخزون';
+  static const productUnavailableNow = 'غير متاح الآن';
+  static const outOfStockProductsRemovedFromCart =
+      'بعض المنتجات نفدت من المخزون وتم حذفها من السلة.';
+  static const unavailableProductsRemovedFromCart =
+      'بعض المنتجات لم تعد متاحة وتم حذفها من السلة.';
   static const invalidProduct = 'بيانات المنتج غير صالحة';
   static const invalidAddress = 'بيانات العنوان غير صالحة';
   static const deliveryAddress = 'عنوان التوصيل';
@@ -246,6 +252,12 @@ class AppStrings {
 
   static String productAddedToCart(String productName, String quantityText) =>
       'تمت إضافة$quantityText $productName إلى';
+
+  static String outOfStockProductRemovedFromCart(String productName) =>
+      'المنتج $productName نفد من المخزون وتم حذفه من السلة.';
+
+  static String unavailableProductRemovedFromCart(String productName) =>
+      'المنتج $productName لم يعد متاحًا وتم حذفه من السلة.';
 
   static String priceInEgyptianPounds(int price) => '$price جنيه';
 

@@ -1,4 +1,4 @@
-import 'package:get_it/get_it.dart';
+﻿import 'package:get_it/get_it.dart';
 import 'package:makanak/core/data/data_sources/address_remote_data_source.dart';
 import 'package:makanak/core/data/repos/address_repository_impl.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
@@ -171,7 +171,11 @@ void _registerCartFeature() {
   );
 
   getIt.registerFactoryParam<CartCubit, String, void>(
-    (userId, _) => CartCubit(getIt<CartRepository>(), userId: userId),
+    (userId, _) => CartCubit(
+      getIt<CartRepository>(),
+      getIt<ProductsRepo>(),
+      userId: userId,
+    ),
   );
 
   getIt.registerLazySingleton<CartCubitRegistry>(

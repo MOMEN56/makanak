@@ -75,6 +75,17 @@ class CartLocalStorage {
     return cart.first;
   }
 
+  static Future<void> replaceCart({
+    required String userId,
+    required List<CartLocalData> items,
+  }) {
+    return _runQueued(() async {
+      final prefs = await SharedPreferences.getInstance();
+      await _removeLegacyCart(prefs);
+      await _writeCart(prefs, userId, List<CartLocalData>.of(items));
+    });
+  }
+
   static Future<void> updateProductQuantity({
     required String userId,
     required String productId,
@@ -163,9 +174,7 @@ class CartLocalStorage {
     if (decoded is List) {
       return decoded
           .map(
-            (item) => _cartLocalDataFromJson(
-              Map<String, dynamic>.from(item),
-            ),
+            (item) => _cartLocalDataFromJson(Map<String, dynamic>.from(item)),
           )
           .toList();
     }

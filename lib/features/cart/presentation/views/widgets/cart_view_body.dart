@@ -1,3 +1,5 @@
+﻿import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -42,6 +44,9 @@ class _CartViewBodyState extends State<CartViewBody> {
     super.initState();
     final cartCubit = context.read<CartCubit>();
     cartCubit.initializeCart(widget.cartArguments);
+    unawaited(
+      cartCubit.refreshCartAvailability(shopId: widget.cartArguments?.shopId),
+    );
     context.read<AddressCubit>().checkSavedAddresses();
   }
 
