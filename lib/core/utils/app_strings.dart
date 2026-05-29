@@ -27,6 +27,8 @@ class AppStrings {
   static const orderConfirmError = 'حدث خطأ أثناء تأكيد الطلب';
   static const cartAvailabilityCheckFailed =
       'تعذر التحقق من توفر المنتجات، حاول مرة أخرى.';
+  static const productAvailabilityCheckFailed =
+      'تعذر التحقق من توفر المنتج، حاول مرة أخرى.';
   static const productOutOfStock = 'نفد من المخزون';
   static const productUnavailableNow = 'غير متاح الآن';
   static const outOfStockProductsRemovedFromCart =

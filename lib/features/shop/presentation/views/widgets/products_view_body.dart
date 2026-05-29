@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -60,11 +62,12 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
     });
   }
 
-  void _addSelectedProductsToCart() {
+  Future<void> _addSelectedProductsToCart() async {
     if (_selectedProducts.isEmpty) return;
 
-    for (final item in _selectedProducts.values) {
-      AddProductToCartAction.run(
+    final selectedProducts = _selectedProducts.values.toList(growable: false);
+    for (final item in selectedProducts) {
+      await AddProductToCartAction.run(
         context: context,
         product: item.product,
         primaryColor: AppColors.primaryColor,
@@ -73,6 +76,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
       );
     }
 
+    if (!mounted) return;
     setState(() {
       _selectedProducts.clear();
       _resetSelectionSignal++;
@@ -181,7 +185,10 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
             const Gap(16),
             CustomButton(
               hint: AppStrings.addToCart,
-              onTap: hasSelectedProducts ? _addSelectedProductsToCart : null,
+              onTap:
+                  hasSelectedProducts
+                      ? () => unawaited(_addSelectedProductsToCart())
+                      : null,
               preventRapidTaps: true,
               hasShadowEffect: hasSelectedProducts,
               color:
