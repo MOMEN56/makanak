@@ -1,4 +1,4 @@
-﻿import 'package:makanak/core/services/supabase_remote_data_source.dart';
+import 'package:makanak/core/services/supabase_remote_data_source.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
@@ -57,9 +57,15 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchProductsByIds(
-    List<String> productIds,
-  ) async {
+  Future<List<Map<String, dynamic>>> fetchProductsByIds({
+    required String shopId,
+    required List<String> productIds,
+  }) async {
+    final normalizedShopId = shopId.trim();
+    if (normalizedShopId.isEmpty) {
+      throw ArgumentError.value(shopId, 'shopId', 'Shop id cannot be empty.');
+    }
+
     final normalizedIds =
         productIds.map((id) => id.trim()).where((id) => id.isNotEmpty).toSet();
     if (normalizedIds.isEmpty) {
@@ -70,6 +76,7 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
       final data = await client
           .from('products')
           .select(_productSelectColumns)
+          .eq('shop_id', normalizedShopId)
           .inFilter('id', normalizedIds.toList(growable: false));
 
       return List<Map<String, dynamic>>.from(data);
