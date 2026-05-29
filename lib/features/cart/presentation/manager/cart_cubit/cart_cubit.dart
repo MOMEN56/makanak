@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/app_strings.dart';
@@ -158,6 +158,13 @@ class CartCubit extends Cubit<CartState> {
         sourceItems: currentItems,
         shopId: shopId,
       );
+      if (preSubmitSync.syncFailed) {
+        emit(
+          _errorFromItems(currentItems, AppStrings.cartAvailabilityCheckFailed),
+        );
+        return;
+      }
+
       var itemsToSubmit = currentItems;
 
       if (preSubmitSync.didFetchLatestProducts) {
@@ -207,6 +214,15 @@ class CartCubit extends Cubit<CartState> {
             sourceItems: itemsToSubmit,
             shopId: validatedShopId,
           );
+          if (postFailureSync.syncFailed) {
+            emit(
+              _errorFromItems(
+                itemsToSubmit,
+                AppStrings.cartAvailabilityCheckFailed,
+              ),
+            );
+            return;
+          }
 
           if (postFailureSync.didFetchLatestProducts) {
             itemsToSubmit = postFailureSync.availableItems;
@@ -362,6 +378,17 @@ class CartCubit extends Cubit<CartState> {
         availableItems: const [],
         removedItems: const [],
         didFetchLatestProducts: true,
+        syncFailed: false,
+      );
+    }
+
+    if (resolvedShopId == null || resolvedShopId.isEmpty) {
+      return _CartSyncResult(
+        shopId: resolvedShopId,
+        availableItems: sourceItems,
+        removedItems: const [],
+        didFetchLatestProducts: false,
+        syncFailed: true,
       );
     }
 
@@ -384,16 +411,21 @@ class CartCubit extends Cubit<CartState> {
             )
             .toList(growable: false),
         didFetchLatestProducts: true,
+        syncFailed: false,
       );
     }
 
-    final result = await _productsRepo.fetchProductsByIds(productIds);
+    final result = await _productsRepo.fetchProductsByIds(
+      shopId: resolvedShopId,
+      productIds: productIds,
+    );
     return result.fold(
       (_) => _CartSyncResult(
         shopId: resolvedShopId,
         availableItems: sourceItems,
         removedItems: const [],
         didFetchLatestProducts: false,
+        syncFailed: true,
       ),
       (products) {
         final productsById = <String, ProductModel>{
@@ -443,6 +475,7 @@ class CartCubit extends Cubit<CartState> {
           availableItems: availableItems,
           removedItems: removedItems,
           didFetchLatestProducts: true,
+          syncFailed: false,
         );
       },
     );
@@ -540,12 +573,14 @@ class _CartSyncResult {
     required this.availableItems,
     required this.removedItems,
     required this.didFetchLatestProducts,
+    this.syncFailed = false,
   });
 
   final String? shopId;
   final List<CartLocalData> availableItems;
   final List<_RemovedCartItem> removedItems;
   final bool didFetchLatestProducts;
+  final bool syncFailed;
 }
 
 class _RemovedCartItem {

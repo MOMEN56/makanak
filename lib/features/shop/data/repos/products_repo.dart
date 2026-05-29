@@ -11,7 +11,8 @@ abstract class ProductsRepo {
     ProductPriceSort priceSort = ProductPriceSort.none,
   });
 
-  Future<Either<Failure, List<ProductModel>>> fetchProductsByIds(
-    List<String> productIds,
-  );
+  Future<Either<Failure, List<ProductModel>>> fetchProductsByIds({
+    required String shopId,
+    required List<String> productIds,
+  });
 }

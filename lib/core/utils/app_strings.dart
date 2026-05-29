@@ -25,6 +25,8 @@ class AppStrings {
   static const addressLoadError = 'حدث خطأ أثناء تحميل العناوين';
   static const defaultAddressError = 'حدث خطأ أثناء تحديد العنوان الرئيسي';
   static const orderConfirmError = 'حدث خطأ أثناء تأكيد الطلب';
+  static const cartAvailabilityCheckFailed =
+      'تعذر التحقق من توفر المنتجات، حاول مرة أخرى.';
   static const productOutOfStock = 'نفد من المخزون';
   static const productUnavailableNow = 'غير متاح الآن';
   static const outOfStockProductsRemovedFromCart =

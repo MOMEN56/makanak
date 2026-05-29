@@ -33,10 +33,28 @@ class CartRepositoryImpl implements CartRepository {
             .toList(growable: false),
       );
       return right(null);
-    } on DatabaseException {
-      return left(const Failure(AppStrings.orderConfirmError));
+    } on DatabaseException catch (error) {
+      return left(_mapCreateOrderFailure(error));
     } catch (_) {
       return left(const Failure(AppStrings.orderConfirmError));
     }
+  }
+
+  Failure _mapCreateOrderFailure(DatabaseException error) {
+    if (_isAvailabilityValidationFailure(error.message)) {
+      return const Failure(AppStrings.cartAvailabilityCheckFailed);
+    }
+
+    return const Failure(AppStrings.orderConfirmError);
+  }
+
+  bool _isAvailabilityValidationFailure(String message) {
+    final normalizedMessage = message.toLowerCase();
+    return normalizedMessage.contains('out of stock') ||
+        normalizedMessage.contains('not available') ||
+        normalizedMessage.contains('unavailable') ||
+        normalizedMessage.contains('hidden') ||
+        normalizedMessage.contains('is_visible') ||
+        normalizedMessage.contains('in_stock');
   }
 }
