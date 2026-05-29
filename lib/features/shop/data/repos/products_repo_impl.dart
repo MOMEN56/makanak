@@ -1,7 +1,9 @@
-﻿import 'package:dartz/dartz.dart';
+import 'package:dartz/dartz.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/shop/data/data_sources/products_remote_data_source.dart';
+import 'package:makanak/features/shop/data/data_sources/products_remote_data_source_client_extension.dart';
+import 'package:makanak/features/shop/data/data_sources/shop_scoped_products_remote_data_source.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 
@@ -34,11 +36,14 @@ class ProductsRepoImpl implements ProductsRepo {
   }
 
   @override
-  Future<Either<Failure, List<ProductModel>>> fetchProductsByIds(
-    List<String> productIds,
-  ) async {
+  Future<Either<Failure, List<ProductModel>>> fetchProductsByIds({
+    required String shopId,
+    required List<String> productIds,
+  }) async {
     try {
-      final productsData = await _remoteDataSource.fetchProductsByIds(productIds);
+      final productsData = await ShopScopedProductsRemoteDataSource(
+        _remoteDataSource.supabaseClient,
+      ).fetchProductsByShopAndIds(shopId: shopId, productIds: productIds);
       final products = productsData.map(ProductModel.fromJson).toList();
       return right(products);
     } catch (_) {
