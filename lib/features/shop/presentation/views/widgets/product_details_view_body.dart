@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_colors.dart';
@@ -46,7 +48,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
     _quantity = widget.initialQuantity < 1 ? 1 : widget.initialQuantity;
   }
 
-  void _onAddButtonTap() {
+  Future<void> _onAddButtonTap() async {
     if (!mounted || _isDisposed || widget.product.isUnavailableForPurchase) {
       return;
     }
@@ -54,25 +56,29 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
     final quantity = _quantity < 1 ? 1 : _quantity;
     final navigator = Navigator.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    AddProductToCartAction.run(
+    final result = await AddProductToCartAction.run(
       context: context,
       product: widget.product,
       primaryColor: widget.primaryColor,
       shopModel: widget.shopModel,
       quantity: quantity,
     );
+    if (!mounted || _isDisposed || !result.wasAdded || result.product == null) {
+      return;
+    }
 
+    final latestProduct = result.product!;
     AppSnackBar.show(
       context: context,
       message: AppStrings.productAddedToCart(
-        widget.product.name,
+        latestProduct.name,
         quantity > 1 ? ' $quantity' : '',
       ),
       badgeText: AppStrings.cart,
       backgroundColor: widget.primaryColor,
       onBadgeTap:
           () => _openCart(
+            product: latestProduct,
             quantity: quantity,
             navigator: navigator,
             scaffoldMessenger: scaffoldMessenger,
@@ -81,6 +87,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   }
 
   void _openCart({
+    required ProductModel product,
     required int quantity,
     required NavigatorState navigator,
     required ScaffoldMessengerState scaffoldMessenger,
@@ -97,7 +104,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
     navigator.pushNamed(
       CartView.routeName,
       arguments: CartViewArguments(
-        product: widget.product,
+        product: product,
         quantity: quantity,
         primaryColor: widget.primaryColor,
         shopModel: widget.shopModel,
@@ -195,7 +202,10 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
                     isAvailableForPurchase
                         ? AppStrings.addToCart
                         : availabilityLabel,
-                onTap: isAvailableForPurchase ? _onAddButtonTap : null,
+                onTap:
+                    isAvailableForPurchase
+                        ? () => unawaited(_onAddButtonTap())
+                        : null,
                 preventRapidTaps: true,
                 hasShadowEffect: isAvailableForPurchase,
                 color:

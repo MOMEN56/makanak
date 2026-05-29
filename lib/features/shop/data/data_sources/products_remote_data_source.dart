@@ -95,4 +95,44 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
       );
     }
   }
+
+  Future<Map<String, dynamic>?> fetchProductByShopAndId({
+    required String shopId,
+    required String productId,
+  }) async {
+    final normalizedShopId = shopId.trim();
+    final normalizedProductId = productId.trim();
+
+    if (normalizedShopId.isEmpty || normalizedProductId.isEmpty) {
+      return null;
+    }
+
+    try {
+      final data = await client
+          .from('products')
+          .select(_productSelectColumns)
+          .eq('shop_id', normalizedShopId)
+          .eq('id', normalizedProductId)
+          .maybeSingle();
+
+      if (data == null) {
+        return null;
+      }
+
+      return Map<String, dynamic>.from(data);
+    } on PostgrestException catch (error) {
+      throw databaseException(
+        error,
+        operation: 'fetchProductByShopAndId',
+        log: true,
+      );
+    } catch (error, stackTrace) {
+      throw unexpectedDatabaseException(
+        operation: 'fetchProductByShopAndId',
+        error: error,
+        stackTrace: stackTrace,
+        log: true,
+      );
+    }
+  }
 }
