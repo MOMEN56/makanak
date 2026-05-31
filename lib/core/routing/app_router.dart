@@ -18,7 +18,6 @@ import 'package:makanak/features/cart/presentation/views/add_user_address_view.d
 import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/submit_order_view.dart';
-import 'package:makanak/features/notifications/presentation/views/notifications_history_view.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_cubit.dart';
 import 'package:makanak/features/order_history/presentation/views/order_details_view.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
