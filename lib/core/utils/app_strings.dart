@@ -72,6 +72,8 @@ class AppStrings {
   static const signOut = 'تسجيل الخروج';
   static const goToShopsList = 'الذهاب لقائمة المحلات';
   static const retry = 'إعادة المحاولة';
+  static const releaseErrorTitle = 'حصلت مشكلة تقنية';
+  static const releaseErrorAction = 'العودة للرئيسية';
 
   static const home = 'الرئيسية';
   static const orderHistory = 'سجل الطلبات';

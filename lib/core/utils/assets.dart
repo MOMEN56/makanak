@@ -42,6 +42,15 @@ class Assets {
   /// assets/icons/idk_emoji.png
   static const String assetsIconsIdkEmoji = "assets/icons/idk_emoji.png";
 
+  /// Assets for assetsIconsOopsEmoji
+  /// assets/icons/oops_emoji.png
+  static const String assetsIconsOopsEmoji = "assets/icons/oops_emoji.png";
+
+  /// Assets for assetsIconsIsStatNotification
+  /// assets/icons/is_stat_notification.png
+  static const String assetsIconsIsStatNotification =
+      "assets/icons/is_stat_notification.png";
+
   /// Assets for assetsIconsSplashBrand800x320
   /// assets/icons/splash_brand_800x320.png
   static const String assetsIconsSplashBrand800x320 =

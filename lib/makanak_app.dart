@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +21,7 @@ import 'package:makanak/features/app_remote_config/presentation/views/app_remote
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
+import 'package:makanak/shared/views/release_error_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
 
 class MakanakApp extends StatefulWidget {
@@ -31,12 +33,15 @@ class MakanakApp extends StatefulWidget {
 
 class _MakanakAppState extends State<MakanakApp> {
   late final AppRemoteConfigCubit _appRemoteConfigCubit;
+  late final ErrorWidgetBuilder _previousErrorWidgetBuilder;
   StreamSubscription<AppRemoteConfigState>? _startupRemoteConfigSubscription;
   bool _hasReleasedFirstFrame = false;
 
   @override
   void initState() {
     super.initState();
+    _previousErrorWidgetBuilder = ErrorWidget.builder;
+    _configureReleaseErrorWidget();
     _appRemoteConfigCubit = AppRemoteConfigCubit(
       AppRemoteConfigRepoImpl(
         AppRemoteConfigRemoteDataSource(getIt<SupabaseClient>()),
@@ -53,13 +58,33 @@ class _MakanakAppState extends State<MakanakApp> {
   void dispose() {
     _startupRemoteConfigSubscription?.cancel();
     _releaseFirstFrameIfNeeded();
+    _restoreErrorWidgetBuilder();
     _appRemoteConfigCubit.close();
     super.dispose();
+  }
+
+  void _configureReleaseErrorWidget() {
+    if (!kReleaseMode) return;
+
+    ErrorWidget.builder =
+        (details) => ReleaseErrorView(onReturnHome: _returnToHome);
+  }
+
+  void _restoreErrorWidgetBuilder() {
+    if (!kReleaseMode) return;
+    ErrorWidget.builder = _previousErrorWidgetBuilder;
   }
 
   void _handleStartupRemoteConfigState(AppRemoteConfigState state) {
     if (state is! AppRemoteConfigResolved) return;
     _releaseFirstFrameIfNeeded();
+  }
+
+  void _returnToHome() {
+    final navigator = appNavigatorKey.currentState;
+    if (navigator == null) return;
+
+    navigator.pushNamedAndRemoveUntil(AuthGateView.routeName, (route) => false);
   }
 
   void _releaseFirstFrameIfNeeded() {
