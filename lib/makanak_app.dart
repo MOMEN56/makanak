@@ -11,12 +11,63 @@ import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_navigator_key.dart';
 import 'package:makanak/core/utils/app_route_tracker.dart';
 import 'package:makanak/core/utils/app_strings.dart';
+import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_local_data_source.dart';
+import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_remote_data_source.dart';
+import 'package:makanak/features/app_remote_config/data/repos/app_remote_config_repo_impl.dart';
+import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_cubit.dart';
+import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_state.dart';
+import 'package:makanak/features/app_remote_config/presentation/views/app_remote_config_gate_view.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
 
-class MakanakApp extends StatelessWidget {
+class MakanakApp extends StatefulWidget {
   const MakanakApp({super.key});
+
+  @override
+  State<MakanakApp> createState() => _MakanakAppState();
+}
+
+class _MakanakAppState extends State<MakanakApp> {
+  late final AppRemoteConfigCubit _appRemoteConfigCubit;
+  StreamSubscription<AppRemoteConfigState>? _startupRemoteConfigSubscription;
+  bool _hasReleasedFirstFrame = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _appRemoteConfigCubit = AppRemoteConfigCubit(
+      AppRemoteConfigRepoImpl(
+        AppRemoteConfigRemoteDataSource(getIt<SupabaseClient>()),
+        const AppRemoteConfigLocalDataSource(),
+      ),
+    );
+    _startupRemoteConfigSubscription = _appRemoteConfigCubit.stream.listen(
+      _handleStartupRemoteConfigState,
+    );
+    unawaited(_appRemoteConfigCubit.checkAccessOnce());
+  }
+
+  @override
+  void dispose() {
+    _startupRemoteConfigSubscription?.cancel();
+    _releaseFirstFrameIfNeeded();
+    _appRemoteConfigCubit.close();
+    super.dispose();
+  }
+
+  void _handleStartupRemoteConfigState(AppRemoteConfigState state) {
+    if (state is! AppRemoteConfigResolved) return;
+    _releaseFirstFrameIfNeeded();
+  }
+
+  void _releaseFirstFrameIfNeeded() {
+    if (_hasReleasedFirstFrame) return;
+
+    _hasReleasedFirstFrame = true;
+    WidgetsBinding.instance.allowFirstFrame();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +113,13 @@ class MakanakApp extends StatelessWidget {
             scaffoldBackgroundColor: AppColors.greyBackground,
           ),
           builder: (context, child) {
+            final gatedChild = BlocProvider.value(
+              value: _appRemoteConfigCubit,
+              child: AppRemoteConfigGateView(
+                child: child ?? const SizedBox.shrink(),
+              ),
+            );
+
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: const SystemUiOverlayStyle(
                 statusBarColor: Colors.white,
@@ -75,7 +133,7 @@ class MakanakApp extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  child ?? const SizedBox.shrink(),
+                  gatedChild,
                   Positioned(
                     top: 0,
                     left: 0,
