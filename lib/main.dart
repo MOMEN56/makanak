@@ -8,7 +8,8 @@ import 'package:makanak/features/notifications/data/repos/notifications_reposito
 import 'package:makanak/makanak_app.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final binding = WidgetsFlutterBinding.ensureInitialized();
+  binding.deferFirstFrame();
   await SupabaseClientService.initialize();
   setupServiceLocator();
   getIt<NotificationsRepository>();
