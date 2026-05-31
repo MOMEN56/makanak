@@ -4,6 +4,7 @@ import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
+import 'package:makanak/features/order_history/presentation/views/widgets/order_meta_chip.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/add_button.dart';
 import 'package:makanak/shared/widgets/network_image_with_placeholder.dart';
 import 'package:makanak/shared/widgets/quantity_selector.dart';
@@ -94,10 +95,7 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     final darkerPrimaryColor = AppColors.darkerShade(widget.primaryColor);
     final isAvailableForPurchase = widget.product.isAvailableForPurchase;
-    final availabilityLabel =
-        widget.product.isOutOfStock
-            ? AppStrings.productOutOfStock
-            : AppStrings.productUnavailableNow;
+    final availabilityLabel = AppStrings.productOutOfStock;
 
     return Material(
       color: AppColors.white,
@@ -180,9 +178,13 @@ class _ProductCardState extends State<ProductCard> {
                                   color: widget.primaryColor,
                                   onTap: _showSelector,
                                 )
-                            : _ProductAvailabilityBadge(
+                            : OrderMetaChip(
                               key: const ValueKey('availability-badge'),
                               label: availabilityLabel,
+                              backgroundColor: const Color(0xffFCE8E8),
+                              foregroundColor: const Color(0xffD85B5B),
+                              compact: false,
+                              maxTextWidth: 120,
                             ),
                   ),
                 ],
@@ -190,27 +192,6 @@ class _ProductCardState extends State<ProductCard> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ProductAvailabilityBadge extends StatelessWidget {
-  const _ProductAvailabilityBadge({super.key, required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xffFCE8E8),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: TextStyles.semiBold14.copyWith(color: const Color(0xffD85B5B)),
       ),
     );
   }

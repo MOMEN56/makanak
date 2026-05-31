@@ -102,6 +102,64 @@ class CartCubit extends Cubit<CartState> {
     );
   }
 
+  Future<AddProductToCartResult> addProductSafely(
+    CartViewArguments arguments,
+  ) async {
+    final incomingProduct = arguments.product;
+    if (incomingProduct == null) {
+      return _addProductFailure(
+        message: AppStrings.invalidProduct,
+        status: AddProductToCartStatus.invalidProduct,
+      );
+    }
+
+    final productId = (incomingProduct.id ?? '').trim();
+    final normalizedShopId =
+        (arguments.shopId ?? incomingProduct.shopId).trim();
+    if (productId.isEmpty || normalizedShopId.isEmpty) {
+      return _addProductFailure(
+        message: AppStrings.invalidProduct,
+        status: AddProductToCartStatus.invalidProduct,
+      );
+    }
+
+    final result = await _productsRepo.fetchProductByShopAndId(
+      shopId: normalizedShopId,
+      productId: productId,
+    );
+
+    return result.fold(
+      (failure) => _addProductFailure(
+        message: failure.message,
+        status: AddProductToCartStatus.verificationFailed,
+      ),
+      (latestProduct) {
+        final latestProductId = (latestProduct?.id ?? '').trim();
+        final latestShopId = latestProduct?.shopId.trim() ?? '';
+
+        if (latestProduct == null ||
+            latestProductId.isEmpty ||
+            latestShopId != normalizedShopId ||
+            latestProduct.isHiddenFromCustomers) {
+          return _addProductFailure(
+            message: AppStrings.productOutOfStock,
+            status: AddProductToCartStatus.unavailable,
+          );
+        }
+
+        if (latestProduct.isOutOfStock) {
+          return _addProductFailure(
+            message: AppStrings.productOutOfStock,
+            status: AddProductToCartStatus.outOfStock,
+          );
+        }
+
+        addProduct(arguments.copyWith(product: latestProduct));
+        return AddProductToCartResult.added(latestProduct);
+      },
+    );
+  }
+
   void initializeCart(CartViewArguments? arguments) {
     if (arguments == null) return;
 
@@ -334,6 +392,14 @@ class CartCubit extends Cubit<CartState> {
       items: items,
       shippingPrice: _shippingPriceFor(items),
     );
+  }
+
+  AddProductToCartResult _addProductFailure({
+    required String message,
+    required AddProductToCartStatus status,
+  }) {
+    emit(_errorFromItems(state.items, message));
+    return AddProductToCartResult.failure(status: status, message: message);
   }
 
   Future<void> _applySyncedItems({
@@ -591,3 +657,39 @@ class _RemovedCartItem {
 }
 
 enum _RemovedCartItemReason { outOfStock, unavailable }
+
+enum AddProductToCartStatus {
+  added,
+  invalidProduct,
+  unavailable,
+  outOfStock,
+  verificationFailed,
+}
+
+class AddProductToCartResult {
+  const AddProductToCartResult._({
+    required this.status,
+    this.product,
+    this.message,
+  });
+
+  factory AddProductToCartResult.added(ProductModel product) {
+    return AddProductToCartResult._(
+      status: AddProductToCartStatus.added,
+      product: product,
+    );
+  }
+
+  factory AddProductToCartResult.failure({
+    required AddProductToCartStatus status,
+    required String message,
+  }) {
+    return AddProductToCartResult._(status: status, message: message);
+  }
+
+  final AddProductToCartStatus status;
+  final ProductModel? product;
+  final String? message;
+
+  bool get wasAdded => status == AddProductToCartStatus.added;
+}

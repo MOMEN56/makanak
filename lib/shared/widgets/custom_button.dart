@@ -119,19 +119,18 @@ class _CustomButtonState extends State<CustomButton> {
               ),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  widget.hint,
-                  textAlign: TextAlign.center,
-                  style: TextStyles.bold16.copyWith(color: AppColors.white),
+                if (widget.icon != null) ...[widget.icon!, const Gap(6)],
+                Flexible(
+                  child: Text(
+                    widget.hint,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyles.bold16.copyWith(color: AppColors.white),
+                  ),
                 ),
-                Gap(6),
-                if (widget.icon != null) ...[
-                  widget.icon!,
-                  const SizedBox(width: 12),
-                ],
               ],
             ),
           ),

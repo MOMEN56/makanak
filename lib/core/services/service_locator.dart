@@ -7,8 +7,11 @@ import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/google_sign_in_service.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
 import 'package:makanak/core/services/supabase_client_service.dart';
-import 'package:makanak/features/admin_notifications/data/services/manual_notification_service.dart';
-import 'package:makanak/features/admin_notifications/presentation/manager/admin_send_notification_cubit/admin_send_notification_cubit.dart';
+import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_local_data_source.dart';
+import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_remote_data_source.dart';
+import 'package:makanak/features/app_remote_config/data/repos/app_remote_config_repo_impl.dart';
+import 'package:makanak/features/app_remote_config/domain/repos/app_remote_config_repo.dart';
+import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_cubit.dart';
 import 'package:makanak/features/auth/data/data_sources/profile_remote_data_source.dart';
 import 'package:makanak/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:makanak/features/auth/domain/repos/auth_repo.dart';
@@ -45,6 +48,7 @@ void setupServiceLocator() {
   _isInitialized = true;
 
   _registerCoreServices();
+  _registerAppRemoteConfigFeature();
   _registerShopsFeature();
   _registerProductsFeature();
   _registerAddressFeature();
@@ -52,7 +56,6 @@ void setupServiceLocator() {
   _registerNotificationsFeature();
   _registerAuthFeature();
   _registerCartFeature();
-  _registerAdminNotificationsFeature();
 }
 
 void _registerCoreServices() {
@@ -65,6 +68,27 @@ void _registerCoreServices() {
   );
 
   getIt.registerLazySingleton<GoogleSignInService>(GoogleSignInService.new);
+}
+
+void _registerAppRemoteConfigFeature() {
+  getIt.registerLazySingleton<AppRemoteConfigRemoteDataSource>(
+    () => AppRemoteConfigRemoteDataSource(getIt<SupabaseClient>()),
+  );
+
+  getIt.registerLazySingleton<AppRemoteConfigLocalDataSource>(
+    AppRemoteConfigLocalDataSource.new,
+  );
+
+  getIt.registerLazySingleton<AppRemoteConfigRepo>(
+    () => AppRemoteConfigRepoImpl(
+      getIt<AppRemoteConfigRemoteDataSource>(),
+      getIt<AppRemoteConfigLocalDataSource>(),
+    ),
+  );
+
+  getIt.registerFactory<AppRemoteConfigCubit>(
+    () => AppRemoteConfigCubit(getIt<AppRemoteConfigRepo>()),
+  );
 }
 
 void _registerShopsFeature() {
@@ -181,16 +205,6 @@ void _registerCartFeature() {
   getIt.registerLazySingleton<CartCubitRegistry>(
     () => CartCubitRegistry((userId) => getIt<CartCubit>(param1: userId)),
     dispose: (registry) => registry.disposeAll(),
-  );
-}
-
-void _registerAdminNotificationsFeature() {
-  getIt.registerLazySingleton<ManualNotificationService>(
-    () => ManualNotificationService(getIt<SupabaseClient>()),
-  );
-
-  getIt.registerFactory<AdminSendNotificationCubit>(
-    () => AdminSendNotificationCubit(getIt<ManualNotificationService>()),
   );
 }
 

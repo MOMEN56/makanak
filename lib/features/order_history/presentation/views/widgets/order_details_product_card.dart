@@ -35,6 +35,8 @@ class OrderDetailsProductCard extends StatelessWidget {
                   item.product.name.isEmpty
                       ? AppStrings.product
                       : item.product.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyles.bold16.copyWith(
                     color: AppColors.shopNameColor,
                   ),
@@ -78,24 +80,33 @@ class _ProductLineRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Text(
             label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyles.medium12.copyWith(
               color: AppColors.shopCategoryColor,
             ),
           ),
         ),
-        Text(
-          value,
-          style: (highlight ? TextStyles.bold16 : TextStyles.semiBold14)
-              .copyWith(
-                color:
-                    highlight
-                        ? AppColors.primaryColor
-                        : AppColors.primaryDarkColor,
-              ),
+        const Gap(12),
+        Flexible(
+          child: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.end,
+            style: (highlight ? TextStyles.bold16 : TextStyles.semiBold14)
+                .copyWith(
+                  color:
+                      highlight
+                          ? AppColors.primaryColor
+                          : AppColors.primaryDarkColor,
+                ),
+          ),
         ),
       ],
     );

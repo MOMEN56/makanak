@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
-import 'package:makanak/features/app_remote_config/app_remote_config_strings.dart';
 import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
 
 class AppRemoteConfigLoadingViewBody extends StatelessWidget {
@@ -35,7 +35,7 @@ class AppRemoteConfigLoadingViewBody extends StatelessWidget {
                 ),
                 Gap(AppResponsive.spacing(context, 22)),
                 Text(
-                  AppRemoteConfigStrings.loadingTitle,
+                  AppStrings.appRemoteConfigLoadingTitle,
                   textAlign: TextAlign.center,
                   style: TextStyles.bold24.copyWith(
                     color: AppColors.primaryDarkColor,
@@ -44,7 +44,7 @@ class AppRemoteConfigLoadingViewBody extends StatelessWidget {
                 ),
                 Gap(AppResponsive.spacing(context, 10)),
                 Text(
-                  AppRemoteConfigStrings.loadingSubtitle,
+                  AppStrings.appRemoteConfigLoadingSubtitle,
                   textAlign: TextAlign.center,
                   style: TextStyles.regular14.copyWith(
                     color: AppColors.shopCategoryColor,

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:makanak/features/app_remote_config/app_remote_config_strings.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_local_data_source.dart';
 import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_remote_data_source.dart';
 import 'package:makanak/features/app_remote_config/data/models/remote_app_config_model.dart';
@@ -114,7 +114,7 @@ class AppRemoteConfigRepoImpl implements AppRemoteConfigRepo {
         status: AppAccessStatus.maintenance,
         message: _resolveMessage(
           config.maintenanceMessage,
-          AppRemoteConfigStrings.maintenanceFallbackMessage,
+          AppStrings.appRemoteConfigMaintenanceFallbackMessage,
         ),
       );
     }
@@ -124,7 +124,7 @@ class AppRemoteConfigRepoImpl implements AppRemoteConfigRepo {
         status: AppAccessStatus.forceUpdate,
         message: _resolveMessage(
           config.forceUpdateMessage,
-          AppRemoteConfigStrings.forceUpdateFallbackMessage,
+          AppStrings.appRemoteConfigForceUpdateFallbackMessage,
         ),
         updateUrl: _normalizeOptionalValue(config.updateUrl),
       );
@@ -135,7 +135,7 @@ class AppRemoteConfigRepoImpl implements AppRemoteConfigRepo {
         status: AppAccessStatus.forceUpdate,
         message: _resolveMessage(
           config.forceUpdateMessage,
-          AppRemoteConfigStrings.forceUpdateFallbackMessage,
+          AppStrings.appRemoteConfigForceUpdateFallbackMessage,
         ),
         updateUrl: _normalizeOptionalValue(config.updateUrl),
       );

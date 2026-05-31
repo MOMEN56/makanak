@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/app_colors.dart';
-import 'package:makanak/features/app_remote_config/app_remote_config_strings.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/app_remote_config/domain/entities/app_access_result.dart';
 import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_cubit.dart';
 import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_state.dart';
@@ -36,26 +36,26 @@ class _AppRemoteConfigGateViewBodyState
             AppAccessStatus.allowed => widget.child,
 
             AppAccessStatus.maintenance => AppRemoteConfigBlockingWidget(
-              title: AppRemoteConfigStrings.maintenanceTitle,
+              title: AppStrings.appRemoteConfigMaintenanceTitle,
               message:
                   result.message ??
-                  AppRemoteConfigStrings.maintenanceFallbackMessage,
+                  AppStrings.appRemoteConfigMaintenanceFallbackMessage,
               icon: Icons.build_rounded,
-              primaryActionLabel: AppRemoteConfigStrings.retry,
+              primaryActionLabel: AppStrings.retry,
               onPrimaryAction: context.read<AppRemoteConfigCubit>().retry,
               primaryActionColor: AppColors.primaryColor,
             ),
 
             AppAccessStatus.forceUpdate => AppRemoteConfigBlockingWidget(
-              title: AppRemoteConfigStrings.forceUpdateTitle,
+              title: AppStrings.appRemoteConfigForceUpdateTitle,
               message:
                   result.message ??
-                  AppRemoteConfigStrings.forceUpdateFallbackMessage,
+                  AppStrings.appRemoteConfigForceUpdateFallbackMessage,
               icon: Icons.system_update_rounded,
               primaryActionLabel:
                   _isLaunchingForceUpdate
-                      ? AppRemoteConfigStrings.openingStore
-                      : AppRemoteConfigStrings.updateNow,
+                      ? AppStrings.appRemoteConfigOpeningStore
+                      : AppStrings.appRemoteConfigUpdateNow,
               onPrimaryAction:
                   _isLaunchingForceUpdate
                       ? () {}
@@ -84,7 +84,7 @@ class _AppRemoteConfigGateViewBodyState
     setState(() {
       _isLaunchingForceUpdate = false;
       _forceUpdateLaunchError =
-          success ? null : AppRemoteConfigStrings.openStoreError;
+          success ? null : AppStrings.appRemoteConfigOpenStoreError;
     });
   }
 

@@ -12,7 +12,9 @@ class EmptyAddresses extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Expanded(child: StateMessage(message: AppStrings.noSavedAddresses)),
+        const Expanded(
+          child: StateMessage(message: AppStrings.noSavedAddresses),
+        ),
         AddAddressButton(onTap: onAddAddress),
       ],
     );

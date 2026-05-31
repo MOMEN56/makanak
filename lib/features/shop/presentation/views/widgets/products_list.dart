@@ -3,6 +3,7 @@ import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/assets.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
+import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
 import 'package:makanak/features/shop/presentation/views/product_details_view.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/products_grid_delegate.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/product_card.dart';
@@ -18,6 +19,7 @@ class ProductsList extends StatefulWidget {
     this.shopModel,
     this.onProductSelected,
     this.onCartRequested,
+    this.bottomPadding = 0,
   });
 
   final List<ProductModel> products;
@@ -26,6 +28,7 @@ class ProductsList extends StatefulWidget {
   final ShopModel? shopModel;
   final void Function(ProductModel product, int quantity)? onProductSelected;
   final VoidCallback? onCartRequested;
+  final double bottomPadding;
 
   @override
   State<ProductsList> createState() => _ProductsListState();
@@ -57,20 +60,28 @@ class _ProductsListState extends State<ProductsList> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.products.isEmpty) {
-      return const MessageEmojiWidget(
-        image: Assets.assetsIconsIdkEmoji,
-        text: AppStrings.productsEmptySearch,
+    final visibleProducts =
+        widget.products
+            .where((product) => !product.isHiddenFromCustomers)
+            .toList(growable: false);
+
+    if (visibleProducts.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: widget.bottomPadding),
+        child: const MessageEmojiWidget(
+          image: Assets.assetsIconsIdkEmoji,
+          text: AppStrings.productsEmptySearch,
+        ),
       );
     }
 
     return GridView.builder(
-      padding: EdgeInsets.zero,
+      padding: EdgeInsets.only(bottom: widget.bottomPadding),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      itemCount: widget.products.length,
+      itemCount: visibleProducts.length,
       gridDelegate: buildProductsGridDelegate(context),
       itemBuilder: (context, index) {
-        final product = widget.products[index];
+        final product = visibleProducts[index];
         final quantity = _quantityFor(product, index);
 
         return ProductCard(

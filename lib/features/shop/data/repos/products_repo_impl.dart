@@ -49,4 +49,25 @@ class ProductsRepoImpl implements ProductsRepo {
       return left(const Failure(AppStrings.productsLoadError));
     }
   }
+
+  @override
+  Future<Either<Failure, ProductModel?>> fetchProductByShopAndId({
+    required String shopId,
+    required String productId,
+  }) async {
+    try {
+      final productData = await _remoteDataSource.fetchProductByShopAndId(
+        shopId: shopId,
+        productId: productId,
+      );
+
+      if (productData == null) {
+        return right(null);
+      }
+
+      return right(ProductModel.fromJson(productData));
+    } catch (_) {
+      return left(const Failure(AppStrings.productAvailabilityCheckFailed));
+    }
+  }
 }

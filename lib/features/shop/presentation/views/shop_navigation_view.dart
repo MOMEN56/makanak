@@ -89,6 +89,7 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
       ],
       child: Scaffold(
         backgroundColor: AppColors.greyBackground,
+        resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
             Positioned.fill(

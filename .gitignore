@@ -35,6 +35,10 @@ migrate_working_dir/
 .pub/
 /build/
 .gradle-user-home/
+.codex_clone_preadd/
+.codex_worktree_preadd/
+.git-history-rewrite-mirror/
+.git-history-rewrite-worktree/
 
 # Symbolication related
 app.*.symbols
@@ -55,6 +59,7 @@ AGENTS.md
 Global_Engineering_Rules.md
 lib/core/utils/app_keys.dart
 lib/core/utils/assets.dart
+supabase/
 supabase/.env
 supabase/functions/.env
 supabase/functions/.env.*
