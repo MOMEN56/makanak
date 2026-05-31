@@ -52,10 +52,15 @@ class AuthGoogleButton extends StatelessWidget {
                       ),
                     ),
                     const Gap(12),
-                    Text(
-                      AppStrings.authGoogleContinue,
-                      style: TextStyles.medium12.copyWith(
-                        color: AppColors.shopNameColor,
+                    Flexible(
+                      child: Text(
+                        AppStrings.authGoogleContinue,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyles.medium12.copyWith(
+                          color: AppColors.shopNameColor,
+                        ),
                       ),
                     ),
                   ],

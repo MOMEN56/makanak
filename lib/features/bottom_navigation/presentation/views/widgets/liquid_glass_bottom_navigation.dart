@@ -27,7 +27,8 @@ class LiquidGlassBottomNavigation extends StatefulWidget {
       _LiquidGlassBottomNavigationState();
 }
 
-class _LiquidGlassBottomNavigationState extends State<LiquidGlassBottomNavigation>
+class _LiquidGlassBottomNavigationState
+    extends State<LiquidGlassBottomNavigation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _cartAnimationController;
   late final Animation<double> _cartScaleAnimation;

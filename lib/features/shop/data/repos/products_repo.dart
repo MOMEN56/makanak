@@ -15,4 +15,9 @@ abstract class ProductsRepo {
     required String shopId,
     required List<String> productIds,
   });
+
+  Future<Either<Failure, ProductModel?>> fetchProductByShopAndId({
+    required String shopId,
+    required String productId,
+  });
 }

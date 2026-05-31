@@ -17,7 +17,11 @@ class OrderHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardHeight = AppResponsive.height(context, 130);
+    final textScaleFactor = MediaQuery.textScalerOf(
+      context,
+    ).scale(1).clamp(1.0, 1.5);
+    final baseCardHeight = AppResponsive.height(context, 130);
+    final cardHeight = baseCardHeight + ((textScaleFactor - 1) * 210);
     final cardRadius = AppResponsive.radius(context, 12);
     final imageWidth = AppResponsive.width(context, 82);
     final badgeTextWidth = AppResponsive.width(context, 90);
@@ -68,17 +72,18 @@ class OrderHistoryCard extends StatelessWidget {
                             const Gap(6),
                             Text(
                               AppStrings.priceInEgyptianPounds(order.totalPaid),
-                              maxLines: 2,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyles.bold16.copyWith(
                                 color: AppColors.white,
                                 height: 1.15,
                               ),
                             ),
-                            //in bottom first line date
-                            // second line date
                             const Spacer(),
                             Text(
                               formatOrderDate(order.createdAt).date,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyles.medium10.copyWith(
                                 color: AppColors.white.withValues(alpha: 0.82),
                               ),
@@ -86,13 +91,14 @@ class OrderHistoryCard extends StatelessWidget {
                             if (formatOrderDate(order.createdAt).time != null)
                               Text(
                                 formatOrderDate(order.createdAt).time!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyles.medium10.copyWith(
                                   color: AppColors.white.withValues(
                                     alpha: 0.82,
                                   ),
                                 ),
                               ),
-                            //
                           ],
                         ),
                       ),

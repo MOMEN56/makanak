@@ -32,8 +32,7 @@ class CartSkeleton extends StatelessWidget {
                   separatorBuilder:
                       (context, index) =>
                           SizedBox(height: AppResponsive.spacing(context, 12)),
-                  itemBuilder:
-                      (context, index) => const CartItemCardSkeleton(),
+                  itemBuilder: (context, index) => const CartItemCardSkeleton(),
                 ),
               ),
               SizedBox(height: AppResponsive.spacing(context, 12)),
@@ -103,7 +102,9 @@ class _CartStepItemSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: AppResponsive.spacing(context, 4)),
+      padding: EdgeInsets.symmetric(
+        vertical: AppResponsive.spacing(context, 4),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

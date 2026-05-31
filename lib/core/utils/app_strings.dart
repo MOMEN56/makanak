@@ -1,6 +1,8 @@
-class AppStrings {
+﻿class AppStrings {
   const AppStrings._();
 
+  static const addToCartChecking =
+      '\u062C\u0627\u0631\u064A \u0627\u0644\u062A\u062D\u0642\u0642...';
   static const appTitle = 'مكانك';
   static const cartTitle = 'سلة المشتريات';
   static const cartEmpty = 'السلة فارغة';
@@ -24,11 +26,14 @@ class AppStrings {
   static const addressSaveError = 'حدث خطأ أثناء حفظ العنوان';
   static const addressLoadError = 'حدث خطأ أثناء تحميل العناوين';
   static const defaultAddressError = 'حدث خطأ أثناء تحديد العنوان الرئيسي';
-  static const orderConfirmError = 'حدث خطأ أثناء تأكيد الطلب';
+  static const orderConfirmError =
+      '\u062D\u062F\u062B \u062E\u0637\u0623 \u0623\u062B\u0646\u0627\u0621 \u062A\u0623\u0643\u064A\u062F \u0627\u0644\u0637\u0644\u0628';
   static const cartAvailabilityCheckFailed =
-      'تعذر التحقق من توفر المنتجات، حاول مرة أخرى.';
-  static const productOutOfStock = 'نفد من المخزون';
-  static const productUnavailableNow = 'غير متاح الآن';
+      '\u062A\u0639\u0630\u0631 \u0627\u0644\u062A\u062D\u0642\u0642 \u0645\u0646 \u062A\u0648\u0641\u0631 \u0627\u0644\u0645\u0646\u062A\u062C\u0627\u062A\u060C \u062D\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062E\u0631\u0649.';
+  static const productAvailabilityCheckFailed =
+      '\u062A\u0639\u0630\u0631 \u0627\u0644\u062A\u062D\u0642\u0642 \u0645\u0646 \u062A\u0648\u0641\u0631 \u0627\u0644\u0645\u0646\u062A\u062C\u060C \u062D\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062E\u0631\u0649.';
+  static const productOutOfStock =
+      '\u0646\u0641\u062F \u0645\u0646 \u0627\u0644\u0645\u062E\u0632\u0648\u0646';
   static const outOfStockProductsRemovedFromCart =
       'بعض المنتجات نفدت من المخزون وتم حذفها من السلة.';
   static const unavailableProductsRemovedFromCart =
@@ -158,6 +163,20 @@ class AppStrings {
   static const authSignUpSubtitle =
       'أنشئ حسابًا جديدًا لحفظ بياناتك والدخول السريع إلى تجربة تسوق عربية سهلة.';
   static const authSignUpFormTitle = 'حساب جديد';
+  static const appRemoteConfigLoadingTitle = 'جار التحقق من حالة التطبيق';
+  static const appRemoteConfigLoadingSubtitle =
+      'لحظات بسيطة ونتأكد أن كل شيء جاهز قبل الدخول.';
+  static const appRemoteConfigForceUpdateTitle = 'تحديث مطلوب';
+  static const appRemoteConfigMaintenanceTitle = 'صيانة مؤقتة';
+  static const appRemoteConfigUpdateNow = 'تحديث الآن';
+  static const appRemoteConfigLater = 'لاحقًا';
+  static const appRemoteConfigOpeningStore = 'جار فتح صفحة التحديث...';
+  static const appRemoteConfigOpenStoreError =
+      'تعذر فتح صفحة التحديث الآن. حاول مرة أخرى.';
+  static const appRemoteConfigForceUpdateFallbackMessage =
+      'يرجى تحديث التطبيق للاستمرار.';
+  static const appRemoteConfigMaintenanceFallbackMessage =
+      'التطبيق تحت الصيانة حاليًا. حاول مرة أخرى لاحقًا.';
   static const authEmail = 'البريد الإلكتروني';
   static const authEmailHint = 'example@email.com';
   static const authPassword = 'كلمة المرور';

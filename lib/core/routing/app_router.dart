@@ -7,8 +7,6 @@ import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/routing/route_error_view.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_strings.dart';
-import 'package:makanak/features/admin_notifications/presentation/manager/admin_send_notification_cubit/admin_send_notification_cubit.dart';
-import 'package:makanak/features/admin_notifications/presentation/views/admin_send_notification_view.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
 import 'package:makanak/features/auth/presentation/views/sign_in_view.dart';
 import 'package:makanak/features/auth/presentation/views/sign_up_view.dart';
@@ -105,20 +103,6 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return _fadeRoute(
         settings: settings,
         builder: (_) => const OrderHistoryView(),
-      );
-    case NotificationsHistoryView.routeName:
-      return _fadeRoute(
-        settings: settings,
-        builder: (_) => const NotificationsHistoryView(),
-      );
-    case AdminSendNotificationView.routeName:
-      return _fadeRoute(
-        settings: settings,
-        builder:
-            (_) => BlocProvider<AdminSendNotificationCubit>(
-              create: (_) => getIt<AdminSendNotificationCubit>(),
-              child: const AdminSendNotificationView(),
-            ),
       );
     case OrderDetailsView.routeName:
       final arguments = settings.arguments;

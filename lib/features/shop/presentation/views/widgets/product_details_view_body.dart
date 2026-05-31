@@ -1,18 +1,18 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
-import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
-import 'package:makanak/features/cart/presentation/views/cart_view.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
 import 'package:makanak/features/shop/presentation/actions/add_product_to_cart_action.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/product_details_image.dart';
+import 'package:makanak/features/shop/presentation/views/widgets/show_product_added_snack_bar.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
-import 'package:makanak/shared/widgets/app_snack_bar.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 import 'package:makanak/shared/widgets/quantity_selector.dart';
 
@@ -39,6 +39,7 @@ class ProductDetailsViewBody extends StatefulWidget {
 class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   late int _quantity;
   bool _isDisposed = false;
+  bool _isAddingToCart = false;
 
   @override
   void initState() {
@@ -46,63 +47,52 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
     _quantity = widget.initialQuantity < 1 ? 1 : widget.initialQuantity;
   }
 
-  void _onAddButtonTap() {
-    if (!mounted || _isDisposed || widget.product.isUnavailableForPurchase) {
+  Future<void> _onAddButtonTap() async {
+    if (!mounted ||
+        _isDisposed ||
+        _isAddingToCart ||
+        widget.product.isUnavailableForPurchase) {
       return;
     }
 
     final quantity = _quantity < 1 ? 1 : _quantity;
-    final navigator = Navigator.of(context);
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    setState(() => _isAddingToCart = true);
 
-    AddProductToCartAction.run(
-      context: context,
-      product: widget.product,
-      primaryColor: widget.primaryColor,
-      shopModel: widget.shopModel,
-      quantity: quantity,
-    );
-
-    AppSnackBar.show(
-      context: context,
-      message: AppStrings.productAddedToCart(
-        widget.product.name,
-        quantity > 1 ? ' $quantity' : '',
-      ),
-      badgeText: AppStrings.cart,
-      backgroundColor: widget.primaryColor,
-      onBadgeTap:
-          () => _openCart(
-            quantity: quantity,
-            navigator: navigator,
-            scaffoldMessenger: scaffoldMessenger,
-          ),
-    );
-  }
-
-  void _openCart({
-    required int quantity,
-    required NavigatorState navigator,
-    required ScaffoldMessengerState scaffoldMessenger,
-  }) {
-    if (!mounted || _isDisposed) return;
-
-    scaffoldMessenger.hideCurrentSnackBar();
-
-    if (widget.returnToCartTab) {
-      navigator.pop(ProductDetailsRouteResult.openCart);
-      return;
-    }
-
-    navigator.pushNamed(
-      CartView.routeName,
-      arguments: CartViewArguments(
+    try {
+      final result = await AddProductToCartAction.run(
+        context: context,
         product: widget.product,
-        quantity: quantity,
         primaryColor: widget.primaryColor,
         shopModel: widget.shopModel,
-      ),
-    );
+        quantity: quantity,
+      );
+      if (!mounted ||
+          _isDisposed ||
+          !result.wasAdded ||
+          result.product == null) {
+        return;
+      }
+
+      showProductAddedSnackBar(
+        context: context,
+        product: result.product!,
+        shopColor: widget.primaryColor,
+        shopModel: widget.shopModel,
+        quantity: quantity,
+        onCartTap: widget.returnToCartTab ? _openCartTab : null,
+      );
+    } finally {
+      if (!mounted || _isDisposed) {
+        _isAddingToCart = false;
+      } else {
+        setState(() => _isAddingToCart = false);
+      }
+    }
+  }
+
+  void _openCartTab() {
+    if (!mounted || _isDisposed) return;
+    Navigator.of(context).pop(ProductDetailsRouteResult.openCart);
   }
 
   @override
@@ -115,17 +105,15 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   Widget build(BuildContext context) {
     final darkerPrimaryColor = AppColors.darkerShade(widget.primaryColor);
     final isAvailableForPurchase = widget.product.isAvailableForPurchase;
-    final availabilityLabel =
-        widget.product.isOutOfStock
-            ? AppStrings.productOutOfStock
-            : AppStrings.productUnavailableNow;
+    final availabilityLabel = AppStrings.productOutOfStock;
+    final contentBottomPadding = isAvailableForPurchase ? 120.0 : 24.0;
 
     return Container(
       color: Colors.white,
       child: Stack(
         children: [
           ListView(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+            padding: EdgeInsets.fromLTRB(20, 20, 20, contentBottomPadding),
             children: [
               ProductDetailsImage(imageUrl: widget.product.imageUrl),
               const Gap(24),
@@ -140,33 +128,46 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
                   Expanded(
                     child: Text(
                       widget.product.priceText,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyles.bold16.copyWith(
                         color: widget.primaryColor,
                       ),
                     ),
                   ),
-                  const Gap(12),
+                  const Gap(8),
                   if (isAvailableForPurchase)
                     QuantitySelector(
                       initialQuantity:
-                          widget.initialQuantity < 1 ? 1 : widget.initialQuantity,
+                          widget.initialQuantity < 1
+                              ? 1
+                              : widget.initialQuantity,
                       color: widget.primaryColor,
                       onChanged: (quantity) => _quantity = quantity,
                     )
                   else
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xffFCE8E8),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        availabilityLabel,
-                        style: TextStyles.semiBold14.copyWith(
-                          color: const Color(0xffD85B5B),
+                    Flexible(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xffFCE8E8),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            availabilityLabel,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            textAlign: TextAlign.center,
+                            style: TextStyles.semiBold14.copyWith(
+                              color: const Color(0xffD85B5B),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -182,29 +183,30 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
               ),
             ],
           ),
-          PositionedDirectional(
-            start: AppSpacing.screenEdge,
-            end: AppSpacing.screenEdge,
-            bottom: 0,
-            child: SafeArea(
-              minimum: const EdgeInsets.only(
-                bottom: AppSpacing.buttonBottomGap,
-              ),
-              child: CustomButton(
-                hint:
-                    isAvailableForPurchase
-                        ? AppStrings.addToCart
-                        : availabilityLabel,
-                onTap: isAvailableForPurchase ? _onAddButtonTap : null,
-                preventRapidTaps: true,
-                hasShadowEffect: isAvailableForPurchase,
-                color:
-                    isAvailableForPurchase
-                        ? widget.primaryColor
-                        : AppColors.searchFieldBackground,
+          if (isAvailableForPurchase)
+            PositionedDirectional(
+              start: AppSpacing.screenEdge,
+              end: AppSpacing.screenEdge,
+              bottom: 0,
+              child: SafeArea(
+                minimum: const EdgeInsets.only(
+                  bottom: AppSpacing.buttonBottomGap,
+                ),
+                child: CustomButton(
+                  hint:
+                      _isAddingToCart
+                          ? AppStrings.addToCartChecking
+                          : AppStrings.addToCart,
+                  onTap:
+                      _isAddingToCart
+                          ? null
+                          : () => unawaited(_onAddButtonTap()),
+                  preventRapidTaps: true,
+                  hasShadowEffect: true,
+                  color: widget.primaryColor,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

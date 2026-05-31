@@ -189,7 +189,7 @@ class ProductDetailsRouteArguments extends Equatable {
       product: ProductRouteData.fromModel(product),
       primaryColor: primaryColor,
       shop: shopModel == null ? null : ShopRouteData.fromModel(shopModel),
-      initialQuantity: initialQuantity,
+      initialQuantity: initialQuantity < 1 ? 1 : initialQuantity,
       returnToCartTab: returnToCartTab,
     );
   }

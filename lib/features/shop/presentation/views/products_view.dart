@@ -37,6 +37,7 @@ class ProductsView extends StatelessWidget {
     return BlocProvider(
       create: (_) => getIt<ProductsCubit>()..fetchProducts(shopModel.id ?? ''),
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: KeyboardDismissOnTap(
           child: ProductsViewBody(
             shopModel: shopModel,
