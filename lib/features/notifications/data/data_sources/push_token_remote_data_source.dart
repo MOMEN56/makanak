@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class PushTokenRemoteDataSource extends SupabaseRemoteDataSource {
   const PushTokenRemoteDataSource(super.client);
 
+  static const String _appType = 'customer';
+
   Future<void> upsertUserPushToken({
     required String token,
     required String platform,
@@ -11,7 +13,11 @@ class PushTokenRemoteDataSource extends SupabaseRemoteDataSource {
     try {
       await client.rpc(
         'upsert_user_push_token',
-        params: {'p_token': token.trim(), 'p_platform': platform.trim()},
+        params: {
+          'p_token': token.trim(),
+          'p_platform': platform.trim(),
+          'p_app_type': _appType,
+        },
       );
     } on PostgrestException catch (error) {
       throw databaseException(
@@ -28,7 +34,10 @@ class PushTokenRemoteDataSource extends SupabaseRemoteDataSource {
     try {
       await client.rpc(
         'delete_user_push_token',
-        params: {'p_token': token.trim()},
+        params: {
+          'p_token': token.trim(),
+          'p_app_type': _appType,
+        },
       );
     } on PostgrestException catch (error) {
       throw databaseException(
