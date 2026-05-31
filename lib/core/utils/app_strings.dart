@@ -1,4 +1,4 @@
-﻿class AppStrings {
+class AppStrings {
   const AppStrings._();
 
   static const addToCartChecking =
@@ -34,6 +34,7 @@
       '\u062A\u0639\u0630\u0631 \u0627\u0644\u062A\u062D\u0642\u0642 \u0645\u0646 \u062A\u0648\u0641\u0631 \u0627\u0644\u0645\u0646\u062A\u062C\u060C \u062D\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062E\u0631\u0649.';
   static const productOutOfStock =
       '\u0646\u0641\u062F \u0645\u0646 \u0627\u0644\u0645\u062E\u0632\u0648\u0646';
+  static const productUnavailableNow = 'غير متاح الآن';
   static const outOfStockProductsRemovedFromCart =
       'بعض المنتجات نفدت من المخزون وتم حذفها من السلة.';
   static const unavailableProductsRemovedFromCart =

@@ -142,14 +142,14 @@ class CartCubit extends Cubit<CartState> {
             latestShopId != normalizedShopId ||
             latestProduct.isHiddenFromCustomers) {
           return _addProductFailure(
-            message: AppStrings.productOutOfStock,
+            message: AppStrings.productUnavailableNow,
             status: AddProductToCartStatus.unavailable,
           );
         }
 
         if (latestProduct.isOutOfStock) {
           return _addProductFailure(
-            message: AppStrings.productOutOfStock,
+            message: AppStrings.productUnavailableNow,
             status: AddProductToCartStatus.outOfStock,
           );
         }
