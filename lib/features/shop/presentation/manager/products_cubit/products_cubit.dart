@@ -1,5 +1,6 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/debouncer.dart';
+import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_state.dart';
 
@@ -13,9 +14,15 @@ class ProductsCubit extends Cubit<ProductsState> {
   String _query = '';
   ProductPriceSort _priceSort = ProductPriceSort.none;
   int _requestId = 0;
+  int _refreshFailureId = 0;
 
   Future<void> fetchProducts(String shopId) async {
     await _fetchProducts(shopId, query: '', priceSort: ProductPriceSort.none);
+  }
+
+  Future<void> retry(String shopId) async {
+    _searchDebouncer.cancel();
+    await _fetchProducts(shopId, query: _query, priceSort: _priceSort);
   }
 
   void searchProducts(String shopId, String query) {
@@ -44,7 +51,16 @@ class ProductsCubit extends Cubit<ProductsState> {
     _query = query;
     _priceSort = priceSort;
     final currentRequestId = ++_requestId;
-    emit(ProductsLoading(priceSort: priceSort));
+    final currentState = state;
+    final previousProducts =
+        currentState is ProductsSuccess
+            ? currentState.products
+            : const <ProductModel>[];
+    final shouldPreserveContent = currentState is ProductsSuccess;
+
+    if (!shouldPreserveContent) {
+      emit(ProductsLoading(priceSort: priceSort));
+    }
 
     final result = await _productsRepo.fetchProductsByShopId(
       shopId,
@@ -54,7 +70,21 @@ class ProductsCubit extends Cubit<ProductsState> {
     if (currentRequestId != _requestId || isClosed) return;
 
     result.fold(
-      (failure) => emit(ProductsFailure(failure.message, priceSort: priceSort)),
+      (failure) {
+        if (shouldPreserveContent) {
+          emit(
+            ProductsSuccess(
+              List.unmodifiable(previousProducts),
+              priceSort: priceSort,
+              refreshFailure: failure,
+              refreshFailureId: ++_refreshFailureId,
+            ),
+          );
+          return;
+        }
+
+        emit(ProductsFailure(failure, priceSort: priceSort));
+      },
       (products) => emit(ProductsSuccess(products, priceSort: priceSort)),
     );
   }

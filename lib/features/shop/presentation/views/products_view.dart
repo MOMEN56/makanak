@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_cubit.dart';
@@ -13,6 +13,7 @@ class ProductsView extends StatelessWidget {
     required this.shopModel,
     this.bottomContentPadding = 0,
     this.onCartRequested,
+    this.onFullScreenNetworkStateChanged,
     this.initialNavigationIndex = 0,
   });
 
@@ -21,6 +22,7 @@ class ProductsView extends StatelessWidget {
   final ShopModel shopModel;
   final double bottomContentPadding;
   final VoidCallback? onCartRequested;
+  final ValueChanged<bool>? onFullScreenNetworkStateChanged;
   final int initialNavigationIndex;
 
   bool get _isInsideShopNavigation => onCartRequested != null;
@@ -43,6 +45,7 @@ class ProductsView extends StatelessWidget {
             shopModel: shopModel,
             bottomContentPadding: bottomContentPadding,
             onCartRequested: onCartRequested,
+            onFullScreenNetworkStateChanged: onFullScreenNetworkStateChanged,
           ),
         ),
       ),

@@ -150,6 +150,11 @@ class AppStrings {
   static const shopsLoadError =
       'تعذر تحميل المحلات الآن. حاول مرة أخرى بعد قليل.';
   static const shopCardAction = 'تسوق';
+  static const shopClosedLabel = 'مغلق';
+  static const shopClosedNow = 'المحل مغلق حاليًا';
+  static const shopWorkingHoursLabel = 'ساعات العمل';
+  static const shopWorkingHoursUnavailable = 'ساعات العمل غير محددة';
+  static const shopUnavailableNow = 'هذا المحل غير متاح الآن';
   static const productsEmptySearch = 'لا توجد منتجات بهذا الاسم.';
   static const productsLoadError = 'تعذر تحميل المنتجات الآن. حاول مرة أخرى.';
   static const filterTooltip = 'فلتر';
@@ -219,6 +224,15 @@ class AppStrings {
       'تعذر تسجيل الخروج الآن. حاول مرة أخرى بعد قليل.';
   static const authRequestFailed =
       'تعذر تنفيذ الطلب الآن. حاول مرة أخرى بعد قليل.';
+
+  static const networkActionError =
+      'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
+
+  static const noInternetTitle =
+      'لا يوجد اتصال بالإنترنت';
+
+  static const noInternetSubtitle =
+      'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
 
   static const googleSignInStartError =
       'تعذر بدء تسجيل الدخول بحساب Google الآن.';

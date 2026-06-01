@@ -1,4 +1,5 @@
-import 'package:equatable/equatable.dart';
+﻿import 'package:equatable/equatable.dart';
+import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 
 sealed class ShopsState extends Equatable {
@@ -17,19 +18,28 @@ class ShopsLoading extends ShopsState {
 }
 
 class ShopsSuccess extends ShopsState {
-  const ShopsSuccess(this.shops);
+  const ShopsSuccess(
+    this.shops, {
+    this.refreshFailure,
+    this.refreshFailureId = 0,
+  });
 
   final List<ShopModel> shops;
+  final Failure? refreshFailure;
+  final int refreshFailureId;
 
   @override
-  List<Object?> get props => [shops];
+  List<Object?> get props => [shops, refreshFailure, refreshFailureId];
 }
 
 class ShopsFailure extends ShopsState {
-  const ShopsFailure(this.message);
+  const ShopsFailure(this.failure);
 
-  final String message;
+  final Failure failure;
+
+  String get message => failure.message;
+  bool get isNetworkFailure => failure.isNetwork;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [failure];
 }

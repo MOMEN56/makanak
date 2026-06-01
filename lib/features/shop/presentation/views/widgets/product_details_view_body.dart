@@ -11,6 +11,7 @@ import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
 import 'package:makanak/features/shop/presentation/actions/add_product_to_cart_action.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/product_details_image.dart';
+import 'package:makanak/features/shop/presentation/views/widgets/shop_closed_notice_banner.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/show_product_added_snack_bar.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
@@ -40,6 +41,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   late int _quantity;
   bool _isDisposed = false;
   bool _isAddingToCart = false;
+  bool _closedByLatestValidation = false;
 
   @override
   void initState() {
@@ -47,11 +49,15 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
     _quantity = widget.initialQuantity < 1 ? 1 : widget.initialQuantity;
   }
 
+  bool get _isShopClosed =>
+      widget.shopModel?.isOpen == false || _closedByLatestValidation;
+
   Future<void> _onAddButtonTap() async {
     if (!mounted ||
         _isDisposed ||
         _isAddingToCart ||
-        widget.product.isUnavailableForPurchase) {
+        widget.product.isUnavailableForPurchase ||
+        _isShopClosed) {
       return;
     }
 
@@ -66,10 +72,16 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
         shopModel: widget.shopModel,
         quantity: quantity,
       );
-      if (!mounted ||
-          _isDisposed ||
-          !result.wasAdded ||
-          result.product == null) {
+      if (!mounted || _isDisposed) {
+        return;
+      }
+
+      if (result.wasBlockedByClosedShop) {
+        setState(() => _closedByLatestValidation = true);
+        return;
+      }
+
+      if (!result.wasAdded || result.product == null) {
         return;
       }
 
@@ -105,8 +117,19 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
   Widget build(BuildContext context) {
     final darkerPrimaryColor = AppColors.darkerShade(widget.primaryColor);
     final isAvailableForPurchase = widget.product.isAvailableForPurchase;
-    final availabilityLabel = AppStrings.productOutOfStock;
-    final contentBottomPadding = isAvailableForPurchase ? 120.0 : 24.0;
+    final canPurchase = !_isShopClosed && isAvailableForPurchase;
+    final showBottomButton = isAvailableForPurchase || _isShopClosed;
+    final statusLabel =
+        _isShopClosed
+            ? AppStrings.shopClosedLabel
+            : AppStrings.productOutOfStock;
+    final statusBackgroundColor =
+        _isShopClosed
+            ? AppColors.searchFieldBackground
+            : const Color(0xffFCE8E8);
+    final statusForegroundColor =
+        _isShopClosed ? AppColors.searchFieldGrey : const Color(0xffD85B5B);
+    final contentBottomPadding = showBottomButton ? 120.0 : 24.0;
 
     return Container(
       color: Colors.white,
@@ -116,6 +139,12 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
             padding: EdgeInsets.fromLTRB(20, 20, 20, contentBottomPadding),
             children: [
               ProductDetailsImage(imageUrl: widget.product.imageUrl),
+              if (_isShopClosed) ...[
+                const Gap(20),
+                ShopClosedNoticeBanner(
+                  workingHours: widget.shopModel?.workingHours ?? '',
+                ),
+              ],
               const Gap(24),
               Text(
                 widget.product.name,
@@ -136,7 +165,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
                     ),
                   ),
                   const Gap(8),
-                  if (isAvailableForPurchase)
+                  if (canPurchase)
                     QuantitySelector(
                       initialQuantity:
                           widget.initialQuantity < 1
@@ -155,17 +184,17 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xffFCE8E8),
+                            color: statusBackgroundColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            availabilityLabel,
+                            statusLabel,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             softWrap: true,
                             textAlign: TextAlign.center,
                             style: TextStyles.semiBold14.copyWith(
-                              color: const Color(0xffD85B5B),
+                              color: statusForegroundColor,
                             ),
                           ),
                         ),
@@ -183,7 +212,7 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
               ),
             ],
           ),
-          if (isAvailableForPurchase)
+          if (showBottomButton)
             PositionedDirectional(
               start: AppSpacing.screenEdge,
               end: AppSpacing.screenEdge,
@@ -194,16 +223,21 @@ class _ProductDetailsViewBodyState extends State<ProductDetailsViewBody> {
                 ),
                 child: CustomButton(
                   hint:
-                      _isAddingToCart
+                      _isShopClosed
+                          ? AppStrings.shopClosedNow
+                          : _isAddingToCart
                           ? AppStrings.addToCartChecking
                           : AppStrings.addToCart,
                   onTap:
-                      _isAddingToCart
+                      _isShopClosed || _isAddingToCart
                           ? null
                           : () => unawaited(_onAddButtonTap()),
                   preventRapidTaps: true,
-                  hasShadowEffect: true,
-                  color: widget.primaryColor,
+                  hasShadowEffect: canPurchase,
+                  color:
+                      _isShopClosed
+                          ? AppColors.searchFieldGrey
+                          : widget.primaryColor,
                 ),
               ),
             ),

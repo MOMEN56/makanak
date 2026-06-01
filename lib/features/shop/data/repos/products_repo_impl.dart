@@ -1,4 +1,6 @@
-import 'package:dartz/dartz.dart';
+﻿import 'package:dartz/dartz.dart';
+import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/errors/failure_mapper.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/shop/data/data_sources/products_remote_data_source.dart';
@@ -28,6 +30,13 @@ class ProductsRepoImpl implements ProductsRepo {
       );
       final products = productsData.map(ProductModel.fromJson).toList();
       return right(products);
+    } on DatabaseException catch (error) {
+      return left(
+        FailureMapper.fromDatabaseException(
+          error,
+          genericMessage: AppStrings.productsLoadError,
+        ),
+      );
     } catch (_) {
       return left(const Failure(AppStrings.productsLoadError));
     }
@@ -45,6 +54,13 @@ class ProductsRepoImpl implements ProductsRepo {
       );
       final products = productsData.map(ProductModel.fromJson).toList();
       return right(products);
+    } on DatabaseException catch (error) {
+      return left(
+        FailureMapper.fromDatabaseException(
+          error,
+          genericMessage: AppStrings.productsLoadError,
+        ),
+      );
     } catch (_) {
       return left(const Failure(AppStrings.productsLoadError));
     }
@@ -66,6 +82,13 @@ class ProductsRepoImpl implements ProductsRepo {
       }
 
       return right(ProductModel.fromJson(productData));
+    } on DatabaseException catch (error) {
+      return left(
+        FailureMapper.fromDatabaseException(
+          error,
+          genericMessage: AppStrings.productAvailabilityCheckFailed,
+        ),
+      );
     } catch (_) {
       return left(const Failure(AppStrings.productAvailabilityCheckFailed));
     }

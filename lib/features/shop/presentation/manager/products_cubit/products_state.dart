@@ -1,4 +1,5 @@
-import 'package:equatable/equatable.dart';
+﻿import 'package:equatable/equatable.dart';
+import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 
@@ -20,19 +21,29 @@ class ProductsLoading extends ProductsState {
 }
 
 class ProductsSuccess extends ProductsState {
-  const ProductsSuccess(this.products, {super.priceSort});
+  const ProductsSuccess(
+    this.products, {
+    super.priceSort,
+    this.refreshFailure,
+    this.refreshFailureId = 0,
+  });
 
   final List<ProductModel> products;
+  final Failure? refreshFailure;
+  final int refreshFailureId;
 
   @override
-  List<Object?> get props => [products, priceSort];
+  List<Object?> get props => [products, priceSort, refreshFailure, refreshFailureId];
 }
 
 class ProductsFailure extends ProductsState {
-  const ProductsFailure(this.message, {super.priceSort});
+  const ProductsFailure(this.failure, {super.priceSort});
 
-  final String message;
+  final Failure failure;
+
+  String get message => failure.message;
+  bool get isNetworkFailure => failure.isNetwork;
 
   @override
-  List<Object?> get props => [message, priceSort];
+  List<Object?> get props => [failure, priceSort];
 }

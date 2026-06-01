@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,8 +11,8 @@ import 'package:makanak/features/bottom_navigation/presentation/views/widgets/bo
 import 'package:makanak/features/bottom_navigation/presentation/views/widgets/cart_navigation_tab.dart';
 import 'package:makanak/features/bottom_navigation/presentation/views/widgets/liquid_glass_bottom_navigation.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
-import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit_registry.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/order_history/presentation/views/order_history_view.dart';
 import 'package:makanak/features/profile/presentation/views/profile_view.dart';
 import 'package:makanak/features/shop/presentation/views/products_view.dart';
@@ -26,6 +26,7 @@ class ShopNavigationView extends StatefulWidget {
   });
 
   static const homeTabIndex = 0;
+  static const cartTabIndex = 1;
   static const orderHistoryTabIndex = 2;
 
   final ShopModel shopModel;
@@ -42,6 +43,8 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
   late final StreamSubscription<CartState> _cartSubscription;
   int _lastCartItemCount = 0;
   bool _isRestoringCart = true;
+  bool _isShowingProductsNoInternet = false;
+  bool _isShowingOrderHistoryNoInternet = false;
 
   static const _items = [
     BottomNavigationItemData(icon: Icons.home_rounded, label: AppStrings.home),
@@ -82,6 +85,14 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
 
   @override
   Widget build(BuildContext context) {
+    final shouldShowBottomNavigation = switch (_currentIndex) {
+      0 => !_isShowingProductsNoInternet,
+      1 => true,
+      2 => !_isShowingOrderHistoryNoInternet,
+      3 => true,
+      _ => true,
+    };
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<CartCubit>.value(value: _cartCubit),
@@ -102,33 +113,39 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
                         AppSpacing
                             .buttonBottomExtraGapWithLiquidGlassNavigation,
                     onCartRequested: () => _selectTab(1),
+                    onFullScreenNetworkStateChanged:
+                        _handleProductsNoInternetStateChanged,
                   ),
                   CartNavigationTab(
                     shopModel: widget.shopModel,
                     onBack: () => _selectTab(0),
                   ),
-                  const OrderHistoryView(),
+                  OrderHistoryView(
+                    onFullScreenNetworkStateChanged:
+                        _handleOrderHistoryNoInternetStateChanged,
+                  ),
                   const ProfileView(),
                 ],
               ),
             ),
-            PositionedDirectional(
-              start: 20,
-              end: 20,
-              bottom: 25,
-              child: BlocSelector<CartCubit, CartState, int>(
-                selector: (state) => state.itemCount,
-                builder: (context, cartCount) {
-                  return LiquidGlassBottomNavigation(
-                    currentIndex: _currentIndex,
-                    items: _items,
-                    cartAnimationTrigger: _cartAnimationTrigger,
-                    cartBadgeCount: cartCount,
-                    onItemSelected: _selectTab,
-                  );
-                },
+            if (shouldShowBottomNavigation)
+              PositionedDirectional(
+                start: 20,
+                end: 20,
+                bottom: 25,
+                child: BlocSelector<CartCubit, CartState, int>(
+                  selector: (state) => state.itemCount,
+                  builder: (context, cartCount) {
+                    return LiquidGlassBottomNavigation(
+                      currentIndex: _currentIndex,
+                      items: _items,
+                      cartAnimationTrigger: _cartAnimationTrigger,
+                      cartBadgeCount: cartCount,
+                      onItemSelected: _selectTab,
+                    );
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -163,6 +180,26 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
     _lastCartItemCount = nextItemCount;
   }
 
+  void _handleProductsNoInternetStateChanged(bool isShowing) {
+    if (!mounted || _isShowingProductsNoInternet == isShowing) {
+      return;
+    }
+
+    setState(() {
+      _isShowingProductsNoInternet = isShowing;
+    });
+  }
+
+  void _handleOrderHistoryNoInternetStateChanged(bool isShowing) {
+    if (!mounted || _isShowingOrderHistoryNoInternet == isShowing) {
+      return;
+    }
+
+    setState(() {
+      _isShowingOrderHistoryNoInternet = isShowing;
+    });
+  }
+
   int _validatedInitialIndex(int index) {
     if (index < 0 || index >= _items.length) {
       return ShopNavigationView.homeTabIndex;
@@ -177,3 +214,5 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
     super.dispose();
   }
 }
+
+

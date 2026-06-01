@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/services/request_timeout.dart';
+import 'package:makanak/core/services/supabase_request_guard.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class SupabaseRemoteDataSource {
@@ -7,6 +9,32 @@ abstract class SupabaseRemoteDataSource {
 
   @protected
   final SupabaseClient client;
+
+  @protected
+  Future<T> guardedRequest<T>(
+    Future<T> Function() request, {
+    String? operation,
+    bool log = false,
+    Duration timeout = RequestTimeout.normal,
+  }) async {
+    try {
+      return await SupabaseRequestGuard.run(request, timeout: timeout);
+    } on PostgrestException catch (error) {
+      throw databaseException(error, operation: operation, log: log);
+    } on DatabaseException catch (error) {
+      if (log) {
+        _logDatabaseException(operation ?? runtimeType.toString(), error);
+      }
+      rethrow;
+    } catch (error, stackTrace) {
+      throw unexpectedDatabaseException(
+        operation: operation,
+        error: error,
+        stackTrace: stackTrace,
+        log: log,
+      );
+    }
+  }
 
   @protected
   String requireAuthenticatedUserId() {
@@ -55,6 +83,15 @@ abstract class SupabaseRemoteDataSource {
     debugPrint(
       'Supabase $operation failed: '
       'code=${error.code}, message=${error.message}, details=${error.details}',
+    );
+  }
+
+  void _logDatabaseException(String operation, DatabaseException error) {
+    if (!kDebugMode) return;
+
+    debugPrint(
+      'Supabase $operation failed: '
+      'kind=${error.kind}, code=${error.code}, message=${error.message}',
     );
   }
 

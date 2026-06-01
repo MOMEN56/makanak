@@ -29,14 +29,34 @@ class ShopCard extends StatelessWidget {
             SizedBox(
               height: 140,
               width: double.infinity,
-              child: NetworkImageWithPlaceholder(
-                imageUrl: shop.imageUrl,
-                height: 140,
-                width: double.infinity,
-                cacheWidth: 700,
-                placeholderIcon: Icons.storefront_outlined,
-                placeholderColor: AppColors.greyBackground,
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    NetworkImageWithPlaceholder(
+                      imageUrl: shop.imageUrl,
+                      height: 140,
+                      width: double.infinity,
+                      cacheWidth: 700,
+                      placeholderIcon: Icons.storefront_outlined,
+                      placeholderColor: AppColors.greyBackground,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    if (!shop.isOpen)
+                      ColoredBox(
+                        color: AppColors.searchFieldGrey.withValues(alpha: 0.58),
+                        child: Center(
+                          child: Text(
+                            AppStrings.shopClosedLabel,
+                            style: TextStyles.bold20.copyWith(
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             const Gap(16),
@@ -88,7 +108,6 @@ class ShopCard extends StatelessWidget {
               hint: AppStrings.shopCardAction,
               onTap: onShopTap,
               preventRapidTaps: true,
-              //hasShadowEffect: true,
             ),
           ],
         ),

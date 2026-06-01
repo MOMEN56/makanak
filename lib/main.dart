@@ -12,8 +12,7 @@ import 'package:makanak/makanak_app.dart';
 Future<void> main() async {
   configureErrorLogging(libraryName: 'makanak bootstrap');
 
-  final binding = WidgetsFlutterBinding.ensureInitialized();
-  binding.deferFirstFrame();
+  WidgetsFlutterBinding.ensureInitialized();
   await SupabaseClientService.initialize();
   setupServiceLocator();
   getIt<NotificationsRepository>();

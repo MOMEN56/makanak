@@ -1,7 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
+import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/models/address_form_draft_model.dart';
 import 'package:makanak/core/models/user_address_model.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_state.dart';
@@ -32,10 +33,7 @@ class AddressCubit extends Cubit<AddressState> {
     final result = await _addressRepository.fetchUserAddresses();
     if (isClosed || !_isActiveUser(requestUserId)) return;
 
-    result.fold(
-      (failure) => emit(_errorFromState(failure.message)),
-      _emitAddressState,
-    );
+    result.fold((failure) => emit(_errorFromState(failure)), _emitAddressState);
   }
 
   Future<void> fetchAddresses({bool forceRefresh = false}) async {
@@ -53,9 +51,7 @@ class AddressCubit extends Cubit<AddressState> {
     final result = await _addressRepository.fetchUserAddresses();
     if (isClosed || !_isActiveUser(requestUserId)) return;
 
-    result.fold((failure) => emit(_errorFromState(failure.message)), (
-      addresses,
-    ) {
+    result.fold((failure) => emit(_errorFromState(failure)), (addresses) {
       _emitAddressesLoaded(addresses);
     });
   }
@@ -82,7 +78,7 @@ class AddressCubit extends Cubit<AddressState> {
     );
     if (isClosed || !_isActiveUser(requestUserId)) return;
 
-    result.fold((failure) => emit(_errorFromState(failure.message)), (address) {
+    result.fold((failure) => emit(_errorFromState(failure)), (address) {
       final updatedAddresses = [
         ...state.addresses,
         if (!state.addresses.any((item) => item.id == address.id)) address,
@@ -117,7 +113,7 @@ class AddressCubit extends Cubit<AddressState> {
 
     return result.fold(
       (failure) {
-        emit(_errorFromState(failure.message));
+        emit(_errorFromState(failure));
         return false;
       },
       (_) {
@@ -193,9 +189,9 @@ class AddressCubit extends Cubit<AddressState> {
     );
   }
 
-  AddressError _errorFromState(String message) {
+  AddressError _errorFromState(Failure failure) {
     return AddressError(
-      message,
+      failure,
       addresses: state.addresses,
       selectedAddressIndex: _validatedAddressIndex(
         state.selectedAddressIndex,

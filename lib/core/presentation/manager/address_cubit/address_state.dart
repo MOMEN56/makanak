@@ -1,4 +1,5 @@
-import 'package:equatable/equatable.dart';
+﻿import 'package:equatable/equatable.dart';
+import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/models/address_form_draft_model.dart';
 import 'package:makanak/core/models/user_address_model.dart';
 
@@ -67,14 +68,17 @@ class AddressesLoaded extends AddressState {
 
 class AddressError extends AddressState {
   const AddressError(
-    this.message, {
+    this.failure, {
     super.addresses,
     super.selectedAddressIndex,
     super.draft,
   });
 
-  final String message;
+  final Failure failure;
+
+  String get message => failure.message;
+  bool get isNetworkFailure => failure.isNetwork;
 
   @override
-  List<Object?> get props => [...super.props, message];
+  List<Object?> get props => [...super.props, failure];
 }

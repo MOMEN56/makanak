@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
+import 'package:makanak/features/order_history/presentation/views/widgets/order_meta_chip.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
-import 'package:makanak/features/order_history/presentation/views/widgets/order_meta_chip.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/add_button.dart';
 import 'package:makanak/shared/widgets/network_image_with_placeholder.dart';
 import 'package:makanak/shared/widgets/quantity_selector.dart';
@@ -16,6 +16,7 @@ class ProductCard extends StatefulWidget {
     required this.quantity,
     required this.primaryColor,
     required this.resetSignal,
+    required this.isShopOpen,
     this.onTap,
     this.onQuantityChanged,
   });
@@ -24,6 +25,7 @@ class ProductCard extends StatefulWidget {
   final int quantity;
   final Color primaryColor;
   final int resetSignal;
+  final bool isShopOpen;
   final VoidCallback? onTap;
   final ValueChanged<int>? onQuantityChanged;
 
@@ -38,14 +40,14 @@ class _ProductCardState extends State<ProductCard> {
   @override
   void initState() {
     super.initState();
-    _quantity = widget.product.isAvailableForPurchase ? widget.quantity : 0;
+    _quantity = _initialQuantity();
     _showQuantitySelector = _quantity > 0;
   }
 
   @override
   void didUpdateWidget(covariant ProductCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.product.isUnavailableForPurchase) {
+    if (!widget.isShopOpen || widget.product.isUnavailableForPurchase) {
       final shouldClearSelection = _quantity != 0 || _showQuantitySelector;
       _showQuantitySelector = false;
       _quantity = 0;
@@ -71,8 +73,14 @@ class _ProductCardState extends State<ProductCard> {
     }
   }
 
+  int _initialQuantity() {
+    return widget.isShopOpen && widget.product.isAvailableForPurchase
+        ? widget.quantity
+        : 0;
+  }
+
   void _showSelector() {
-    if (widget.product.isUnavailableForPurchase) return;
+    if (!widget.isShopOpen || widget.product.isUnavailableForPurchase) return;
 
     setState(() {
       _quantity = 1;
@@ -82,7 +90,7 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   void _onQuantityChanged(int quantity) {
-    if (widget.product.isUnavailableForPurchase) return;
+    if (!widget.isShopOpen || widget.product.isUnavailableForPurchase) return;
 
     setState(() {
       _quantity = quantity;
@@ -95,7 +103,17 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     final darkerPrimaryColor = AppColors.darkerShade(widget.primaryColor);
     final isAvailableForPurchase = widget.product.isAvailableForPurchase;
-    final availabilityLabel = AppStrings.productOutOfStock;
+    final canPurchase = widget.isShopOpen && isAvailableForPurchase;
+    final statusLabel =
+        widget.isShopOpen
+            ? AppStrings.productOutOfStock
+            : AppStrings.shopClosedLabel;
+    final statusBackgroundColor =
+        widget.isShopOpen
+            ? const Color(0xffFCE8E8)
+            : AppColors.searchFieldBackground;
+    final statusForegroundColor =
+        widget.isShopOpen ? const Color(0xffD85B5B) : AppColors.searchFieldGrey;
 
     return Material(
       color: AppColors.white,
@@ -157,7 +175,7 @@ class _ProductCardState extends State<ProductCard> {
                       );
                     },
                     child:
-                        isAvailableForPurchase
+                        canPurchase
                             ? _showQuantitySelector
                                 ? QuantitySelector(
                                   key: const ValueKey('quantity-selector'),
@@ -180,9 +198,9 @@ class _ProductCardState extends State<ProductCard> {
                                 )
                             : OrderMetaChip(
                               key: const ValueKey('availability-badge'),
-                              label: availabilityLabel,
-                              backgroundColor: const Color(0xffFCE8E8),
-                              foregroundColor: const Color(0xffD85B5B),
+                              label: statusLabel,
+                              backgroundColor: statusBackgroundColor,
+                              foregroundColor: statusForegroundColor,
                               compact: false,
                               maxTextWidth: 120,
                             ),

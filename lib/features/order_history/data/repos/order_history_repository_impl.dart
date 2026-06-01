@@ -1,5 +1,6 @@
-import 'package:dartz/dartz.dart';
+﻿import 'package:dartz/dartz.dart';
 import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/errors/failure_mapper.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/order_history/data/data_sources/orders_remote_data_source.dart';
@@ -17,8 +18,13 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepository {
       final data = await _remoteDataSource.fetchUserOrders();
       final orders = data.map(OrderModel.fromJson).toList(growable: false);
       return right(orders);
-    } on DatabaseException {
-      return left(const Failure(AppStrings.orderHistoryLoadError));
+    } on DatabaseException catch (error) {
+      return left(
+        FailureMapper.fromDatabaseException(
+          error,
+          genericMessage: AppStrings.orderHistoryLoadError,
+        ),
+      );
     } catch (_) {
       return left(const Failure(AppStrings.orderHistoryLoadError));
     }
@@ -33,8 +39,13 @@ class OrderHistoryRepositoryImpl implements OrderHistoryRepository {
       }
 
       return right(OrderModel.fromJson(data));
-    } on DatabaseException {
-      return left(const Failure(AppStrings.orderDetailsLoadError));
+    } on DatabaseException catch (error) {
+      return left(
+        FailureMapper.fromDatabaseException(
+          error,
+          genericMessage: AppStrings.orderDetailsLoadError,
+        ),
+      );
     } catch (_) {
       return left(const Failure(AppStrings.orderDetailsLoadError));
     }

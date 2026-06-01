@@ -1,10 +1,14 @@
-﻿import 'package:get_it/get_it.dart';
+import 'package:get_it/get_it.dart';
 import 'package:makanak/core/data/data_sources/address_remote_data_source.dart';
 import 'package:makanak/core/data/repos/address_repository_impl.dart';
+import 'package:makanak/core/deep_linking/deep_link_navigator.dart';
+import 'package:makanak/core/deep_linking/deep_link_parser.dart';
+import 'package:makanak/core/deep_linking/deep_link_service.dart';
+import 'package:makanak/core/deep_linking/pending_deep_link_manager.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
-import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/google_sign_in_service.dart';
+import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
 import 'package:makanak/core/services/supabase_client_service.dart';
 import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_local_data_source.dart';
@@ -55,6 +59,7 @@ void setupServiceLocator() {
   _registerOrdersFeature();
   _registerNotificationsFeature();
   _registerAuthFeature();
+  _registerDeepLinkingFeature();
   _registerCartFeature();
 }
 
@@ -189,6 +194,27 @@ void _registerAuthFeature() {
   getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepo>()));
 }
 
+void _registerDeepLinkingFeature() {
+  getIt.registerLazySingleton<PendingDeepLinkManager>(
+    PendingDeepLinkManager.new,
+  );
+
+  getIt.registerLazySingleton<DeepLinkParser>(DeepLinkParser.new);
+
+  getIt.registerLazySingleton<DeepLinkNavigator>(
+    () => DeepLinkNavigator(
+      getIt<SupabaseAuthService>(),
+      getIt<ShopsRepo>(),
+      getIt<ProductsRepo>(),
+      getIt<PendingDeepLinkManager>(),
+    ),
+  );
+
+  getIt.registerFactory<DeepLinkService>(
+    () => DeepLinkService(getIt<DeepLinkParser>(), getIt<DeepLinkNavigator>()),
+  );
+}
+
 void _registerCartFeature() {
   getIt.registerLazySingleton<CartRepository>(
     () => CartRepositoryImpl(getIt<OrdersRemoteDataSource>()),
@@ -198,6 +224,7 @@ void _registerCartFeature() {
     (userId, _) => CartCubit(
       getIt<CartRepository>(),
       getIt<ProductsRepo>(),
+      getIt<ShopsRepo>(),
       userId: userId,
     ),
   );

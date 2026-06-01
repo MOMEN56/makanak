@@ -1,7 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/services/supabase_request_guard.dart';
 import 'package:makanak/core/services/notification_service/notification_event.dart';
 import 'package:makanak/core/services/services.dart';
 import 'package:makanak/features/notifications/data/models/app_notification_model.dart';
@@ -82,27 +83,23 @@ class SupabaseNotificationsRepository implements NotificationsRepository {
 
     final readAt = DateTime.now().toUtc();
 
-    try {
-      await _client
+    await _guardedRequest(
+      () => _client
           .from('notifications')
           .update({'read_at': readAt.toIso8601String()})
-          .eq('id', normalizedId);
+          .eq('id', normalizedId),
+    );
 
-      _notifications = _notifications
-          .map((notification) {
-            if (notification.id != normalizedId) {
-              return notification;
-            }
+    _notifications = _notifications
+        .map((notification) {
+          if (notification.id != normalizedId) {
+            return notification;
+          }
 
-            return notification.copyWith(readAt: readAt);
-          })
-          .toList(growable: false);
-      _emitNotifications();
-    } on PostgrestException catch (error) {
-      throw DatabaseException(error.message, code: error.code);
-    } catch (_) {
-      throw const DatabaseException('Unexpected database error');
-    }
+          return notification.copyWith(readAt: readAt);
+        })
+        .toList(growable: false);
+    _emitNotifications();
   }
 
   @override
@@ -113,30 +110,26 @@ class SupabaseNotificationsRepository implements NotificationsRepository {
 
     final readAt = DateTime.now().toUtc();
 
-    try {
-      await _client
+    await _guardedRequest(
+      () => _client
           .from('notifications')
           .update({'read_at': readAt.toIso8601String()})
-          .isFilter('read_at', null);
+          .isFilter('read_at', null),
+    );
 
-      if (_notifications.isEmpty) {
-        return;
-      }
-
-      _notifications = _notifications
-          .map(
-            (notification) =>
-                notification.isRead
-                    ? notification
-                    : notification.copyWith(readAt: readAt),
-          )
-          .toList(growable: false);
-      _emitNotifications();
-    } on PostgrestException catch (error) {
-      throw DatabaseException(error.message, code: error.code);
-    } catch (_) {
-      throw const DatabaseException('Unexpected database error');
+    if (_notifications.isEmpty) {
+      return;
     }
+
+    _notifications = _notifications
+        .map(
+          (notification) =>
+              notification.isRead
+                  ? notification
+                  : notification.copyWith(readAt: readAt),
+        )
+        .toList(growable: false);
+    _emitNotifications();
   }
 
   @override
@@ -166,22 +159,30 @@ class SupabaseNotificationsRepository implements NotificationsRepository {
       return const [];
     }
 
-    try {
-      final response = await _client
+    final response = await _guardedRequest(
+      () => _client
           .from('notifications')
           .select('id, title, body, type, data, read_at, created_at')
           .order('created_at', ascending: false)
-          .limit(limit);
+          .limit(limit),
+    );
 
-      final notifications = List<Map<String, dynamic>>.from(
-        response,
-      ).map(AppNotificationModel.fromJson).toList(growable: false);
+    final notifications = List<Map<String, dynamic>>.from(
+      response,
+    ).map(AppNotificationModel.fromJson).toList(growable: false);
 
-      _notifications = notifications;
-      _emitNotifications();
-      return List<AppNotificationModel>.unmodifiable(_notifications);
+    _notifications = notifications;
+    _emitNotifications();
+    return List<AppNotificationModel>.unmodifiable(_notifications);
+  }
+
+  Future<T> _guardedRequest<T>(Future<T> Function() request) async {
+    try {
+      return await SupabaseRequestGuard.run(request);
     } on PostgrestException catch (error) {
       throw DatabaseException(error.message, code: error.code);
+    } on DatabaseException {
+      rethrow;
     } catch (_) {
       throw const DatabaseException('Unexpected database error');
     }

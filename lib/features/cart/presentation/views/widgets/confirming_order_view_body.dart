@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,22 +14,28 @@ import 'package:makanak/features/cart/presentation/actions/cart_route_arguments_
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/cart/presentation/views/submit_order_view.dart';
-import 'package:makanak/shared/widgets/address_selector_sheet_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_header_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_indicator.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/confirming_order_content.dart';
 import 'package:makanak/shared/views/add_address_view.dart';
+import 'package:makanak/shared/widgets/address_selector_sheet_widget.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
+import 'package:makanak/shared/widgets/no_internet_view.dart';
+import 'package:makanak/shared/widgets/state_message.dart';
 
 class ConfirmingOrderViewBody extends StatefulWidget {
   const ConfirmingOrderViewBody({
     super.key,
     this.cartArguments,
     this.showAddressStep = false,
+    this.onBack,
+    this.onOrderSubmitted,
   });
 
   final CartViewArguments? cartArguments;
   final bool showAddressStep;
+  final VoidCallback? onBack;
+  final ValueChanged<CartViewArguments?>? onOrderSubmitted;
 
   @override
   State<ConfirmingOrderViewBody> createState() =>
@@ -60,6 +66,12 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
   }
 
   void _goBackToPreviousStep() {
+    final onBack = widget.onBack;
+    if (onBack != null) {
+      onBack();
+      return;
+    }
+
     Navigator.maybePop(context);
   }
 
@@ -114,6 +126,30 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
     context.read<CartCubit>().createOrder(addressId: selectedAddress.id);
   }
 
+  void _retryAddresses() {
+    context.read<AddressCubit>().fetchAddresses(forceRefresh: true);
+  }
+
+  void _handleOrderSubmitted(CartState state, Color primaryColor) {
+    final routeArguments = CartRouteArgumentsBuilder.fromState(
+      state: state,
+      primaryColor: primaryColor,
+      fallback: widget.cartArguments,
+    );
+
+    final onOrderSubmitted = widget.onOrderSubmitted;
+    if (onOrderSubmitted != null) {
+      onOrderSubmitted(routeArguments);
+      return;
+    }
+
+    Navigator.pushReplacementNamed(
+      context,
+      SubmitOrderView.routeName,
+      arguments: routeArguments,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primaryColor =
@@ -129,15 +165,7 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
         }
 
         if (state is CartOrderSubmitted) {
-          Navigator.pushReplacementNamed(
-            context,
-            SubmitOrderView.routeName,
-            arguments: CartRouteArgumentsBuilder.fromState(
-              state: state,
-              primaryColor: primaryColor,
-              fallback: widget.cartArguments,
-            ),
-          );
+          _handleOrderSubmitted(state, primaryColor);
         }
       },
       builder: (context, state) {
@@ -146,6 +174,10 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
           buildWhen: _shouldRebuildConfirmingAddress,
           listener: (context, addressState) {
             if (addressState is AddressError) {
+              if (addressState.addresses.isEmpty) {
+                return;
+              }
+
               final route = ModalRoute.of(context);
               if (route != null && !route.isCurrent) return;
 
@@ -155,6 +187,23 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
           builder: (context, addressState) {
             final isLoading =
                 state is CartLoading || addressState is AddressLoading;
+
+            if (state.product == null) {
+              return const SafeArea(
+                child: StateMessage(message: AppStrings.cartEmpty),
+              );
+            }
+
+            if (addressState is AddressError && addressState.addresses.isEmpty) {
+              return addressState.isNetworkFailure
+                  ? NoInternetView(onRetry: _retryAddresses)
+                  : SafeArea(
+                    child: StateMessage(
+                      message: addressState.message,
+                      onRetry: _retryAddresses,
+                    ),
+                  );
+            }
 
             return SafeArea(
               child: Padding(

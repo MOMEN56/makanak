@@ -1,5 +1,6 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/debouncer.dart';
+import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/features/shops/data/repos/shops_repo.dart';
 import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_state.dart';
 
@@ -12,9 +13,15 @@ class ShopsCubit extends Cubit<ShopsState> {
   );
   String _query = '';
   int _requestId = 0;
+  int _refreshFailureId = 0;
 
   Future<void> fetchShops() async {
     await _fetchShops(query: '');
+  }
+
+  Future<void> retry() async {
+    _searchDebouncer.cancel();
+    await _fetchShops(query: _query);
   }
 
   void searchShops(String query) {
@@ -32,13 +39,33 @@ class ShopsCubit extends Cubit<ShopsState> {
   Future<void> _fetchShops({required String query}) async {
     _query = query;
     final currentRequestId = ++_requestId;
-    emit(const ShopsLoading());
+    final currentState = state;
+    final previousShops =
+        currentState is ShopsSuccess ? currentState.shops : const <ShopModel>[];
+    final shouldPreserveContent = currentState is ShopsSuccess;
+
+    if (!shouldPreserveContent) {
+      emit(const ShopsLoading());
+    }
 
     final result = await _shopsRepo.fetchShops(query: query);
     if (currentRequestId != _requestId || isClosed) return;
 
     result.fold(
-      (failure) => emit(ShopsFailure(failure.message)),
+      (failure) {
+        if (shouldPreserveContent) {
+          emit(
+            ShopsSuccess(
+              List.unmodifiable(previousShops),
+              refreshFailure: failure,
+              refreshFailureId: ++_refreshFailureId,
+            ),
+          );
+          return;
+        }
+
+        emit(ShopsFailure(failure));
+      },
       (shops) => emit(ShopsSuccess(shops)),
     );
   }

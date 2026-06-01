@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:makanak/core/deep_linking/deep_link_navigator.dart';
+import 'package:makanak/core/deep_linking/deep_link_service.dart';
 import 'package:makanak/core/routing/app_router.dart';
-import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/services/service_locator.dart';
+import 'package:makanak/core/services/services.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_navigator_key.dart';
 import 'package:makanak/core/utils/app_route_tracker.dart';
@@ -16,7 +18,6 @@ import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_
 import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_remote_data_source.dart';
 import 'package:makanak/features/app_remote_config/data/repos/app_remote_config_repo_impl.dart';
 import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_cubit.dart';
-import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_state.dart';
 import 'package:makanak/features/app_remote_config/presentation/views/app_remote_config_gate_view.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
@@ -33,31 +34,28 @@ class MakanakApp extends StatefulWidget {
 
 class _MakanakAppState extends State<MakanakApp> {
   late final AppRemoteConfigCubit _appRemoteConfigCubit;
+  late final DeepLinkService _deepLinkService;
   late final ErrorWidgetBuilder _previousErrorWidgetBuilder;
-  StreamSubscription<AppRemoteConfigState>? _startupRemoteConfigSubscription;
-  bool _hasReleasedFirstFrame = false;
 
   @override
   void initState() {
     super.initState();
     _previousErrorWidgetBuilder = ErrorWidget.builder;
     _configureReleaseErrorWidget();
+    _deepLinkService = getIt<DeepLinkService>();
     _appRemoteConfigCubit = AppRemoteConfigCubit(
       AppRemoteConfigRepoImpl(
         AppRemoteConfigRemoteDataSource(getIt<SupabaseClient>()),
         const AppRemoteConfigLocalDataSource(),
       ),
     );
-    _startupRemoteConfigSubscription = _appRemoteConfigCubit.stream.listen(
-      _handleStartupRemoteConfigState,
-    );
     unawaited(_appRemoteConfigCubit.checkAccessOnce());
+    unawaited(_deepLinkService.initialize());
   }
 
   @override
   void dispose() {
-    _startupRemoteConfigSubscription?.cancel();
-    _releaseFirstFrameIfNeeded();
+    unawaited(_deepLinkService.dispose());
     _restoreErrorWidgetBuilder();
     _appRemoteConfigCubit.close();
     super.dispose();
@@ -75,11 +73,6 @@ class _MakanakAppState extends State<MakanakApp> {
     ErrorWidget.builder = _previousErrorWidgetBuilder;
   }
 
-  void _handleStartupRemoteConfigState(AppRemoteConfigState state) {
-    if (state is! AppRemoteConfigResolved) return;
-    _releaseFirstFrameIfNeeded();
-  }
-
   void _returnToHome() {
     final navigator = appNavigatorKey.currentState;
     if (navigator == null) return;
@@ -87,11 +80,12 @@ class _MakanakAppState extends State<MakanakApp> {
     navigator.pushNamedAndRemoveUntil(AuthGateView.routeName, (route) => false);
   }
 
-  void _releaseFirstFrameIfNeeded() {
-    if (_hasReleasedFirstFrame) return;
-
-    _hasReleasedFirstFrame = true;
-    WidgetsBinding.instance.allowFirstFrame();
+  Future<void> _handleAuthenticatedNavigation(
+    DeepLinkNavigator deepLinkNavigator,
+    PushNotificationService pushNotificationService,
+  ) async {
+    await deepLinkNavigator.openPendingAfterLogin();
+    await pushNotificationService.markNavigationReady();
   }
 
   @override
@@ -101,7 +95,12 @@ class _MakanakAppState extends State<MakanakApp> {
       child: BlocListener<AuthCubit, AuthState>(
         listenWhen: _shouldReturnToAuthGate,
         listener: (context, state) {
+          final deepLinkNavigator = getIt<DeepLinkNavigator>();
           final pushNotificationService = getIt<PushNotificationService>();
+
+          if (state is AuthUnauthenticated) {
+            deepLinkNavigator.resetNavigationReadiness();
+          }
 
           if (state is AuthUnauthenticated && !state.hasMessage) {
             pushNotificationService.resetNavigationReadiness();
@@ -112,7 +111,12 @@ class _MakanakAppState extends State<MakanakApp> {
 
           if (state is AuthAuthenticated) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              unawaited(pushNotificationService.markNavigationReady());
+              unawaited(
+                _handleAuthenticatedNavigation(
+                  deepLinkNavigator,
+                  pushNotificationService,
+                ),
+              );
             });
           }
         },

@@ -1,6 +1,5 @@
-import 'package:makanak/core/services/supabase_remote_data_source.dart';
+﻿import 'package:makanak/core/services/supabase_remote_data_source.dart';
 import 'package:makanak/core/utils/address_form_validator.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddressRemoteDataSource extends SupabaseRemoteDataSource {
   const AddressRemoteDataSource(super.client);
@@ -13,9 +12,9 @@ class AddressRemoteDataSource extends SupabaseRemoteDataSource {
     String notes = '',
     required String phoneNumber,
   }) async {
-    try {
-      final normalizedPhone = AddressFormValidator.normalizeDigits(phoneNumber);
-      final data = await client.rpc(
+    final normalizedPhone = AddressFormValidator.normalizeDigits(phoneNumber);
+    final data = await guardedRequest(
+      () => client.rpc(
         'add_user_address',
         params: {
           'p_street': street.trim(),
@@ -25,44 +24,31 @@ class AddressRemoteDataSource extends SupabaseRemoteDataSource {
           'p_address_notes': notes.trim(),
           'p_phone_number': normalizedPhone,
         },
-      );
+      ),
+      operation: 'addUserAddress',
+      log: true,
+    );
 
-      return Map<String, dynamic>.from(data as Map);
-    } on PostgrestException catch (error) {
-      throw databaseException(error, operation: 'addUserAddress', log: true);
-    } catch (error, stackTrace) {
-      throw unexpectedDatabaseException(
-        operation: 'addUserAddress',
-        error: error,
-        stackTrace: stackTrace,
-        log: true,
-      );
-    }
+    return Map<String, dynamic>.from(data as Map);
   }
 
   Future<List<Map<String, dynamic>>> fetchUserAddresses() async {
-    try {
-      final data = await client.rpc('fetch_user_addresses');
-      return List<Map<String, dynamic>>.from(data);
-    } on PostgrestException catch (error) {
-      throw databaseException(error);
-    } catch (_) {
-      throw unexpectedDatabaseException();
-    }
+    final data = await guardedRequest(
+      () => client.rpc('fetch_user_addresses'),
+      operation: 'fetchUserAddresses',
+    );
+    return List<Map<String, dynamic>>.from(data);
   }
 
   Future<Map<String, dynamic>> setDefaultUserAddress(String addressId) async {
-    try {
-      final data = await client.rpc(
+    final data = await guardedRequest(
+      () => client.rpc(
         'set_default_user_address',
         params: {'p_address_id': addressId},
-      );
+      ),
+      operation: 'setDefaultUserAddress',
+    );
 
-      return Map<String, dynamic>.from(data as Map);
-    } on PostgrestException catch (error) {
-      throw databaseException(error);
-    } catch (_) {
-      throw unexpectedDatabaseException();
-    }
+    return Map<String, dynamic>.from(data as Map);
   }
 }

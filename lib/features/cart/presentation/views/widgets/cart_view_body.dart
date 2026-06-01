@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,16 +9,17 @@ import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/assets.dart';
-import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
-import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/presentation/actions/cart_route_arguments_builder.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/cart/presentation/views/add_user_address_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_header_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_item_card.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_skeleton.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_indicator.dart';
+import 'package:makanak/shared/widgets/app_snack_bar.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
@@ -28,11 +29,14 @@ class CartViewBody extends StatefulWidget {
     this.cartArguments,
     this.bottomContentPadding = 0,
     this.onBack,
+    this.onContinueRequested,
   });
 
   final CartViewArguments? cartArguments;
   final double bottomContentPadding;
   final VoidCallback? onBack;
+  final void Function(CartViewArguments? routeArguments, bool hasSavedAddress)?
+  onContinueRequested;
 
   @override
   State<CartViewBody> createState() => _CartViewBodyState();
@@ -50,19 +54,39 @@ class _CartViewBodyState extends State<CartViewBody> {
     context.read<AddressCubit>().checkSavedAddresses();
   }
 
-  void _goToNextStep(
+  Future<void> _goToNextStep(
     CartState cartState,
     AddressState addressState,
     Color primaryColor,
-  ) {
+  ) async {
     final product = cartState.product;
     if (product == null) return;
+
+    final networkMessage = await context.read<CartCubit>()
+        .networkMessageBeforeCheckout(shopId: product.shopId);
+    if (!mounted) return;
+
+    if (networkMessage != null) {
+      AppSnackBar.show(
+        context: context,
+        message: networkMessage,
+        badgeText: MaterialLocalizations.of(context).closeButtonTooltip,
+        onBadgeTap: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+      );
+      return;
+    }
 
     final routeArguments = CartRouteArgumentsBuilder.fromState(
       state: cartState,
       primaryColor: primaryColor,
       fallback: widget.cartArguments,
     );
+
+    final onContinueRequested = widget.onContinueRequested;
+    if (onContinueRequested != null) {
+      onContinueRequested(routeArguments, addressState.hasSavedAddress);
+      return;
+    }
 
     Navigator.pushNamed(
       context,
@@ -183,12 +207,13 @@ class _CartViewBodyState extends State<CartViewBody> {
                         hint: AppStrings.continueText,
                         color: primaryColor,
                         preventRapidTaps: true,
-                        onTap:
-                            () => _goToNextStep(
-                              cartState,
-                              addressState,
-                              primaryColor,
-                            ),
+                        onTap: () => unawaited(
+                          _goToNextStep(
+                            cartState,
+                            addressState,
+                            primaryColor,
+                          ),
+                        ),
                         hasShadowEffect: false,
                       ),
                       SizedBox(height: widget.bottomContentPadding),

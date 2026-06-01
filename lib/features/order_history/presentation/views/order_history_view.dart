@@ -5,15 +5,21 @@ import 'package:makanak/features/order_history/presentation/manager/order_histor
 import 'package:makanak/features/order_history/presentation/views/widgets/order_history_view_body.dart';
 
 class OrderHistoryView extends StatelessWidget {
-  const OrderHistoryView({super.key});
+  const OrderHistoryView({super.key, this.onFullScreenNetworkStateChanged});
 
   static const String routeName = 'order_history';
+
+  final ValueChanged<bool>? onFullScreenNetworkStateChanged;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<OrderHistoryCubit>()..fetchOrders(),
-      child: const Scaffold(body: OrderHistoryViewBody()),
+      child: Scaffold(
+        body: OrderHistoryViewBody(
+          onFullScreenNetworkStateChanged: onFullScreenNetworkStateChanged,
+        ),
+      ),
     );
   }
 }

@@ -1,7 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:makanak/core/domain/repos/address_repository.dart';
+﻿import 'package:dartz/dartz.dart';
 import 'package:makanak/core/data/data_sources/address_remote_data_source.dart';
+import 'package:makanak/core/domain/repos/address_repository.dart';
 import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/errors/failure_mapper.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/models/user_address_model.dart';
 import 'package:makanak/core/utils/app_strings.dart';
@@ -17,8 +18,13 @@ class AddressRepositoryImpl implements AddressRepository {
       final data = await _remoteDataSource.fetchUserAddresses();
       final addresses = data.map(UserAddressModel.fromJson).toList();
       return right(addresses);
-    } on DatabaseException {
-      return left(const Failure(AppStrings.addressLoadError));
+    } on DatabaseException catch (error) {
+      return left(
+        FailureMapper.fromDatabaseException(
+          error,
+          genericMessage: AppStrings.addressLoadError,
+        ),
+      );
     } catch (_) {
       return left(const Failure(AppStrings.addressLoadError));
     }
@@ -43,8 +49,13 @@ class AddressRepositoryImpl implements AddressRepository {
         phoneNumber: phoneNumber,
       );
       return right(UserAddressModel.fromJson(data));
-    } on DatabaseException {
-      return left(const Failure(AppStrings.addressSaveError));
+    } on DatabaseException catch (error) {
+      return left(
+        FailureMapper.fromDatabaseException(
+          error,
+          genericMessage: AppStrings.addressSaveError,
+        ),
+      );
     } catch (_) {
       return left(const Failure(AppStrings.addressSaveError));
     }
@@ -55,8 +66,13 @@ class AddressRepositoryImpl implements AddressRepository {
     try {
       await _remoteDataSource.setDefaultUserAddress(addressId);
       return right(null);
-    } on DatabaseException {
-      return left(const Failure(AppStrings.defaultAddressError));
+    } on DatabaseException catch (error) {
+      return left(
+        FailureMapper.fromDatabaseException(
+          error,
+          genericMessage: AppStrings.defaultAddressError,
+        ),
+      );
     } catch (_) {
       return left(const Failure(AppStrings.defaultAddressError));
     }

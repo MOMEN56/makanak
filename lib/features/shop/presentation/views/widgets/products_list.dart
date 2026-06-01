@@ -5,8 +5,8 @@ import 'package:makanak/core/utils/assets.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
 import 'package:makanak/features/shop/presentation/views/product_details_view.dart';
-import 'package:makanak/features/shop/presentation/views/widgets/products_grid_delegate.dart';
 import 'package:makanak/features/shop/presentation/views/widgets/product_card.dart';
+import 'package:makanak/features/shop/presentation/views/widgets/products_grid_delegate.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/message_emoji_widget.dart';
 
@@ -16,6 +16,7 @@ class ProductsList extends StatefulWidget {
     required this.products,
     required this.primaryColor,
     required this.resetSelectionSignal,
+    required this.isShopOpen,
     this.shopModel,
     this.onProductSelected,
     this.onCartRequested,
@@ -25,6 +26,7 @@ class ProductsList extends StatefulWidget {
   final List<ProductModel> products;
   final Color primaryColor;
   final int resetSelectionSignal;
+  final bool isShopOpen;
   final ShopModel? shopModel;
   final void Function(ProductModel product, int quantity)? onProductSelected;
   final VoidCallback? onCartRequested;
@@ -89,6 +91,7 @@ class _ProductsListState extends State<ProductsList> {
           quantity: quantity,
           primaryColor: widget.primaryColor,
           resetSignal: widget.resetSelectionSignal,
+          isShopOpen: widget.isShopOpen,
           onTap: () async {
             FocusManager.instance.primaryFocus?.unfocus();
             final result = await Navigator.pushNamed(
@@ -115,3 +118,4 @@ class _ProductsListState extends State<ProductsList> {
     );
   }
 }
+

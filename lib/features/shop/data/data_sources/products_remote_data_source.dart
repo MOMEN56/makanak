@@ -1,5 +1,4 @@
-import 'package:makanak/core/services/supabase_remote_data_source.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:makanak/core/services/supabase_remote_data_source.dart';
 
 class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
   const ProductsRemoteDataSource(super.client);
@@ -21,40 +20,29 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
     bool? priceAscending,
     int limit = defaultFetchLimit,
   }) async {
-    try {
-      final normalizedQuery = query.trim();
-      var request = client
-          .from('products')
-          .select(_productSelectColumns)
-          .eq('shop_id', shopId)
-          .eq('is_visible', true);
+    final normalizedQuery = query.trim();
+    var request = client
+        .from('products')
+        .select(_productSelectColumns)
+        .eq('shop_id', shopId)
+        .eq('is_visible', true);
 
-      if (normalizedQuery.isNotEmpty) {
-        final escapedQuery = _escapeWildcards(normalizedQuery);
-        request = request.ilike('name', '%$escapedQuery%');
-      }
-
-      final orderedRequest =
-          priceAscending == null
-              ? request.order('name')
-              : request.order('price', ascending: priceAscending);
-      final data = await orderedRequest.limit(limit);
-
-      return List<Map<String, dynamic>>.from(data);
-    } on PostgrestException catch (error) {
-      throw databaseException(
-        error,
-        operation: 'fetchVisibleProductsByShopId',
-        log: true,
-      );
-    } catch (error, stackTrace) {
-      throw unexpectedDatabaseException(
-        operation: 'fetchVisibleProductsByShopId',
-        error: error,
-        stackTrace: stackTrace,
-        log: true,
-      );
+    if (normalizedQuery.isNotEmpty) {
+      final escapedQuery = _escapeWildcards(normalizedQuery);
+      request = request.ilike('name', '%$escapedQuery%');
     }
+
+    final orderedRequest =
+        priceAscending == null
+            ? request.order('name')
+            : request.order('price', ascending: priceAscending);
+    final data = await guardedRequest(
+      () => orderedRequest.limit(limit),
+      operation: 'fetchVisibleProductsByShopId',
+      log: true,
+    );
+
+    return List<Map<String, dynamic>>.from(data);
   }
 
   Future<List<Map<String, dynamic>>> fetchProductsByIds({
@@ -72,28 +60,17 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
       return const [];
     }
 
-    try {
-      final data = await client
+    final data = await guardedRequest(
+      () => client
           .from('products')
           .select(_productSelectColumns)
           .eq('shop_id', normalizedShopId)
-          .inFilter('id', normalizedIds.toList(growable: false));
+          .inFilter('id', normalizedIds.toList(growable: false)),
+      operation: 'fetchProductsByIds',
+      log: true,
+    );
 
-      return List<Map<String, dynamic>>.from(data);
-    } on PostgrestException catch (error) {
-      throw databaseException(
-        error,
-        operation: 'fetchProductsByIds',
-        log: true,
-      );
-    } catch (error, stackTrace) {
-      throw unexpectedDatabaseException(
-        operation: 'fetchProductsByIds',
-        error: error,
-        stackTrace: stackTrace,
-        log: true,
-      );
-    }
+    return List<Map<String, dynamic>>.from(data);
   }
 
   Future<Map<String, dynamic>?> fetchProductByShopAndId({
@@ -107,32 +84,23 @@ class ProductsRemoteDataSource extends SupabaseRemoteDataSource {
       return null;
     }
 
-    try {
-      final data = await client
+    final data = await guardedRequest(
+      () => client
           .from('products')
           .select(_productSelectColumns)
           .eq('shop_id', normalizedShopId)
           .eq('id', normalizedProductId)
-          .maybeSingle();
+          .eq('is_visible', true)
+          .maybeSingle(),
+      operation: 'fetchProductByShopAndId',
+      log: true,
+    );
 
-      if (data == null) {
-        return null;
-      }
-
-      return Map<String, dynamic>.from(data);
-    } on PostgrestException catch (error) {
-      throw databaseException(
-        error,
-        operation: 'fetchProductByShopAndId',
-        log: true,
-      );
-    } catch (error, stackTrace) {
-      throw unexpectedDatabaseException(
-        operation: 'fetchProductByShopAndId',
-        error: error,
-        stackTrace: stackTrace,
-        log: true,
-      );
+    if (data == null) {
+      return null;
     }
+
+    return Map<String, dynamic>.from(data);
   }
 }
+

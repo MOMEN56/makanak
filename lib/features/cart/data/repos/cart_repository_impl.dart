@@ -1,5 +1,6 @@
-import 'package:dartz/dartz.dart';
+﻿import 'package:dartz/dartz.dart';
 import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/errors/failure_mapper.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/domain/entities/create_order_item.dart';
@@ -41,11 +42,32 @@ class CartRepositoryImpl implements CartRepository {
   }
 
   Failure _mapCreateOrderFailure(DatabaseException error) {
+    if (_isShopClosedFailure(error.message)) {
+      return const Failure(AppStrings.shopClosedNow);
+    }
+
+    if (_isShopUnavailableFailure(error.message)) {
+      return const Failure(AppStrings.shopUnavailableNow);
+    }
+
     if (_isAvailabilityValidationFailure(error.message)) {
       return const Failure(AppStrings.cartAvailabilityCheckFailed);
     }
 
-    return const Failure(AppStrings.orderConfirmError);
+    return FailureMapper.fromDatabaseException(
+      error,
+      genericMessage: AppStrings.orderConfirmError,
+    );
+  }
+
+  bool _isShopClosedFailure(String message) {
+    final normalizedMessage = message.toLowerCase();
+    return normalizedMessage.contains('shop_closed');
+  }
+
+  bool _isShopUnavailableFailure(String message) {
+    final normalizedMessage = message.toLowerCase();
+    return normalizedMessage.contains('shop_unavailable');
   }
 
   bool _isAvailabilityValidationFailure(String message) {

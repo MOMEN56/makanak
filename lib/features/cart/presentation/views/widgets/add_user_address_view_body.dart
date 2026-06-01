@@ -8,9 +8,9 @@ import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
-import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/presentation/actions/cart_route_arguments_builder.dart';
+import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_header_widget.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_step_indicator.dart';
@@ -23,10 +23,14 @@ class AddUserAddressViewBody extends StatefulWidget {
     super.key,
     this.cartArguments,
     this.returnOnSave = false,
+    this.onBack,
+    this.onContinueRequested,
   });
 
   final CartViewArguments? cartArguments;
   final bool returnOnSave;
+  final VoidCallback? onBack;
+  final ValueChanged<CartViewArguments?>? onContinueRequested;
 
   @override
   State<AddUserAddressViewBody> createState() => _AddUserAddressViewBodyState();
@@ -88,7 +92,33 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
 
   void _goToCart() {
     _saveDraft();
+    final onBack = widget.onBack;
+    if (onBack != null) {
+      onBack();
+      return;
+    }
+
     Navigator.maybePop(context);
+  }
+
+  void _continueToConfirmingOrder(Color primaryColor) {
+    final routeArguments = CartRouteArgumentsBuilder.fromState(
+      state: _cartCubit.state,
+      primaryColor: primaryColor,
+      fallback: widget.cartArguments,
+    );
+
+    final onContinueRequested = widget.onContinueRequested;
+    if (onContinueRequested != null) {
+      onContinueRequested(routeArguments);
+      return;
+    }
+
+    Navigator.pushNamed(
+      context,
+      ConfirmingOrderView.routeName,
+      arguments: routeArguments,
+    );
   }
 
   @override
@@ -107,15 +137,7 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
         if (state is AddressChecked &&
             state.hasSavedAddress &&
             !_submittedAddress) {
-          Navigator.pushReplacementNamed(
-            context,
-            ConfirmingOrderView.routeName,
-            arguments: CartRouteArgumentsBuilder.fromState(
-              state: _cartCubit.state,
-              primaryColor: primaryColor,
-              fallback: widget.cartArguments,
-            ),
-          );
+          _continueToConfirmingOrder(primaryColor);
           return;
         }
 
@@ -125,15 +147,7 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
             Navigator.pop(context);
             return;
           }
-          Navigator.pushNamed(
-            context,
-            ConfirmingOrderView.routeName,
-            arguments: CartRouteArgumentsBuilder.fromState(
-              state: _cartCubit.state,
-              primaryColor: primaryColor,
-              fallback: widget.cartArguments,
-            ),
-          );
+          _continueToConfirmingOrder(primaryColor);
         }
       },
       builder: (context, state) {

@@ -2,21 +2,30 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/errors/failure_mapper.dart';
+import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/services/service_locator.dart';
-import 'package:makanak/core/utils/app_responsive.dart';
-import 'package:makanak/core/utils/app_strings.dart';
-import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/services/services.dart';
+import 'package:makanak/core/utils/app_responsive.dart';
+import 'package:makanak/core/utils/app_spacing.dart';
+import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/notifications/data/models/app_notification_model.dart';
 import 'package:makanak/features/notifications/data/repos/notifications_repository.dart';
 import 'package:makanak/features/notifications/presentation/notifications_strings.dart';
 import 'package:makanak/features/notifications/presentation/widgets/notification_list_item.dart';
 import 'package:makanak/shared/widgets/app_snack_bar.dart';
 import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
+import 'package:makanak/shared/widgets/no_internet_view.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class NotificationsHistoryViewBody extends StatefulWidget {
-  const NotificationsHistoryViewBody({super.key});
+  const NotificationsHistoryViewBody({
+    super.key,
+    this.onFullScreenNetworkStateChanged,
+  });
+
+  final ValueChanged<bool>? onFullScreenNetworkStateChanged;
 
   @override
   State<NotificationsHistoryViewBody> createState() =>
@@ -29,7 +38,8 @@ class _NotificationsHistoryViewBodyState
 
   List<AppNotificationModel> _notifications = const [];
   bool _isLoading = true;
-  String? _errorMessage;
+  bool _hasLoadedContentOnce = false;
+  Failure? _failure;
 
   @override
   void initState() {
@@ -42,8 +52,9 @@ class _NotificationsHistoryViewBodyState
     if (showLoading) {
       setState(() {
         _isLoading = true;
-        _errorMessage = null;
+        _failure = null;
       });
+      widget.onFullScreenNetworkStateChanged?.call(false);
     }
 
     try {
@@ -55,25 +66,31 @@ class _NotificationsHistoryViewBodyState
       setState(() {
         _notifications = notifications;
         _isLoading = false;
-        _errorMessage = null;
+        _hasLoadedContentOnce = true;
+        _failure = null;
       });
-    } catch (_) {
+      widget.onFullScreenNetworkStateChanged?.call(false);
+    } catch (error) {
       if (!mounted) {
         return;
       }
 
-      if (_notifications.isNotEmpty) {
+      final failure = _mapFailure(error);
+
+      if (_hasLoadedContentOnce) {
         setState(() {
           _isLoading = false;
         });
-        _showRefreshError();
+        widget.onFullScreenNetworkStateChanged?.call(false);
+        _showRefreshError(failure);
         return;
       }
 
       setState(() {
         _isLoading = false;
-        _errorMessage = NotificationsStrings.loadError;
+        _failure = failure;
       });
+      widget.onFullScreenNetworkStateChanged?.call(failure.isNetwork);
     }
   }
 
@@ -83,9 +100,9 @@ class _NotificationsHistoryViewBodyState
         await _repository.markAsRead(notification.id);
         _markNotificationAsReadLocally(notification.id);
       }
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
-        _showRefreshError();
+        _showRefreshError(_mapFailure(error));
       }
     }
 
@@ -97,6 +114,17 @@ class _NotificationsHistoryViewBodyState
       notification.data,
       resetStack: false,
     );
+  }
+
+  Failure _mapFailure(Object error) {
+    if (error is DatabaseException) {
+      return FailureMapper.fromDatabaseException(
+        error,
+        genericMessage: NotificationsStrings.loadError,
+      );
+    }
+
+    return const Failure(NotificationsStrings.loadError);
   }
 
   void _markNotificationAsReadLocally(String notificationId) {
@@ -113,10 +141,10 @@ class _NotificationsHistoryViewBodyState
     });
   }
 
-  void _showRefreshError() {
+  void _showRefreshError(Failure failure) {
     AppSnackBar.show(
       context: context,
-      message: NotificationsStrings.loadError,
+      message: failure.message,
       badgeText: AppStrings.retry,
       backgroundColor: const Color(0xffD85B5B),
       onBadgeTap: () {
@@ -132,14 +160,14 @@ class _NotificationsHistoryViewBodyState
       return const CustomLoadingIndicator();
     }
 
-    if (_errorMessage != null) {
-      return _RefreshableState(
-        onRefresh: () => _loadNotifications(showLoading: false),
-        child: StateMessage(
-          message: _errorMessage!,
-          onRetry: () => unawaited(_loadNotifications()),
-        ),
-      );
+    final failure = _failure;
+    if (failure != null) {
+      return failure.isNetwork
+          ? NoInternetView(onRetry: () => unawaited(_loadNotifications()))
+          : StateMessage(
+            message: failure.message,
+            onRetry: () => unawaited(_loadNotifications()),
+          );
     }
 
     if (_notifications.isEmpty) {

@@ -1,4 +1,5 @@
-import 'package:equatable/equatable.dart';
+﻿import 'package:equatable/equatable.dart';
+import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/features/order_history/data/models/order_model.dart';
 
 sealed class OrderHistoryState extends Equatable {
@@ -17,19 +18,28 @@ class OrderHistoryLoading extends OrderHistoryState {
 }
 
 class OrderHistorySuccess extends OrderHistoryState {
-  const OrderHistorySuccess(this.orders);
+  const OrderHistorySuccess(
+    this.orders, {
+    this.refreshFailure,
+    this.refreshFailureId = 0,
+  });
 
   final List<OrderModel> orders;
+  final Failure? refreshFailure;
+  final int refreshFailureId;
 
   @override
-  List<Object?> get props => [orders];
+  List<Object?> get props => [orders, refreshFailure, refreshFailureId];
 }
 
 class OrderHistoryFailure extends OrderHistoryState {
-  const OrderHistoryFailure(this.message);
+  const OrderHistoryFailure(this.failure);
 
-  final String message;
+  final Failure failure;
+
+  String get message => failure.message;
+  bool get isNetworkFailure => failure.isNetwork;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [failure];
 }

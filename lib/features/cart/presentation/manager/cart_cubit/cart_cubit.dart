@@ -10,14 +10,19 @@ import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
+import 'package:makanak/features/shops/data/repos/shops_repo.dart';
 
 class CartCubit extends Cubit<CartState> {
-  CartCubit(this._cartRepository, this._productsRepo, {required String userId})
+  CartCubit(
+    this._cartRepository,
+    this._productsRepo,
+    this._shopsRepo, {required String userId})
     : _userId = userId,
       super(CartInitial());
 
   final CartRepository _cartRepository;
   final ProductsRepo _productsRepo;
+  final ShopsRepo _shopsRepo;
   final String _userId;
   String? _lastRestoredShopId;
   bool _isInitialized = false;
@@ -123,6 +128,17 @@ class CartCubit extends Cubit<CartState> {
       );
     }
 
+    final shopValidation = await _validateLatestShop(
+      normalizedShopId,
+      fetchFailureMessage: AppStrings.productAvailabilityCheckFailed,
+    );
+    if (!shopValidation.isValid) {
+      return _addProductFailure(
+        message: shopValidation.message,
+        status: shopValidation.addToCartStatus,
+      );
+    }
+
     final result = await _productsRepo.fetchProductByShopAndId(
       shopId: normalizedShopId,
       productId: productId,
@@ -157,6 +173,24 @@ class CartCubit extends Cubit<CartState> {
         addProduct(arguments.copyWith(product: latestProduct));
         return AddProductToCartResult.added(latestProduct);
       },
+    );
+  }
+
+  Future<String?> networkMessageBeforeCheckout({String? shopId}) async {
+    final normalizedShopId = shopId?.trim();
+    final resolvedShopId =
+        normalizedShopId != null && normalizedShopId.isNotEmpty
+            ? normalizedShopId
+            : _shopIdForItems(state.items);
+
+    if (resolvedShopId == null || resolvedShopId.isEmpty) {
+      return null;
+    }
+
+    final result = await _shopsRepo.fetchShopById(resolvedShopId);
+    return result.fold(
+      (failure) => failure.isNetwork ? failure.message : null,
+      (_) => null,
     );
   }
 
@@ -212,13 +246,26 @@ class CartCubit extends Cubit<CartState> {
 
     _isCreatingOrder = true;
     try {
+      final shopValidation = await _validateLatestShop(
+        shopId,
+        fetchFailureMessage: AppStrings.cartAvailabilityCheckFailed,
+      );
+      if (!shopValidation.isValid) {
+        emit(_errorFromItems(currentItems, shopValidation.message));
+        return;
+      }
+
       final preSubmitSync = await _syncCartItems(
         sourceItems: currentItems,
         shopId: shopId,
       );
       if (preSubmitSync.syncFailed) {
         emit(
-          _errorFromItems(currentItems, AppStrings.cartAvailabilityCheckFailed),
+          _errorFromItems(
+            currentItems,
+            preSubmitSync.failureMessage ??
+                AppStrings.cartAvailabilityCheckFailed,
+          ),
         );
         return;
       }
@@ -268,6 +315,11 @@ class CartCubit extends Cubit<CartState> {
 
       await result.fold<Future<void>>(
         (failure) async {
+          if (_isShopStateFailureMessage(failure.message)) {
+            emit(_errorFromItems(itemsToSubmit, failure.message));
+            return;
+          }
+
           final postFailureSync = await _syncCartItems(
             sourceItems: itemsToSubmit,
             shopId: validatedShopId,
@@ -276,7 +328,8 @@ class CartCubit extends Cubit<CartState> {
             emit(
               _errorFromItems(
                 itemsToSubmit,
-                AppStrings.cartAvailabilityCheckFailed,
+                postFailureSync.failureMessage ??
+                    AppStrings.cartAvailabilityCheckFailed,
               ),
             );
             return;
@@ -402,6 +455,36 @@ class CartCubit extends Cubit<CartState> {
     return AddProductToCartResult.failure(status: status, message: message);
   }
 
+  Future<_ShopValidationResult> _validateLatestShop(
+    String shopId, {
+    required String fetchFailureMessage,
+  }) async {
+    final result = await _shopsRepo.fetchShopById(shopId);
+    return result.fold(
+      (failure) => _ShopValidationResult.failure(
+        message: failure.isNetwork ? failure.message : fetchFailureMessage,
+        addToCartStatus: AddProductToCartStatus.verificationFailed,
+      ),
+      (shop) {
+        if (shop == null || !shop.isActive || !shop.isVisible) {
+          return const _ShopValidationResult.failure(
+            message: AppStrings.shopUnavailableNow,
+            addToCartStatus: AddProductToCartStatus.unavailable,
+          );
+        }
+
+        if (!shop.isOpen) {
+          return const _ShopValidationResult.failure(
+            message: AppStrings.shopClosedNow,
+            addToCartStatus: AddProductToCartStatus.shopClosed,
+          );
+        }
+
+        return const _ShopValidationResult.valid();
+      },
+    );
+  }
+
   Future<void> _applySyncedItems({
     required List<CartLocalData> items,
     String? shopId,
@@ -486,12 +569,13 @@ class CartCubit extends Cubit<CartState> {
       productIds: productIds,
     );
     return result.fold(
-      (_) => _CartSyncResult(
+      (failure) => _CartSyncResult(
         shopId: resolvedShopId,
         availableItems: sourceItems,
         removedItems: const [],
         didFetchLatestProducts: false,
         syncFailed: true,
+        failureMessage: failure.isNetwork ? failure.message : null,
       ),
       (products) {
         final productsById = <String, ProductModel>{
@@ -631,6 +715,11 @@ class CartCubit extends Cubit<CartState> {
 
     return AppStrings.product;
   }
+
+  bool _isShopStateFailureMessage(String message) {
+    return message == AppStrings.shopClosedNow ||
+        message == AppStrings.shopUnavailableNow;
+  }
 }
 
 class _CartSyncResult {
@@ -640,6 +729,7 @@ class _CartSyncResult {
     required this.removedItems,
     required this.didFetchLatestProducts,
     this.syncFailed = false,
+    this.failureMessage,
   });
 
   final String? shopId;
@@ -647,6 +737,7 @@ class _CartSyncResult {
   final List<_RemovedCartItem> removedItems;
   final bool didFetchLatestProducts;
   final bool syncFailed;
+  final String? failureMessage;
 }
 
 class _RemovedCartItem {
@@ -661,9 +752,38 @@ enum _RemovedCartItemReason { outOfStock, unavailable }
 enum AddProductToCartStatus {
   added,
   invalidProduct,
+  shopClosed,
   unavailable,
   outOfStock,
   verificationFailed,
+}
+
+class _ShopValidationResult {
+  const _ShopValidationResult._({
+    required this.isValid,
+    required this.message,
+    required this.addToCartStatus,
+  });
+
+  const _ShopValidationResult.valid()
+    : this._(
+        isValid: true,
+        message: '',
+        addToCartStatus: AddProductToCartStatus.added,
+      );
+
+  const _ShopValidationResult.failure({
+    required String message,
+    required AddProductToCartStatus addToCartStatus,
+  }) : this._(
+         isValid: false,
+         message: message,
+         addToCartStatus: addToCartStatus,
+       );
+
+  final bool isValid;
+  final String message;
+  final AddProductToCartStatus addToCartStatus;
 }
 
 class AddProductToCartResult {
@@ -692,4 +812,11 @@ class AddProductToCartResult {
   final String? message;
 
   bool get wasAdded => status == AddProductToCartStatus.added;
+  bool get wasBlockedByClosedShop =>
+      status == AddProductToCartStatus.shopClosed;
 }
+
+
+
+
+

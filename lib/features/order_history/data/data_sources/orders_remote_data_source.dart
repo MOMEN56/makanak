@@ -1,5 +1,4 @@
-import 'package:makanak/core/services/supabase_remote_data_source.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:makanak/core/services/supabase_remote_data_source.dart';
 
 class OrdersRemoteDataSource extends SupabaseRemoteDataSource {
   const OrdersRemoteDataSource(super.client);
@@ -87,8 +86,8 @@ class OrdersRemoteDataSource extends SupabaseRemoteDataSource {
           };
         }).toList(growable: false);
 
-    try {
-      await client.rpc(
+    await guardedRequest(
+      () => client.rpc(
         'create_order',
         params: {
           'p_shop_id': normalizedShopId,
@@ -96,73 +95,47 @@ class OrdersRemoteDataSource extends SupabaseRemoteDataSource {
           'p_shipping_price': shippingPrice,
           'p_order_details': normalizedItems,
         },
-      );
-    } on PostgrestException catch (error) {
-      throw databaseException(error, operation: 'createOrder', log: true);
-    } catch (error, stackTrace) {
-      throw unexpectedDatabaseException(
-        operation: 'createOrder',
-        error: error,
-        stackTrace: stackTrace,
-        log: true,
-      );
-    }
+      ),
+      operation: 'createOrder',
+      log: true,
+    );
   }
 
   Future<List<Map<String, dynamic>>> fetchUserOrders() async {
-    try {
-      final data = await client
+    final data = await guardedRequest(
+      () => client
           .from('orders')
           .select(_userOrderSelect)
           .eq('user_id', requireAuthenticatedUserId())
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false),
+      operation: 'fetchUserOrders',
+      log: true,
+    );
 
-      return List<Map<String, dynamic>>.from(data);
-    } on PostgrestException catch (error) {
-      throw databaseException(error, operation: 'fetchUserOrders', log: true);
-    } catch (error, stackTrace) {
-      throw unexpectedDatabaseException(
-        operation: 'fetchUserOrders',
-        error: error,
-        stackTrace: stackTrace,
-        log: true,
-      );
-    }
+    return List<Map<String, dynamic>>.from(data);
   }
 
   Future<Map<String, dynamic>?> fetchUserOrderById(String orderId) async {
-    try {
-      final normalizedOrderId = orderId.trim();
-      if (normalizedOrderId.isEmpty) {
-        return null;
-      }
-
-      final data =
-          await client
-              .from('orders')
-              .select(_userOrderSelect)
-              .eq('user_id', requireAuthenticatedUserId())
-              .eq('id', normalizedOrderId)
-              .maybeSingle();
-
-      if (data == null) {
-        return null;
-      }
-
-      return Map<String, dynamic>.from(data);
-    } on PostgrestException catch (error) {
-      throw databaseException(
-        error,
-        operation: 'fetchUserOrderById',
-        log: true,
-      );
-    } catch (error, stackTrace) {
-      throw unexpectedDatabaseException(
-        operation: 'fetchUserOrderById',
-        error: error,
-        stackTrace: stackTrace,
-        log: true,
-      );
+    final normalizedOrderId = orderId.trim();
+    if (normalizedOrderId.isEmpty) {
+      return null;
     }
+
+    final data = await guardedRequest(
+      () => client
+          .from('orders')
+          .select(_userOrderSelect)
+          .eq('user_id', requireAuthenticatedUserId())
+          .eq('id', normalizedOrderId)
+          .maybeSingle(),
+      operation: 'fetchUserOrderById',
+      log: true,
+    );
+
+    if (data == null) {
+      return null;
+    }
+
+    return Map<String, dynamic>.from(data);
   }
 }

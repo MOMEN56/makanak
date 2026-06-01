@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/routing/app_route_arguments.dart';
@@ -14,25 +14,52 @@ import 'package:makanak/features/order_history/presentation/views/order_details_
 import 'package:makanak/features/order_history/presentation/views/widgets/empty_order_history_state.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_history_card.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_history_skeleton.dart';
+import 'package:makanak/shared/widgets/app_snack_bar.dart';
+import 'package:makanak/shared/widgets/no_internet_view.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class OrderHistoryViewBody extends StatelessWidget {
-  const OrderHistoryViewBody({super.key});
+  const OrderHistoryViewBody({
+    super.key,
+    this.onFullScreenNetworkStateChanged,
+  });
+
+  final ValueChanged<bool>? onFullScreenNetworkStateChanged;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<OrderHistoryCubit, OrderHistoryState>(
-      buildWhen: (previous, current) => previous != current,
+    return BlocConsumer<OrderHistoryCubit, OrderHistoryState>(
+      listenWhen: _shouldListenToOrderHistoryChanges,
+      listener: (context, state) {
+        onFullScreenNetworkStateChanged?.call(
+          state is OrderHistoryFailure && state.failure.isNetwork,
+        );
+
+        if (state is! OrderHistorySuccess || state.refreshFailure == null) {
+          return;
+        }
+
+        AppSnackBar.show(
+          context: context,
+          message: state.refreshFailure!.message,
+          badgeText: AppStrings.retry,
+          onBadgeTap: context.read<OrderHistoryCubit>().fetchOrders,
+        );
+      },
+      buildWhen: _shouldRebuildOrderHistoryView,
       builder: (context, state) {
         if (state is OrderHistoryInitial || state is OrderHistoryLoading) {
           return const OrderHistorySkeleton();
         }
 
         if (state is OrderHistoryFailure) {
-          return StateMessage(
-            message: state.message,
-            onRetry: () => context.read<OrderHistoryCubit>().fetchOrders(),
-          );
+          final retry = context.read<OrderHistoryCubit>().fetchOrders;
+
+          return state.failure.isNetwork
+              ? NoInternetView(onRetry: retry)
+              : SafeArea(
+                child: StateMessage(message: state.message, onRetry: retry),
+              );
         }
 
         final orders =
@@ -41,7 +68,7 @@ class OrderHistoryViewBody extends StatelessWidget {
         return SafeArea(
           child: RefreshIndicator.adaptive(
             color: AppColors.primaryColor,
-            onRefresh: () => context.read<OrderHistoryCubit>().fetchOrders(),
+            onRefresh: context.read<OrderHistoryCubit>().fetchOrders,
             child:
                 orders.isEmpty
                     ? ListView(
@@ -107,4 +134,42 @@ class _OrderHistoryTitle extends StatelessWidget {
       style: TextStyles.bold24.copyWith(color: AppColors.primaryDarkColor),
     );
   }
+}
+
+bool _shouldListenToOrderHistoryChanges(
+  OrderHistoryState previous,
+  OrderHistoryState current,
+) {
+  final previousFullScreenNetworkFailure =
+      previous is OrderHistoryFailure && previous.failure.isNetwork;
+  final currentFullScreenNetworkFailure =
+      current is OrderHistoryFailure && current.failure.isNetwork;
+
+  if (previousFullScreenNetworkFailure != currentFullScreenNetworkFailure) {
+    return true;
+  }
+
+  return current is OrderHistorySuccess &&
+      current.refreshFailure != null &&
+      (previous is! OrderHistorySuccess ||
+          previous.refreshFailureId != current.refreshFailureId);
+}
+
+bool _shouldRebuildOrderHistoryView(
+  OrderHistoryState previous,
+  OrderHistoryState current,
+) {
+  if (previous.runtimeType != current.runtimeType) {
+    return true;
+  }
+
+  if (previous is OrderHistorySuccess && current is OrderHistorySuccess) {
+    return previous.orders != current.orders;
+  }
+
+  if (previous is OrderHistoryFailure && current is OrderHistoryFailure) {
+    return previous.failure != current.failure;
+  }
+
+  return false;
 }
