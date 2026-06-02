@@ -3,6 +3,8 @@ import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/models/user_address_model.dart';
 
 abstract class AddressRepository {
+  Future<List<UserAddressModel>> loadStoredAddresses();
+
   Future<Either<Failure, List<UserAddressModel>>> fetchUserAddresses();
 
   Future<Either<Failure, UserAddressModel>> saveAddress({

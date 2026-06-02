@@ -6,7 +6,6 @@ import 'package:makanak/features/app_remote_config/domain/entities/app_access_re
 import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_cubit.dart';
 import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_state.dart';
 import 'package:makanak/features/app_remote_config/presentation/views/widgets/app_remote_config_blocking_widget.dart';
-import 'package:makanak/features/app_remote_config/presentation/views/widgets/app_remote_config_loading_view_body.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppRemoteConfigGateViewBody extends StatefulWidget {
@@ -29,8 +28,7 @@ class _AppRemoteConfigGateViewBodyState
     return BlocBuilder<AppRemoteConfigCubit, AppRemoteConfigState>(
       builder: (BuildContext context, AppRemoteConfigState state) {
         return switch (state) {
-          AppRemoteConfigInitial() ||
-          AppRemoteConfigLoading() => const AppRemoteConfigLoadingViewBody(),
+          AppRemoteConfigInitial() || AppRemoteConfigLoading() => widget.child,
 
           AppRemoteConfigResolved(:final result) => switch (result.status) {
             AppAccessStatus.allowed => widget.child,
@@ -120,3 +118,5 @@ class _AppRemoteConfigGateViewBodyState
     return uri.scheme == 'https';
   }
 }
+
+

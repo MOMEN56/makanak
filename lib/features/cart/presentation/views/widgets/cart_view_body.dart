@@ -67,11 +67,9 @@ class _CartViewBodyState extends State<CartViewBody> {
     if (!mounted) return;
 
     if (networkMessage != null) {
-      AppSnackBar.show(
+      AppSnackBar.showNetwork(
         context: context,
         message: networkMessage,
-        badgeText: MaterialLocalizations.of(context).closeButtonTooltip,
-        onBadgeTap: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
       );
       return;
     }
@@ -243,3 +241,4 @@ bool _shouldRebuildCartAddressView(
       previous.addresses != current.addresses ||
       previous.selectedAddressIndex != current.selectedAddressIndex;
 }
+

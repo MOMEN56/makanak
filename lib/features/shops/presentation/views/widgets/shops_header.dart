@@ -6,8 +6,13 @@ import 'package:makanak/core/utils/app_text_styles.dart';
 import 'package:makanak/shared/widgets/search_text_field.dart';
 
 class ShopsHeader extends StatelessWidget {
-  const ShopsHeader({super.key, this.onSearchChanged});
+  const ShopsHeader({
+    super.key,
+    this.controller,
+    this.onSearchChanged,
+  });
 
+  final TextEditingController? controller;
   final ValueChanged<String>? onSearchChanged;
 
   @override
@@ -27,6 +32,7 @@ class ShopsHeader extends StatelessWidget {
           const Gap(16),
           SearchTextField(
             hintText: AppStrings.shopsSearchHint,
+            controller: controller,
             onChanged: onSearchChanged,
           ),
         ],

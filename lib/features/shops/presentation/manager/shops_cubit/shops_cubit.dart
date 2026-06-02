@@ -1,4 +1,4 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/debouncer.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/features/shops/data/repos/shops_repo.dart';
@@ -11,9 +11,12 @@ class ShopsCubit extends Cubit<ShopsState> {
   final Debouncer _searchDebouncer = Debouncer(
     delay: const Duration(milliseconds: 400),
   );
-  String _query = '';
+  String _pendingQuery = '';
+  String _appliedQuery = '';
   int _requestId = 0;
   int _refreshFailureId = 0;
+
+  String get appliedQuery => _appliedQuery;
 
   Future<void> fetchShops() async {
     await _fetchShops(query: '');
@@ -21,14 +24,14 @@ class ShopsCubit extends Cubit<ShopsState> {
 
   Future<void> retry() async {
     _searchDebouncer.cancel();
-    await _fetchShops(query: _query);
+    await _fetchShops(query: _pendingQuery);
   }
 
   void searchShops(String query) {
     final nextQuery = _normalizeQuery(query);
-    if (nextQuery == _query) return;
+    if (nextQuery == _pendingQuery) return;
 
-    _query = nextQuery;
+    _pendingQuery = nextQuery;
     _searchDebouncer.cancel();
     _requestId++;
     _searchDebouncer.run(() {
@@ -37,7 +40,8 @@ class ShopsCubit extends Cubit<ShopsState> {
   }
 
   Future<void> _fetchShops({required String query}) async {
-    _query = query;
+    final previousAppliedQuery = _appliedQuery;
+    _pendingQuery = query;
     final currentRequestId = ++_requestId;
     final currentState = state;
     final previousShops =
@@ -54,6 +58,7 @@ class ShopsCubit extends Cubit<ShopsState> {
     result.fold(
       (failure) {
         if (shouldPreserveContent) {
+          _pendingQuery = previousAppliedQuery;
           emit(
             ShopsSuccess(
               List.unmodifiable(previousShops),
@@ -66,7 +71,11 @@ class ShopsCubit extends Cubit<ShopsState> {
 
         emit(ShopsFailure(failure));
       },
-      (shops) => emit(ShopsSuccess(shops)),
+      (shops) {
+        _appliedQuery = query;
+        _pendingQuery = query;
+        emit(ShopsSuccess(shops));
+      },
     );
   }
 

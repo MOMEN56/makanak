@@ -13,6 +13,7 @@ import 'package:makanak/features/shop/presentation/views/product_details_view.da
 import 'package:makanak/features/shop/presentation/views/products_view.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/features/shops/data/repos/shops_repo.dart';
+import 'package:makanak/shared/widgets/app_snack_bar.dart';
 
 class DeepLinkNavigator {
   DeepLinkNavigator(
@@ -95,6 +96,16 @@ class DeepLinkNavigator {
   }
 
   void _handleFailure(Failure failure) {
+    if (failure.isNetwork) {
+      final context = appNavigatorKey.currentState?.context;
+      if (context == null) {
+        return;
+      }
+
+      AppSnackBar.showNetwork(context: context, message: failure.message);
+      return;
+    }
+
     _showMessage(failure.message);
   }
 
@@ -160,6 +171,12 @@ class DeepLinkNavigator {
     }
 
     navigator.popUntil((route) => route.isFirst);
+
+    navigator.pushNamed(
+      ProductsView.routeName,
+      arguments: ProductsRouteArguments.fromShop(shop),
+    );
+
     navigator.pushNamed(
       ProductDetailsView.routeName,
       arguments: ProductDetailsRouteArguments.fromModels(

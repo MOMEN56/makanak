@@ -20,19 +20,21 @@ import 'package:makanak/features/cart/presentation/views/widgets/confirming_orde
 import 'package:makanak/shared/views/add_address_view.dart';
 import 'package:makanak/shared/widgets/address_selector_sheet_widget.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
-import 'package:makanak/shared/widgets/no_internet_view.dart';
+import 'package:makanak/shared/views/no_internet_view.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class ConfirmingOrderViewBody extends StatefulWidget {
   const ConfirmingOrderViewBody({
     super.key,
     this.cartArguments,
+    this.bottomContentPadding = 0,
     this.showAddressStep = false,
     this.onBack,
     this.onOrderSubmitted,
   });
 
   final CartViewArguments? cartArguments;
+  final double bottomContentPadding;
   final bool showAddressStep;
   final VoidCallback? onBack;
   final ValueChanged<CartViewArguments?>? onOrderSubmitted;
@@ -194,7 +196,8 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
               );
             }
 
-            if (addressState is AddressError && addressState.addresses.isEmpty) {
+            if (addressState is AddressError &&
+                addressState.addresses.isEmpty) {
               return addressState.isNetworkFailure
                   ? NoInternetView(onRetry: _retryAddresses)
                   : SafeArea(
@@ -206,6 +209,7 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
             }
 
             return SafeArea(
+              bottom: widget.bottomContentPadding == 0,
               child: Padding(
                 padding: AppResponsive.all(context, AppSpacing.screenEdge),
                 child: Column(
@@ -253,6 +257,7 @@ class _ConfirmingOrderViewBodyState extends State<ConfirmingOrderViewBody> {
                               ? null
                               : () => _goToSubmitOrder(addressState),
                     ),
+                    SizedBox(height: widget.bottomContentPadding),
                   ],
                 ),
               ),

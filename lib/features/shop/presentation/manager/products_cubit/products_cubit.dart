@@ -1,4 +1,4 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/debouncer.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
@@ -11,10 +11,15 @@ class ProductsCubit extends Cubit<ProductsState> {
   final Debouncer _searchDebouncer = Debouncer(
     delay: const Duration(milliseconds: 400),
   );
-  String _query = '';
-  ProductPriceSort _priceSort = ProductPriceSort.none;
+  String _pendingQuery = '';
+  String _appliedQuery = '';
+  ProductPriceSort _pendingPriceSort = ProductPriceSort.none;
+  ProductPriceSort _appliedPriceSort = ProductPriceSort.none;
   int _requestId = 0;
   int _refreshFailureId = 0;
+
+  String get appliedQuery => _appliedQuery;
+  ProductPriceSort get appliedPriceSort => _appliedPriceSort;
 
   Future<void> fetchProducts(String shopId) async {
     await _fetchProducts(shopId, query: '', priceSort: ProductPriceSort.none);
@@ -22,25 +27,30 @@ class ProductsCubit extends Cubit<ProductsState> {
 
   Future<void> retry(String shopId) async {
     _searchDebouncer.cancel();
-    await _fetchProducts(shopId, query: _query, priceSort: _priceSort);
+    await _fetchProducts(
+      shopId,
+      query: _pendingQuery,
+      priceSort: _pendingPriceSort,
+    );
   }
 
   void searchProducts(String shopId, String query) {
     final nextQuery = _normalizeQuery(query);
-    if (nextQuery == _query) return;
+    if (nextQuery == _pendingQuery) return;
 
-    _query = nextQuery;
+    _pendingQuery = nextQuery;
     _searchDebouncer.cancel();
     _requestId++;
     _searchDebouncer.run(() {
-      _fetchProducts(shopId, query: nextQuery, priceSort: _priceSort);
+      _fetchProducts(shopId, query: nextQuery, priceSort: _pendingPriceSort);
     });
   }
 
   Future<void> changePriceSort(String shopId, ProductPriceSort priceSort) {
-    if (priceSort == _priceSort) return Future.value();
+    if (priceSort == _pendingPriceSort) return Future.value();
     _searchDebouncer.cancel();
-    return _fetchProducts(shopId, query: _query, priceSort: priceSort);
+    _pendingPriceSort = priceSort;
+    return _fetchProducts(shopId, query: _pendingQuery, priceSort: priceSort);
   }
 
   Future<void> _fetchProducts(
@@ -48,8 +58,10 @@ class ProductsCubit extends Cubit<ProductsState> {
     required String query,
     required ProductPriceSort priceSort,
   }) async {
-    _query = query;
-    _priceSort = priceSort;
+    final previousAppliedQuery = _appliedQuery;
+    final previousAppliedPriceSort = _appliedPriceSort;
+    _pendingQuery = query;
+    _pendingPriceSort = priceSort;
     final currentRequestId = ++_requestId;
     final currentState = state;
     final previousProducts =
@@ -72,10 +84,12 @@ class ProductsCubit extends Cubit<ProductsState> {
     result.fold(
       (failure) {
         if (shouldPreserveContent) {
+          _pendingQuery = previousAppliedQuery;
+          _pendingPriceSort = previousAppliedPriceSort;
           emit(
             ProductsSuccess(
               List.unmodifiable(previousProducts),
-              priceSort: priceSort,
+              priceSort: previousAppliedPriceSort,
               refreshFailure: failure,
               refreshFailureId: ++_refreshFailureId,
             ),
@@ -85,7 +99,13 @@ class ProductsCubit extends Cubit<ProductsState> {
 
         emit(ProductsFailure(failure, priceSort: priceSort));
       },
-      (products) => emit(ProductsSuccess(products, priceSort: priceSort)),
+      (products) {
+        _appliedQuery = query;
+        _pendingQuery = query;
+        _appliedPriceSort = priceSort;
+        _pendingPriceSort = priceSort;
+        emit(ProductsSuccess(products, priceSort: priceSort));
+      },
     );
   }
 

@@ -100,12 +100,16 @@ class _CartNavigationTabState extends State<CartNavigationTab> {
       ),
       _CartFlowStep.confirmingOrder => ConfirmingOrderViewBody(
         cartArguments: _cartArguments,
+        bottomContentPadding:
+            AppSpacing.buttonBottomExtraGapWithLiquidGlassNavigation,
         showAddressStep: _showAddressStep,
         onBack: _goBackFromConfirmingOrder,
         onOrderSubmitted: _openSubmitOrder,
       ),
       _CartFlowStep.submitOrder => SubmitOrderViewBody(
         cartArguments: _cartArguments,
+        bottomContentPadding:
+            AppSpacing.buttonBottomExtraGapWithLiquidGlassNavigation,
       ),
     };
   }

@@ -14,7 +14,7 @@ import 'package:makanak/shared/widgets/address_selector_sheet_widget.dart';
 class ProfileAddressesSection extends StatelessWidget {
   const ProfileAddressesSection({super.key, required this.onError});
 
-  final ValueChanged<String> onError;
+  final ValueChanged<AddressError> onError;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class ProfileAddressesSection extends StatelessWidget {
         final route = ModalRoute.of(context);
         if (route != null && !route.isCurrent) return;
 
-        onError(state.message);
+        onError(state);
       },
       buildWhen:
           (previous, current) =>
@@ -94,7 +94,7 @@ class ProfileAddressesSection extends StatelessWidget {
 
               final state = addressCubit.state;
               if (state is AddressError) {
-                onError(state.message);
+                onError(state);
               }
 
               return didUpdate;

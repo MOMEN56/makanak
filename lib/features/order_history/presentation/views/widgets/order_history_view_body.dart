@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/routing/app_route_arguments.dart';
@@ -15,14 +15,11 @@ import 'package:makanak/features/order_history/presentation/views/widgets/empty_
 import 'package:makanak/features/order_history/presentation/views/widgets/order_history_card.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_history_skeleton.dart';
 import 'package:makanak/shared/widgets/app_snack_bar.dart';
-import 'package:makanak/shared/widgets/no_internet_view.dart';
+import 'package:makanak/shared/views/no_internet_view.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class OrderHistoryViewBody extends StatelessWidget {
-  const OrderHistoryViewBody({
-    super.key,
-    this.onFullScreenNetworkStateChanged,
-  });
+  const OrderHistoryViewBody({super.key, this.onFullScreenNetworkStateChanged});
 
   final ValueChanged<bool>? onFullScreenNetworkStateChanged;
 
@@ -39,9 +36,18 @@ class OrderHistoryViewBody extends StatelessWidget {
           return;
         }
 
+        final refreshFailure = state.refreshFailure!;
+        if (refreshFailure.isNetwork) {
+          AppSnackBar.showNetwork(
+            context: context,
+            message: refreshFailure.message,
+          );
+          return;
+        }
+
         AppSnackBar.show(
           context: context,
-          message: state.refreshFailure!.message,
+          message: refreshFailure.message,
           badgeText: AppStrings.retry,
           onBadgeTap: context.read<OrderHistoryCubit>().fetchOrders,
         );

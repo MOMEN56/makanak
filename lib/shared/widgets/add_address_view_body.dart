@@ -45,10 +45,15 @@ class _AddAddressViewBodyState extends State<AddAddressViewBody> {
     await _addressFormController.saveAddress(_addressCubit.saveAddress);
   }
 
-  void _showError(String message) {
+  void _showError(AddressError state) {
+    if (state.isNetworkFailure) {
+      AppSnackBar.showNetwork(context: context, message: state.message);
+      return;
+    }
+
     AppSnackBar.show(
       context: context,
-      message: message,
+      message: state.message,
       badgeText: MaterialLocalizations.of(context).closeButtonTooltip,
       backgroundColor: const Color(0xffD85B5B),
       onBadgeTap: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
@@ -66,7 +71,7 @@ class _AddAddressViewBodyState extends State<AddAddressViewBody> {
 
         if (state is AddressError) {
           _submittedAddress = false;
-          _showError(state.message);
+          _showError(state);
         }
 
         if (state is AddressesLoaded) {

@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:makanak/core/data/data_sources/address_local_data_source.dart';
 import 'package:makanak/core/data/data_sources/address_remote_data_source.dart';
 import 'package:makanak/core/data/repos/address_repository_impl.dart';
 import 'package:makanak/core/deep_linking/deep_link_navigator.dart';
@@ -123,12 +124,20 @@ void _registerProductsFeature() {
 }
 
 void _registerAddressFeature() {
+  getIt.registerLazySingleton<AddressLocalDataSource>(
+    AddressLocalDataSource.new,
+  );
+
   getIt.registerLazySingleton<AddressRemoteDataSource>(
     () => AddressRemoteDataSource(getIt<SupabaseClient>()),
   );
 
   getIt.registerLazySingleton<AddressRepository>(
-    () => AddressRepositoryImpl(getIt<AddressRemoteDataSource>()),
+    () => AddressRepositoryImpl(
+      getIt<AddressRemoteDataSource>(),
+      getIt<AddressLocalDataSource>(),
+      getIt<SupabaseAuthService>(),
+    ),
   );
 
   getIt.registerFactory<AddressCubit>(

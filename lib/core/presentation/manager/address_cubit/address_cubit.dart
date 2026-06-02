@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
@@ -29,7 +29,15 @@ class AddressCubit extends Cubit<AddressState> {
     if (!_hasAuthenticatedUser()) return;
 
     final requestUserId = _activeUserId;
-    emit(_loadingFromState());
+    final storedAddresses = await _addressRepository.loadStoredAddresses();
+    if (isClosed || !_isActiveUser(requestUserId)) return;
+
+    if (storedAddresses.isNotEmpty) {
+      _emitAddressState(storedAddresses);
+    } else {
+      emit(_loadingFromState());
+    }
+
     final result = await _addressRepository.fetchUserAddresses();
     if (isClosed || !_isActiveUser(requestUserId)) return;
 
@@ -47,7 +55,24 @@ class AddressCubit extends Cubit<AddressState> {
     }
 
     final requestUserId = _activeUserId;
-    emit(_loadingFromState());
+    final storedAddresses =
+        forceRefresh
+            ? const <UserAddressModel>[]
+            : await _addressRepository.loadStoredAddresses();
+    if (isClosed || !_isActiveUser(requestUserId)) return;
+
+    if (storedAddresses.isNotEmpty) {
+      _emitAddressesLoaded(
+        storedAddresses,
+        selectedAddressIndex: _validatedAddressIndex(
+          state.selectedAddressIndex,
+          storedAddresses,
+        ),
+      );
+    } else {
+      emit(_loadingFromState());
+    }
+
     final result = await _addressRepository.fetchUserAddresses();
     if (isClosed || !_isActiveUser(requestUserId)) return;
 

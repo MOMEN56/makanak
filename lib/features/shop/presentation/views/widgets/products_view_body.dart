@@ -1,7 +1,8 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makanak/core/errors/failures.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
@@ -21,7 +22,7 @@ import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/shared/widgets/app_snack_bar.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 import 'package:makanak/shared/widgets/network_image_with_placeholder.dart';
-import 'package:makanak/shared/widgets/no_internet_view.dart';
+import 'package:makanak/shared/views/no_internet_view.dart';
 import 'package:makanak/shared/widgets/search_text_field.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
@@ -48,6 +49,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
   static const double _floatingButtonTopGap = 16;
 
   final Map<String, _SelectedCartProduct> _selectedProducts = {};
+  final TextEditingController _searchController = TextEditingController();
   int _resetSelectionSignal = 0;
   bool _isAddingSelectedProducts = false;
 
@@ -60,6 +62,18 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
       _floatingButtonTopGap;
 
   bool get _isShopClosed => !widget.shopModel.isOpen;
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSearchText(context.read<ProductsCubit>().appliedQuery);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _onPriceSortChanged(BuildContext context, ProductPriceSort priceSort) {
     context.read<ProductsCubit>().changePriceSort(
@@ -128,7 +142,9 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
   }
 
   Future<void> _addSelectedProductsToCart() async {
-    if (_selectedProducts.isEmpty || _isAddingSelectedProducts || _isShopClosed) {
+    if (_selectedProducts.isEmpty ||
+        _isAddingSelectedProducts ||
+        _isShopClosed) {
       return;
     }
 
@@ -166,10 +182,24 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
     }
   }
 
-  void _showRefreshError(String message) {
+  void _restoreSearchText(String query) {
+    if (_searchController.text == query) return;
+
+    _searchController.value = TextEditingValue(
+      text: query,
+      selection: TextSelection.collapsed(offset: query.length),
+    );
+  }
+
+  void _showRefreshError(Failure failure) {
+    if (failure.isNetwork) {
+      AppSnackBar.showNetwork(context: context, message: failure.message);
+      return;
+    }
+
     AppSnackBar.show(
       context: context,
-      message: message,
+      message: failure.message,
       badgeText: AppStrings.retry,
       onBadgeTap: () {
         context.read<ProductsCubit>().retry(widget.shopModel.id ?? '');
@@ -202,7 +232,8 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
         _syncSelectedProductsWithCatalog(state.products);
         final refreshFailure = state.refreshFailure;
         if (refreshFailure != null) {
-          _showRefreshError(refreshFailure.message);
+          _restoreSearchText(context.read<ProductsCubit>().appliedQuery);
+          _showRefreshError(refreshFailure);
         }
       },
       buildWhen: _shouldRebuildProductsView,
@@ -278,6 +309,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
                       children: [
                         Expanded(
                           child: SearchTextField(
+                            controller: _searchController,
                             hintText: AppStrings.productSearchHint,
                             onChanged: (value) {
                               context.read<ProductsCubit>().searchProducts(
@@ -396,10 +428,7 @@ bool _shouldListenToProductsState(
   return false;
 }
 
-bool _shouldRebuildProductsView(
-  ProductsState previous,
-  ProductsState current,
-) {
+bool _shouldRebuildProductsView(ProductsState previous, ProductsState current) {
   if (_shouldRebuildProductsContent(previous, current)) {
     return true;
   }

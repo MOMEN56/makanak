@@ -16,7 +16,7 @@ import 'package:makanak/features/notifications/presentation/notifications_string
 import 'package:makanak/features/notifications/presentation/widgets/notification_list_item.dart';
 import 'package:makanak/shared/widgets/app_snack_bar.dart';
 import 'package:makanak/shared/widgets/custom_loading_indicator.dart';
-import 'package:makanak/shared/widgets/no_internet_view.dart';
+import 'package:makanak/shared/views/no_internet_view.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class NotificationsHistoryViewBody extends StatefulWidget {
@@ -142,11 +142,15 @@ class _NotificationsHistoryViewBodyState
   }
 
   void _showRefreshError(Failure failure) {
+    if (failure.isNetwork) {
+      AppSnackBar.showNetwork(context: context, message: failure.message);
+      return;
+    }
+
     AppSnackBar.show(
       context: context,
       message: failure.message,
       badgeText: AppStrings.retry,
-      backgroundColor: const Color(0xffD85B5B),
       onBadgeTap: () {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         unawaited(_loadNotifications(showLoading: false));

@@ -18,6 +18,19 @@ class UserAddressModel extends Equatable {
   final String notes;
   final bool isDefault;
 
+  factory UserAddressModel.fromStoredJson(Map<String, dynamic> json) {
+    final title = json['title']?.toString().trim() ?? '';
+
+    return UserAddressModel(
+      id: json['id']?.toString() ?? '',
+      title: title.isEmpty ? AppStrings.deliveryAddress : title,
+      phone: json['phone']?.toString() ?? '',
+      details: json['details']?.toString() ?? '',
+      notes: json['notes']?.toString() ?? '',
+      isDefault: _readBool(json['is_default'], defaultValue: false),
+    );
+  }
+
   factory UserAddressModel.fromJson(Map<String, dynamic> json) {
     final street = json['street']?.toString().trim() ?? '';
     final floor = json['floor']?.toString().trim() ?? '';
@@ -37,6 +50,35 @@ class UserAddressModel extends Equatable {
       details: detailsParts.join(', '),
       notes: json['address_notes']?.toString() ?? '',
       isDefault: _readBool(json['is_default'], defaultValue: false),
+    );
+  }
+
+  Map<String, dynamic> toStoredJson() {
+    return {
+      'id': id,
+      'title': title,
+      'phone': phone,
+      'details': details,
+      'notes': notes,
+      'is_default': isDefault,
+    };
+  }
+
+  UserAddressModel copyWith({
+    String? id,
+    String? title,
+    String? phone,
+    String? details,
+    String? notes,
+    bool? isDefault,
+  }) {
+    return UserAddressModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      phone: phone ?? this.phone,
+      details: details ?? this.details,
+      notes: notes ?? this.notes,
+      isDefault: isDefault ?? this.isDefault,
     );
   }
 

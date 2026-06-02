@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
@@ -12,11 +12,39 @@ import 'package:makanak/features/shops/presentation/views/widgets/shops_skeleton
 import 'package:makanak/shared/widgets/app_snack_bar.dart';
 import 'package:makanak/shared/widgets/keyboard_dismiss_on_tap.dart';
 import 'package:makanak/shared/widgets/message_emoji_widget.dart';
-import 'package:makanak/shared/widgets/no_internet_view.dart';
+import 'package:makanak/shared/views/no_internet_view.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
-class ShopsViewBody extends StatelessWidget {
+class ShopsViewBody extends StatefulWidget {
   const ShopsViewBody({super.key});
+
+  @override
+  State<ShopsViewBody> createState() => _ShopsViewBodyState();
+}
+
+class _ShopsViewBodyState extends State<ShopsViewBody> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSearchText(context.read<ShopsCubit>().appliedQuery);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _restoreSearchText(String query) {
+    if (_searchController.text == query) return;
+
+    _searchController.value = TextEditingValue(
+      text: query,
+      selection: TextSelection.collapsed(offset: query.length),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +53,19 @@ class ShopsViewBody extends StatelessWidget {
       listener: (context, state) {
         if (state is! ShopsSuccess || state.refreshFailure == null) return;
 
+        _restoreSearchText(context.read<ShopsCubit>().appliedQuery);
+        final refreshFailure = state.refreshFailure!;
+        if (refreshFailure.isNetwork) {
+          AppSnackBar.showNetwork(
+            context: context,
+            message: refreshFailure.message,
+          );
+          return;
+        }
+
         AppSnackBar.show(
           context: context,
-          message: state.refreshFailure!.message,
+          message: refreshFailure.message,
           badgeText: AppStrings.retry,
           onBadgeTap: () => context.read<ShopsCubit>().retry(),
         );
@@ -36,7 +74,9 @@ class ShopsViewBody extends StatelessWidget {
       builder: (context, state) {
         if (state is ShopsFailure) {
           return state.failure.isNetwork
-              ? NoInternetView(onRetry: () => context.read<ShopsCubit>().retry())
+              ? NoInternetView(
+                onRetry: () => context.read<ShopsCubit>().retry(),
+              )
               : SafeArea(
                 child: StateMessage(
                   message: state.message,
@@ -59,6 +99,7 @@ class ShopsViewBody extends StatelessWidget {
                 padding: AppResponsive.fromLTRB(context, 24, 48, 24, 0),
                 sliver: SliverToBoxAdapter(
                   child: ShopsHeader(
+                    controller: _searchController,
                     onSearchChanged: context.read<ShopsCubit>().searchShops,
                   ),
                 ),

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_cubit.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_state.dart';
 import 'package:makanak/features/order_history/presentation/views/widgets/order_details_view_body.dart';
-import 'package:makanak/shared/widgets/no_internet_view.dart';
+import 'package:makanak/shared/views/no_internet_view.dart';
 import 'package:makanak/shared/widgets/state_message.dart';
 
 class OrderDetailsView extends StatelessWidget {

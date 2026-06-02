@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
+import 'package:makanak/core/presentation/manager/address_cubit/address_state.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
@@ -25,10 +26,15 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     context.read<AddressCubit>().fetchAddresses(forceRefresh: true);
   }
 
-  void _showError(String message) {
+  void _showError(AddressError state) {
+    if (state.isNetworkFailure) {
+      AppSnackBar.showNetwork(context: context, message: state.message);
+      return;
+    }
+
     AppSnackBar.show(
       context: context,
-      message: message,
+      message: state.message,
       badgeText: MaterialLocalizations.of(context).closeButtonTooltip,
       backgroundColor: const Color(0xffD85B5B),
       onBadgeTap: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),

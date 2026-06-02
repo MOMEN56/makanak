@@ -14,9 +14,14 @@ import 'package:makanak/features/shops/presentation/views/shops_view.dart';
 import 'package:makanak/shared/widgets/custom_button.dart';
 
 class SubmitOrderViewBody extends StatefulWidget {
-  const SubmitOrderViewBody({super.key, this.cartArguments});
+  const SubmitOrderViewBody({
+    super.key,
+    this.cartArguments,
+    this.bottomContentPadding = 0,
+  });
 
   final CartViewArguments? cartArguments;
+  final double bottomContentPadding;
 
   @override
   State<SubmitOrderViewBody> createState() => _SubmitOrderViewBodyState();
@@ -102,6 +107,7 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
     final primaryColor = _primaryColor;
 
     return SafeArea(
+      bottom: widget.bottomContentPadding == 0,
       child: Padding(
         padding: AppResponsive.all(context, AppSpacing.screenEdge),
         child: Column(
@@ -139,9 +145,11 @@ class _SubmitOrderViewBodyState extends State<SubmitOrderViewBody> {
               hasShadowEffect: true,
               color: primaryColor,
             ),
+            SizedBox(height: widget.bottomContentPadding),
           ],
         ),
       ),
     );
   }
 }
+
