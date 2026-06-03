@@ -7,6 +7,7 @@ class ShopModel extends ShopEntity {
     required super.name,
     super.logoUrl,
     required super.category,
+    super.shippingPrice = 0,
     super.isActive = true,
     super.isVisible = true,
     super.isOpen = true,
@@ -20,6 +21,7 @@ class ShopModel extends ShopEntity {
       name: json['name']?.toString() ?? '',
       logoUrl: json['logo_url']?.toString(),
       category: json['category']?.toString() ?? '',
+      shippingPrice: _readInt(json['shipping_price']),
       isActive: _readBool(json['is_active']),
       isVisible: _readBool(json['is_visible']),
       isOpen: _readBool(json['is_open']),
@@ -34,11 +36,18 @@ class ShopModel extends ShopEntity {
       'name': name,
       'logo_url': logoUrl,
       'category': category,
+      'shipping_price': shippingPrice,
       'is_active': isActive,
       'is_visible': isVisible,
       'is_open': isOpen,
       'working_hours': workingHours,
     }..removeWhere((key, value) => value == null);
+  }
+
+  static int _readInt(Object? value, {int defaultValue = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? defaultValue;
   }
 
   static bool _readBool(Object? value, {bool defaultValue = true}) {

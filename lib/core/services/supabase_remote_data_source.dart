@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/helper/print_helper.dart';
 import 'package:makanak/core/services/request_timeout.dart';
 import 'package:makanak/core/services/supabase_request_guard.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -78,20 +79,18 @@ abstract class SupabaseRemoteDataSource {
   }
 
   void _logPostgrestException(String operation, PostgrestException error) {
-    if (!kDebugMode) return;
-
-    debugPrint(
+    PrintHelper.error(
       'Supabase $operation failed: '
       'code=${error.code}, message=${error.message}, details=${error.details}',
+      tag: 'Supabase',
     );
   }
 
   void _logDatabaseException(String operation, DatabaseException error) {
-    if (!kDebugMode) return;
-
-    debugPrint(
+    PrintHelper.error(
       'Supabase $operation failed: '
       'kind=${error.kind}, code=${error.code}, message=${error.message}',
+      tag: 'Supabase',
     );
   }
 
@@ -100,9 +99,11 @@ abstract class SupabaseRemoteDataSource {
     Object error,
     StackTrace stackTrace,
   ) {
-    if (!kDebugMode) return;
-
-    debugPrint('Supabase $operation failed unexpectedly: $error');
-    debugPrint('$stackTrace');
+    PrintHelper.error(
+      'Supabase $operation failed unexpectedly.',
+      error: error,
+      stackTrace: stackTrace,
+      tag: 'Supabase',
+    );
   }
 }

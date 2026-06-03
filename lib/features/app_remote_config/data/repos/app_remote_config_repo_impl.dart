@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:makanak/core/helper/print_helper.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_local_data_source.dart';
 import 'package:makanak/features/app_remote_config/data/data_sources/app_remote_config_remote_data_source.dart';
@@ -219,10 +220,11 @@ class AppRemoteConfigRepoImpl implements AppRemoteConfigRepo {
   }
 
   void _logFallback(String message, Object error, StackTrace stackTrace) {
-    if (!kDebugMode) return;
-
-    debugPrint(message);
-    debugPrint('$error');
-    debugPrint('$stackTrace');
+    PrintHelper.error(
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      tag: 'RemoteConfig',
+    );
   }
 }

@@ -9,6 +9,7 @@ class CartRouteArgumentsBuilder {
     required CartState state,
     required Color primaryColor,
     CartViewArguments? fallback,
+    int? shippingPriceOverride,
   }) {
     final product = state.product ?? fallback?.product;
     if (product == null) return fallback;
@@ -18,7 +19,7 @@ class CartRouteArgumentsBuilder {
       quantity: state.quantity,
       primaryColor: primaryColor,
       shopModel: fallback?.shopModel,
-      shippingPrice: state.shippingPrice,
+      shippingPrice: shippingPriceOverride ?? state.shippingPrice,
     );
   }
 }

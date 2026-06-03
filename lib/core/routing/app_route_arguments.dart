@@ -10,6 +10,7 @@ class ShopRouteData extends Equatable {
     required this.shopCategory,
     this.ownerId,
     this.logoUrl,
+    this.shippingPrice = 0,
     this.isActive = true,
     this.isVisible = true,
     this.isOpen = true,
@@ -23,6 +24,7 @@ class ShopRouteData extends Equatable {
       shopCategory: shop.category.trim(),
       ownerId: shop.ownerId?.trim(),
       logoUrl: shop.logoUrl?.trim(),
+      shippingPrice: shop.shippingPrice,
       isActive: shop.isActive,
       isVisible: shop.isVisible,
       isOpen: shop.isOpen,
@@ -35,6 +37,7 @@ class ShopRouteData extends Equatable {
   final String shopCategory;
   final String? ownerId;
   final String? logoUrl;
+  final int shippingPrice;
   final bool isActive;
   final bool isVisible;
   final bool isOpen;
@@ -50,6 +53,7 @@ class ShopRouteData extends Equatable {
       name: shopName,
       logoUrl: logoUrl,
       category: shopCategory,
+      shippingPrice: shippingPrice,
       isActive: isActive,
       isVisible: isVisible,
       isOpen: isOpen,
@@ -64,6 +68,7 @@ class ShopRouteData extends Equatable {
     shopCategory,
     ownerId,
     logoUrl,
+    shippingPrice,
     isActive,
     isVisible,
     isOpen,

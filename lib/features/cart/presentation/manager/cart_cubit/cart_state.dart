@@ -7,7 +7,7 @@ sealed class CartState extends Equatable {
     List<CartLocalData> items = const [],
     ProductModel? product,
     int quantity = 1,
-    this.shippingPrice = 35,
+    this.shippingPrice = 0,
   }) : items = List.unmodifiable(
          _resolveItems(
            items: items,
@@ -60,24 +60,6 @@ sealed class CartState extends Equatable {
 
 class CartInitial extends CartState {
   CartInitial({
-    super.items,
-    super.product,
-    super.quantity,
-    super.shippingPrice,
-  });
-}
-
-class CartLoading extends CartState {
-  CartLoading({
-    super.items,
-    super.product,
-    super.quantity,
-    super.shippingPrice,
-  });
-}
-
-class CartOrderSubmitted extends CartState {
-  CartOrderSubmitted({
     super.items,
     super.product,
     super.quantity,

@@ -7,6 +7,7 @@ class ShopEntity extends Equatable {
     required this.name,
     this.logoUrl,
     required this.category,
+    this.shippingPrice = 0,
     this.isActive = true,
     this.isVisible = true,
     this.isOpen = true,
@@ -18,6 +19,7 @@ class ShopEntity extends Equatable {
   final String name;
   final String? logoUrl;
   final String category;
+  final int shippingPrice;
   final bool isActive;
   final bool isVisible;
   final bool isOpen;
@@ -32,6 +34,7 @@ class ShopEntity extends Equatable {
     name,
     logoUrl,
     category,
+    shippingPrice,
     isActive,
     isVisible,
     isOpen,

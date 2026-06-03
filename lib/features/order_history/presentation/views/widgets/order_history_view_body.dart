@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/helpers/bloc_state_change_helpers.dart';
 import 'package:makanak/core/routing/app_route_arguments.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
@@ -29,7 +30,7 @@ class OrderHistoryViewBody extends StatelessWidget {
       listenWhen: _shouldListenToOrderHistoryChanges,
       listener: (context, state) {
         onFullScreenNetworkStateChanged?.call(
-          state is OrderHistoryFailure && state.failure.isNetwork,
+          _isFullScreenNetworkFailure(state),
         );
 
         if (state is! OrderHistorySuccess || state.refreshFailure == null) {
@@ -142,23 +143,37 @@ class _OrderHistoryTitle extends StatelessWidget {
   }
 }
 
+bool _isFullScreenNetworkFailure(OrderHistoryState state) {
+  return state is OrderHistoryFailure && state.failure.isNetwork;
+}
+
+bool _didRefreshFailureChange(
+  OrderHistoryState previous,
+  OrderHistoryState current,
+) {
+  return didRefreshFailureIdChange<OrderHistoryState>(
+    previous: previous,
+    current: current,
+    refreshFailureOf:
+        (state) => state is OrderHistorySuccess ? state.refreshFailure : null,
+    refreshFailureIdOf:
+        (state) => state is OrderHistorySuccess ? state.refreshFailureId : -1,
+  );
+}
+
 bool _shouldListenToOrderHistoryChanges(
   OrderHistoryState previous,
   OrderHistoryState current,
 ) {
-  final previousFullScreenNetworkFailure =
-      previous is OrderHistoryFailure && previous.failure.isNetwork;
-  final currentFullScreenNetworkFailure =
-      current is OrderHistoryFailure && current.failure.isNetwork;
-
-  if (previousFullScreenNetworkFailure != currentFullScreenNetworkFailure) {
+  if (didFlagChange<OrderHistoryState>(
+    previous: previous,
+    current: current,
+    flagOf: _isFullScreenNetworkFailure,
+  )) {
     return true;
   }
 
-  return current is OrderHistorySuccess &&
-      current.refreshFailure != null &&
-      (previous is! OrderHistorySuccess ||
-          previous.refreshFailureId != current.refreshFailureId);
+  return _didRefreshFailureChange(previous, current);
 }
 
 bool _shouldRebuildOrderHistoryView(

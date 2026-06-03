@@ -8,7 +8,7 @@ class CartLocalStorage {
 
   static const _legacyCartKey = 'cart_product_data';
   static const _defaultQuantity = 1;
-  static const _defaultShippingPrice = 35;
+  static const _defaultShippingPrice = 0;
 
   static Future<void> _operationQueue = Future.value();
 

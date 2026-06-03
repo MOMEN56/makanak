@@ -4,39 +4,36 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
-import 'package:makanak/features/cart/domain/entities/create_order_item.dart';
-import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
+import 'package:makanak/features/cart/services/cart_availability_service.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
-import 'package:makanak/features/shops/data/repos/shops_repo.dart';
 
 class CartCubit extends Cubit<CartState> {
   CartCubit(
-    this._cartRepository,
     this._productsRepo,
-    this._shopsRepo, {required String userId})
-    : _userId = userId,
-      super(CartInitial());
+    this._cartAvailabilityService, {
+    required String userId,
+  }) : _userId = userId,
+       super(CartInitial());
 
-  final CartRepository _cartRepository;
   final ProductsRepo _productsRepo;
-  final ShopsRepo _shopsRepo;
+  final CartAvailabilityService _cartAvailabilityService;
   final String _userId;
   String? _lastRestoredShopId;
   bool _isInitialized = false;
-  bool _isCreatingOrder = false;
 
   Future<void> restoreSavedCart({String? shopId}) async {
-    if (_isInitialized && _lastRestoredShopId == shopId) return;
+    final normalizedShopId = shopId?.trim();
+    if (_isInitialized && _lastRestoredShopId == normalizedShopId) return;
     _isInitialized = true;
-    _lastRestoredShopId = shopId;
+    _lastRestoredShopId = normalizedShopId;
 
     final savedCart = await CartLocalStorage.loadProducts(userId: _userId);
     final shopCart = _mergeCartItems(
-      _cartItemsForShop(savedCart, shopId),
-      _cartItemsForShop(state.items, shopId),
+      _cartItemsForShop(savedCart, normalizedShopId),
+      _cartItemsForShop(state.items, normalizedShopId),
     );
     if (isClosed) return;
 
@@ -45,17 +42,18 @@ class CartCubit extends Cubit<CartState> {
     );
     if (shopCart.isEmpty) return;
 
-    await refreshCartAvailability(shopId: shopId);
+    await refreshCartAvailability(shopId: normalizedShopId);
   }
 
   Future<void> refreshCartAvailability({String? shopId}) async {
-    final syncResult = await _syncCartItems(
-      sourceItems: _cartItemsForShop(state.items, shopId),
-      shopId: shopId,
+    final normalizedShopId = shopId?.trim();
+    final syncResult = await _cartAvailabilityService.syncItems(
+      sourceItems: _cartItemsForShop(state.items, normalizedShopId),
+      shopId: normalizedShopId,
     );
     if (!syncResult.didFetchLatestProducts) return;
 
-    await _applySyncedItems(
+    await applySyncedItems(
       items: syncResult.availableItems,
       shopId: syncResult.shopId,
     );
@@ -67,12 +65,12 @@ class CartCubit extends Cubit<CartState> {
       return;
     }
 
-    final incomingProductId = incomingProduct.id;
+    final incomingProductId = incomingProduct.id?.trim();
     if (incomingProductId == null || incomingProductId.isEmpty) return;
 
     final currentItems = List<CartLocalData>.of(state.items);
     final existingIndex = currentItems.indexWhere(
-      (item) => item.product.id == incomingProductId,
+      (item) => item.product.id?.trim() == incomingProductId,
     );
     final existingQuantity =
         existingIndex == -1 ? 0 : currentItems[existingIndex].quantity;
@@ -128,14 +126,14 @@ class CartCubit extends Cubit<CartState> {
       );
     }
 
-    final shopValidation = await _validateLatestShop(
+    final shopValidation = await _cartAvailabilityService.validateShop(
       normalizedShopId,
       fetchFailureMessage: AppStrings.productAvailabilityCheckFailed,
     );
     if (!shopValidation.isValid) {
       return _addProductFailure(
         message: shopValidation.message,
-        status: shopValidation.addToCartStatus,
+        status: _mapAddToCartStatus(shopValidation.status),
       );
     }
 
@@ -170,27 +168,14 @@ class CartCubit extends Cubit<CartState> {
           );
         }
 
-        addProduct(arguments.copyWith(product: latestProduct));
+        addProduct(
+          arguments.copyWith(
+            product: latestProduct,
+            shippingPrice: shopValidation.shippingPrice,
+          ),
+        );
         return AddProductToCartResult.added(latestProduct);
       },
-    );
-  }
-
-  Future<String?> networkMessageBeforeCheckout({String? shopId}) async {
-    final normalizedShopId = shopId?.trim();
-    final resolvedShopId =
-        normalizedShopId != null && normalizedShopId.isNotEmpty
-            ? normalizedShopId
-            : _shopIdForItems(state.items);
-
-    if (resolvedShopId == null || resolvedShopId.isEmpty) {
-      return null;
-    }
-
-    final result = await _shopsRepo.fetchShopById(resolvedShopId);
-    return result.fold(
-      (failure) => failure.isNetwork ? failure.message : null,
-      (_) => null,
     );
   }
 
@@ -198,12 +183,14 @@ class CartCubit extends Cubit<CartState> {
     if (arguments == null) return;
 
     final incomingProduct = arguments.product;
-    final incomingProductId = incomingProduct?.id;
+    final incomingProductId = incomingProduct?.id?.trim();
     if (incomingProduct == null ||
         incomingProduct.isUnavailableForPurchase ||
         incomingProductId == null ||
         incomingProductId.isEmpty ||
-        state.items.any((item) => item.product.id == incomingProductId)) {
+        state.items.any(
+          (item) => item.product.id?.trim() == incomingProductId,
+        )) {
       return;
     }
 
@@ -224,169 +211,23 @@ class CartCubit extends Cubit<CartState> {
     );
   }
 
-  Future<void> createOrder({required String addressId}) async {
-    if (_isCreatingOrder) return;
-
-    final currentItems = state.items;
-    if (currentItems.isEmpty) {
-      emit(_errorFromItems(currentItems, AppStrings.invalidProduct));
-      return;
-    }
-
-    final shopId = _shopIdForItems(currentItems);
-    if (shopId == null) {
-      emit(_errorFromItems(currentItems, AppStrings.invalidProduct));
-      return;
-    }
-
-    if (addressId.isEmpty) {
-      emit(_errorFromItems(currentItems, AppStrings.invalidAddress));
-      return;
-    }
-
-    _isCreatingOrder = true;
-    try {
-      final shopValidation = await _validateLatestShop(
-        shopId,
-        fetchFailureMessage: AppStrings.cartAvailabilityCheckFailed,
-      );
-      if (!shopValidation.isValid) {
-        emit(_errorFromItems(currentItems, shopValidation.message));
-        return;
-      }
-
-      final preSubmitSync = await _syncCartItems(
-        sourceItems: currentItems,
-        shopId: shopId,
-      );
-      if (preSubmitSync.syncFailed) {
-        emit(
-          _errorFromItems(
-            currentItems,
-            preSubmitSync.failureMessage ??
-                AppStrings.cartAvailabilityCheckFailed,
-          ),
-        );
-        return;
-      }
-
-      var itemsToSubmit = currentItems;
-
-      if (preSubmitSync.didFetchLatestProducts) {
-        itemsToSubmit = preSubmitSync.availableItems;
-        await _applySyncedItems(
-          items: itemsToSubmit,
-          shopId: preSubmitSync.shopId,
-        );
-        if (isClosed) return;
-
-        if (preSubmitSync.removedItems.isNotEmpty) {
-          emit(
-            _errorFromItems(
-              itemsToSubmit,
-              _messageForRemovedItems(preSubmitSync.removedItems),
-            ),
-          );
-          return;
-        }
-      }
-
-      final validatedShopId = _shopIdForItems(itemsToSubmit);
-      final orderItems = _buildOrderItems(itemsToSubmit);
-      final hasMixedShops =
-          validatedShopId == null ||
-          itemsToSubmit.any((item) => item.product.shopId != validatedShopId);
-
-      if (validatedShopId == null ||
-          hasMixedShops ||
-          orderItems.length != itemsToSubmit.length) {
-        emit(_errorFromItems(itemsToSubmit, AppStrings.invalidProduct));
-        return;
-      }
-
-      emit(_loadingFromItems(itemsToSubmit));
-      final result = await _cartRepository.createOrder(
-        shopId: validatedShopId,
-        addressId: addressId,
-        shippingPrice: _shippingPriceFor(itemsToSubmit),
-        items: orderItems,
-      );
-      if (isClosed) return;
-
-      await result.fold<Future<void>>(
-        (failure) async {
-          if (_isShopStateFailureMessage(failure.message)) {
-            emit(_errorFromItems(itemsToSubmit, failure.message));
-            return;
-          }
-
-          final postFailureSync = await _syncCartItems(
-            sourceItems: itemsToSubmit,
-            shopId: validatedShopId,
-          );
-          if (postFailureSync.syncFailed) {
-            emit(
-              _errorFromItems(
-                itemsToSubmit,
-                postFailureSync.failureMessage ??
-                    AppStrings.cartAvailabilityCheckFailed,
-              ),
-            );
-            return;
-          }
-
-          if (postFailureSync.didFetchLatestProducts) {
-            itemsToSubmit = postFailureSync.availableItems;
-            await _applySyncedItems(
-              items: itemsToSubmit,
-              shopId: postFailureSync.shopId,
-            );
-            if (isClosed) return;
-
-            if (postFailureSync.removedItems.isNotEmpty) {
-              emit(
-                _errorFromItems(
-                  itemsToSubmit,
-                  _messageForRemovedItems(postFailureSync.removedItems),
-                ),
-              );
-              return;
-            }
-          }
-
-          emit(_errorFromItems(itemsToSubmit, failure.message));
-        },
-        (_) async {
-          final submittedShippingPrice = _shippingPriceFor(itemsToSubmit);
-          await _persistShopItems(items: const [], shopId: validatedShopId);
-          if (isClosed) return;
-
-          _isInitialized = false;
-
-          emit(CartOrderSubmitted(shippingPrice: submittedShippingPrice));
-        },
-      );
-    } finally {
-      _isCreatingOrder = false;
-    }
-  }
-
   void updateQuantity(String productId, int quantity) {
-    if (productId.isEmpty) return;
+    final normalizedProductId = productId.trim();
+    if (normalizedProductId.isEmpty) return;
+
+    final existingIndex = state.items.indexWhere(
+      (item) => item.product.id?.trim() == normalizedProductId,
+    );
+    if (existingIndex == -1) return;
 
     final safeQuantity = quantity < 1 ? 1 : quantity;
-    var shippingPrice = state.shippingPrice;
-    final updatedItems =
-        state.items.map((item) {
-          if (item.product.id != productId) return item;
-
-          shippingPrice = item.shippingPrice;
-          return CartLocalData(
-            product: item.product,
-            quantity: safeQuantity,
-            shippingPrice: item.shippingPrice,
-          );
-        }).toList();
+    final shippingPrice = state.items[existingIndex].shippingPrice;
+    final updatedItems = List<CartLocalData>.of(state.items);
+    updatedItems[existingIndex] = CartLocalData(
+      product: updatedItems[existingIndex].product,
+      quantity: safeQuantity,
+      shippingPrice: shippingPrice,
+    );
 
     emit(
       CartInitial(
@@ -398,7 +239,7 @@ class CartCubit extends Cubit<CartState> {
     unawaited(
       CartLocalStorage.updateProductQuantity(
         userId: _userId,
-        productId: productId,
+        productId: normalizedProductId,
         quantity: safeQuantity,
         shippingPrice: shippingPrice,
       ),
@@ -406,9 +247,18 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void removeItem(String productId) {
-    if (productId.isEmpty) return;
+    final normalizedProductId = productId.trim();
+    if (normalizedProductId.isEmpty) return;
+
+    final hasMatchingItem = state.items.any(
+      (item) => item.product.id?.trim() == normalizedProductId,
+    );
+    if (!hasMatchingItem) return;
+
     final updatedItems =
-        state.items.where((item) => item.product.id != productId).toList();
+        state.items
+            .where((item) => item.product.id?.trim() != normalizedProductId)
+            .toList();
 
     emit(
       CartInitial(
@@ -418,13 +268,18 @@ class CartCubit extends Cubit<CartState> {
     );
 
     unawaited(
-      CartLocalStorage.removeProduct(userId: _userId, productId: productId),
+      CartLocalStorage.removeProduct(
+        userId: _userId,
+        productId: normalizedProductId,
+      ),
     );
   }
 
   void clearProductFromOtherShop(String? shopId) {
-    if (shopId == null || shopId.isEmpty) return;
-    final shopItems = _cartItemsForShop(state.items, shopId);
+    final normalizedShopId = shopId?.trim();
+    if (normalizedShopId == null || normalizedShopId.isEmpty) return;
+
+    final shopItems = _cartItemsForShop(state.items, normalizedShopId);
     if (shopItems.length == state.items.length) return;
 
     emit(
@@ -433,10 +288,34 @@ class CartCubit extends Cubit<CartState> {
         shippingPrice: _shippingPriceFor(shopItems),
       ),
     );
+
+    unawaited(_persistShopItems(items: shopItems, shopId: normalizedShopId));
   }
 
-  CartLoading _loadingFromItems(List<CartLocalData> items) {
-    return CartLoading(items: items, shippingPrice: _shippingPriceFor(items));
+  Future<void> applySyncedItems({
+    required List<CartLocalData> items,
+    String? shopId,
+  }) async {
+    await _persistShopItems(items: items, shopId: shopId);
+    if (isClosed) return;
+
+    emit(CartInitial(items: items, shippingPrice: _shippingPriceFor(items)));
+  }
+
+  Future<void> clearItemsForShop({
+    required String shopId,
+    required int shippingPrice,
+  }) async {
+    final normalizedShopId = shopId.trim();
+    if (normalizedShopId.isEmpty) return;
+
+    await _persistShopItems(items: const [], shopId: normalizedShopId);
+    if (isClosed) return;
+
+    _isInitialized = false;
+    _lastRestoredShopId = null;
+
+    emit(CartInitial(items: const [], shippingPrice: shippingPrice));
   }
 
   CartError _errorFromItems(List<CartLocalData> items, String message) {
@@ -455,51 +334,14 @@ class CartCubit extends Cubit<CartState> {
     return AddProductToCartResult.failure(status: status, message: message);
   }
 
-  Future<_ShopValidationResult> _validateLatestShop(
-    String shopId, {
-    required String fetchFailureMessage,
-  }) async {
-    final result = await _shopsRepo.fetchShopById(shopId);
-    return result.fold(
-      (failure) => _ShopValidationResult.failure(
-        message: failure.isNetwork ? failure.message : fetchFailureMessage,
-        addToCartStatus: AddProductToCartStatus.verificationFailed,
-      ),
-      (shop) {
-        if (shop == null || !shop.isActive || !shop.isVisible) {
-          return const _ShopValidationResult.failure(
-            message: AppStrings.shopUnavailableNow,
-            addToCartStatus: AddProductToCartStatus.unavailable,
-          );
-        }
-
-        if (!shop.isOpen) {
-          return const _ShopValidationResult.failure(
-            message: AppStrings.shopClosedNow,
-            addToCartStatus: AddProductToCartStatus.shopClosed,
-          );
-        }
-
-        return const _ShopValidationResult.valid();
-      },
-    );
-  }
-
-  Future<void> _applySyncedItems({
-    required List<CartLocalData> items,
-    String? shopId,
-  }) async {
-    await _persistShopItems(items: items, shopId: shopId);
-    if (isClosed) return;
-
-    emit(CartInitial(items: items, shippingPrice: _shippingPriceFor(items)));
-  }
-
   Future<void> _persistShopItems({
     required List<CartLocalData> items,
     String? shopId,
   }) async {
-    final resolvedShopId = shopId ?? _shopIdForItems(items);
+    final resolvedShopId = _cartAvailabilityService.resolveShopId(
+      items: items,
+      shopId: shopId,
+    );
     if (resolvedShopId == null || resolvedShopId.isEmpty) {
       await CartLocalStorage.replaceCart(userId: _userId, items: items);
       return;
@@ -508,7 +350,7 @@ class CartCubit extends Cubit<CartState> {
     final fullCart = await CartLocalStorage.loadProducts(userId: _userId);
     final otherShopItems =
         fullCart
-            .where((item) => item.product.shopId != resolvedShopId)
+            .where((item) => item.product.shopId.trim() != resolvedShopId)
             .toList();
     await CartLocalStorage.replaceCart(
       userId: _userId,
@@ -516,128 +358,16 @@ class CartCubit extends Cubit<CartState> {
     );
   }
 
-  Future<_CartSyncResult> _syncCartItems({
-    required List<CartLocalData> sourceItems,
-    String? shopId,
-  }) async {
-    final resolvedShopId = shopId ?? _shopIdForItems(sourceItems);
-    if (sourceItems.isEmpty) {
-      return _CartSyncResult(
-        shopId: resolvedShopId,
-        availableItems: const [],
-        removedItems: const [],
-        didFetchLatestProducts: true,
-        syncFailed: false,
-      );
-    }
-
-    if (resolvedShopId == null || resolvedShopId.isEmpty) {
-      return _CartSyncResult(
-        shopId: resolvedShopId,
-        availableItems: sourceItems,
-        removedItems: const [],
-        didFetchLatestProducts: false,
-        syncFailed: true,
-      );
-    }
-
-    final productIds = sourceItems
-        .map((item) => item.product.id?.trim() ?? '')
-        .where((id) => id.isNotEmpty)
-        .toSet()
-        .toList(growable: false);
-
-    if (productIds.length != sourceItems.length) {
-      return _CartSyncResult(
-        shopId: resolvedShopId,
-        availableItems: const [],
-        removedItems: sourceItems
-            .map(
-              (item) => _RemovedCartItem(
-                productName: _productNameFrom(item.product),
-                reason: _RemovedCartItemReason.unavailable,
-              ),
-            )
-            .toList(growable: false),
-        didFetchLatestProducts: true,
-        syncFailed: false,
-      );
-    }
-
-    final result = await _productsRepo.fetchProductsByIds(
-      shopId: resolvedShopId,
-      productIds: productIds,
-    );
-    return result.fold(
-      (failure) => _CartSyncResult(
-        shopId: resolvedShopId,
-        availableItems: sourceItems,
-        removedItems: const [],
-        didFetchLatestProducts: false,
-        syncFailed: true,
-        failureMessage: failure.isNetwork ? failure.message : null,
-      ),
-      (products) {
-        final productsById = <String, ProductModel>{
-          for (final product in products)
-            if ((product.id ?? '').trim().isNotEmpty)
-              product.id!.trim(): product,
-        };
-        final availableItems = <CartLocalData>[];
-        final removedItems = <_RemovedCartItem>[];
-
-        for (final item in sourceItems) {
-          final productId = item.product.id?.trim() ?? '';
-          final latestProduct = productsById[productId];
-          final productName = _productNameFrom(latestProduct ?? item.product);
-
-          if (latestProduct == null || latestProduct.isHiddenFromCustomers) {
-            removedItems.add(
-              _RemovedCartItem(
-                productName: productName,
-                reason: _RemovedCartItemReason.unavailable,
-              ),
-            );
-            continue;
-          }
-
-          if (latestProduct.isOutOfStock) {
-            removedItems.add(
-              _RemovedCartItem(
-                productName: productName,
-                reason: _RemovedCartItemReason.outOfStock,
-              ),
-            );
-            continue;
-          }
-
-          availableItems.add(
-            CartLocalData(
-              product: latestProduct,
-              quantity: item.quantity,
-              shippingPrice: item.shippingPrice,
-            ),
-          );
-        }
-
-        return _CartSyncResult(
-          shopId: resolvedShopId,
-          availableItems: availableItems,
-          removedItems: removedItems,
-          didFetchLatestProducts: true,
-          syncFailed: false,
-        );
-      },
-    );
-  }
-
   List<CartLocalData> _cartItemsForShop(
     List<CartLocalData> cart,
     String? shopId,
   ) {
-    if (shopId == null || shopId.isEmpty) return cart;
+    final normalizedShopId = shopId?.trim();
+    if (normalizedShopId == null || normalizedShopId.isEmpty) return cart;
 
-    return cart.where((item) => item.product.shopId == shopId).toList();
+    return cart
+        .where((item) => item.product.shopId.trim() == normalizedShopId)
+        .toList();
   }
 
   List<CartLocalData> _mergeCartItems(
@@ -647,9 +377,9 @@ class CartCubit extends Cubit<CartState> {
     final mergedItems = List<CartLocalData>.of(savedItems);
 
     for (final currentItem in currentItems) {
-      final productId = currentItem.product.id;
+      final productId = currentItem.product.id?.trim();
       final existingIndex = mergedItems.indexWhere(
-        (item) => item.product.id == productId,
+        (item) => item.product.id?.trim() == productId,
       );
 
       if (existingIndex == -1) {
@@ -667,87 +397,17 @@ class CartCubit extends Cubit<CartState> {
     return items.first.shippingPrice;
   }
 
-  String? _shopIdForItems(List<CartLocalData> items) {
-    if (items.isEmpty) return null;
-
-    final shopId = items.first.product.shopId.trim();
-    return shopId.isEmpty ? null : shopId;
-  }
-
-  List<CreateOrderItem> _buildOrderItems(List<CartLocalData> items) {
-    return items
-        .map(
-          (item) => CreateOrderItem(
-            productId: item.product.id ?? '',
-            quantity: item.quantity,
-          ),
-        )
-        .where((item) => item.productId.trim().isNotEmpty)
-        .toList(growable: false);
-  }
-
-  String _messageForRemovedItems(List<_RemovedCartItem> removedItems) {
-    if (removedItems.length == 1) {
-      final removedItem = removedItems.first;
-      return switch (removedItem.reason) {
-        _RemovedCartItemReason.outOfStock =>
-          AppStrings.outOfStockProductRemovedFromCart(removedItem.productName),
-        _RemovedCartItemReason.unavailable =>
-          AppStrings.unavailableProductRemovedFromCart(removedItem.productName),
-      };
-    }
-
-    final allOutOfStock = removedItems.every(
-      (item) => item.reason == _RemovedCartItemReason.outOfStock,
-    );
-    if (allOutOfStock) {
-      return AppStrings.outOfStockProductsRemovedFromCart;
-    }
-
-    return AppStrings.unavailableProductsRemovedFromCart;
-  }
-
-  String _productNameFrom(ProductModel product) {
-    final productName = product.name.trim();
-    if (productName.isNotEmpty) {
-      return productName;
-    }
-
-    return AppStrings.product;
-  }
-
-  bool _isShopStateFailureMessage(String message) {
-    return message == AppStrings.shopClosedNow ||
-        message == AppStrings.shopUnavailableNow;
+  AddProductToCartStatus _mapAddToCartStatus(CartShopValidationStatus status) {
+    return switch (status) {
+      CartShopValidationStatus.valid => AddProductToCartStatus.added,
+      CartShopValidationStatus.shopClosed => AddProductToCartStatus.shopClosed,
+      CartShopValidationStatus.unavailable =>
+        AddProductToCartStatus.unavailable,
+      CartShopValidationStatus.verificationFailed =>
+        AddProductToCartStatus.verificationFailed,
+    };
   }
 }
-
-class _CartSyncResult {
-  const _CartSyncResult({
-    required this.shopId,
-    required this.availableItems,
-    required this.removedItems,
-    required this.didFetchLatestProducts,
-    this.syncFailed = false,
-    this.failureMessage,
-  });
-
-  final String? shopId;
-  final List<CartLocalData> availableItems;
-  final List<_RemovedCartItem> removedItems;
-  final bool didFetchLatestProducts;
-  final bool syncFailed;
-  final String? failureMessage;
-}
-
-class _RemovedCartItem {
-  const _RemovedCartItem({required this.productName, required this.reason});
-
-  final String productName;
-  final _RemovedCartItemReason reason;
-}
-
-enum _RemovedCartItemReason { outOfStock, unavailable }
 
 enum AddProductToCartStatus {
   added,
@@ -756,34 +416,6 @@ enum AddProductToCartStatus {
   unavailable,
   outOfStock,
   verificationFailed,
-}
-
-class _ShopValidationResult {
-  const _ShopValidationResult._({
-    required this.isValid,
-    required this.message,
-    required this.addToCartStatus,
-  });
-
-  const _ShopValidationResult.valid()
-    : this._(
-        isValid: true,
-        message: '',
-        addToCartStatus: AddProductToCartStatus.added,
-      );
-
-  const _ShopValidationResult.failure({
-    required String message,
-    required AddProductToCartStatus addToCartStatus,
-  }) : this._(
-         isValid: false,
-         message: message,
-         addToCartStatus: addToCartStatus,
-       );
-
-  final bool isValid;
-  final String message;
-  final AddProductToCartStatus addToCartStatus;
 }
 
 class AddProductToCartResult {
@@ -815,8 +447,3 @@ class AddProductToCartResult {
   bool get wasBlockedByClosedShop =>
       status == AddProductToCartStatus.shopClosed;
 }
-
-
-
-
-

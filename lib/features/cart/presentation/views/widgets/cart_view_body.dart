@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_state.dart';
+import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
@@ -13,6 +14,7 @@ import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/presentation/actions/cart_route_arguments_builder.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
+import 'package:makanak/features/cart/presentation/manager/checkout_cubit/checkout_cubit.dart';
 import 'package:makanak/features/cart/presentation/views/add_user_address_view.dart';
 import 'package:makanak/features/cart/presentation/views/confirming_order_view.dart';
 import 'package:makanak/features/cart/presentation/views/widgets/cart_header_widget.dart';
@@ -43,15 +45,24 @@ class CartViewBody extends StatefulWidget {
 }
 
 class _CartViewBodyState extends State<CartViewBody> {
+  late final CheckoutCubit _checkoutCubit;
+
   @override
   void initState() {
     super.initState();
+    _checkoutCubit = getIt<CheckoutCubit>();
     final cartCubit = context.read<CartCubit>();
     cartCubit.initializeCart(widget.cartArguments);
     unawaited(
       cartCubit.refreshCartAvailability(shopId: widget.cartArguments?.shopId),
     );
     context.read<AddressCubit>().checkSavedAddresses();
+  }
+
+  @override
+  void dispose() {
+    _checkoutCubit.close();
+    super.dispose();
   }
 
   Future<void> _goToNextStep(
@@ -62,15 +73,14 @@ class _CartViewBodyState extends State<CartViewBody> {
     final product = cartState.product;
     if (product == null) return;
 
-    final networkMessage = await context.read<CartCubit>()
-        .networkMessageBeforeCheckout(shopId: product.shopId);
+    final networkMessage = await _checkoutCubit.networkMessageBeforeCheckout(
+      cartItems: cartState.items,
+      shopId: product.shopId,
+    );
     if (!mounted) return;
 
     if (networkMessage != null) {
-      AppSnackBar.showNetwork(
-        context: context,
-        message: networkMessage,
-      );
+      AppSnackBar.showNetwork(context: context, message: networkMessage);
       return;
     }
 
@@ -205,13 +215,14 @@ class _CartViewBodyState extends State<CartViewBody> {
                         hint: AppStrings.continueText,
                         color: primaryColor,
                         preventRapidTaps: true,
-                        onTap: () => unawaited(
-                          _goToNextStep(
-                            cartState,
-                            addressState,
-                            primaryColor,
-                          ),
-                        ),
+                        onTap:
+                            () => unawaited(
+                              _goToNextStep(
+                                cartState,
+                                addressState,
+                                primaryColor,
+                              ),
+                            ),
                         hasShadowEffect: false,
                       ),
                       SizedBox(height: widget.bottomContentPadding),
@@ -241,4 +252,3 @@ bool _shouldRebuildCartAddressView(
       previous.addresses != current.addresses ||
       previous.selectedAddressIndex != current.selectedAddressIndex;
 }
-

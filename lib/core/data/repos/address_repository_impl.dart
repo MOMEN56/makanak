@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:makanak/core/data/data_sources/address_local_data_source.dart';
 import 'package:makanak/core/data/data_sources/address_remote_data_source.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
 import 'package:makanak/core/errors/database_exception.dart';
 import 'package:makanak/core/errors/failure_mapper.dart';
 import 'package:makanak/core/errors/failures.dart';
+import 'package:makanak/core/helper/print_helper.dart';
 import 'package:makanak/core/models/user_address_model.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
 import 'package:makanak/core/utils/app_strings.dart';
@@ -189,7 +189,11 @@ class AddressRepositoryImpl implements AddressRepository {
     required Object error,
     required StackTrace stackTrace,
   }) {
-    debugPrint('Address local storage $operation failed: $error');
-    debugPrint('$stackTrace');
+    PrintHelper.error(
+      'Address local storage $operation failed.',
+      error: error,
+      stackTrace: stackTrace,
+      tag: 'Address',
+    );
   }
 }

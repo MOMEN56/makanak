@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/helpers/bloc_state_change_helpers.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
@@ -222,7 +223,7 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
       listenWhen: _shouldListenToProductsState,
       listener: (context, state) {
         widget.onFullScreenNetworkStateChanged?.call(
-          state is ProductsFailure && state.failure.isNetwork,
+          _isFullScreenNetworkFailure(state),
         );
 
         if (state is! ProductsSuccess) {
@@ -403,29 +404,43 @@ class _SelectedCartProduct {
   final int quantity;
 }
 
+bool _isFullScreenNetworkFailure(ProductsState state) {
+  return state is ProductsFailure && state.failure.isNetwork;
+}
+
+bool _didRefreshFailureChange(ProductsState previous, ProductsState current) {
+  return didRefreshFailureIdChange<ProductsState>(
+    previous: previous,
+    current: current,
+    refreshFailureOf:
+        (state) => state is ProductsSuccess ? state.refreshFailure : null,
+    refreshFailureIdOf:
+        (state) => state is ProductsSuccess ? state.refreshFailureId : -1,
+  );
+}
+
 bool _shouldListenToProductsState(
   ProductsState previous,
   ProductsState current,
 ) {
-  final previousFullScreenNetworkFailure =
-      previous is ProductsFailure && previous.failure.isNetwork;
-  final currentFullScreenNetworkFailure =
-      current is ProductsFailure && current.failure.isNetwork;
-
-  if (previousFullScreenNetworkFailure != currentFullScreenNetworkFailure) {
+  if (didFlagChange<ProductsState>(
+    previous: previous,
+    current: current,
+    flagOf: _isFullScreenNetworkFailure,
+  )) {
     return true;
   }
 
-  if (current is ProductsSuccess) {
-    if (previous is! ProductsSuccess) {
-      return true;
-    }
-
-    return previous.products != current.products ||
-        previous.refreshFailureId != current.refreshFailureId;
+  if (current is! ProductsSuccess) {
+    return false;
   }
 
-  return false;
+  if (previous is! ProductsSuccess) {
+    return true;
+  }
+
+  return previous.products != current.products ||
+      _didRefreshFailureChange(previous, current);
 }
 
 bool _shouldRebuildProductsView(ProductsState previous, ProductsState current) {
@@ -433,12 +448,11 @@ bool _shouldRebuildProductsView(ProductsState previous, ProductsState current) {
     return true;
   }
 
-  final previousFullScreenNetworkFailure =
-      previous is ProductsFailure && previous.failure.isNetwork;
-  final currentFullScreenNetworkFailure =
-      current is ProductsFailure && current.failure.isNetwork;
-
-  return previousFullScreenNetworkFailure != currentFullScreenNetworkFailure;
+  return didFlagChange<ProductsState>(
+    previous: previous,
+    current: current,
+    flagOf: _isFullScreenNetworkFailure,
+  );
 }
 
 bool _shouldRebuildProductsContent(

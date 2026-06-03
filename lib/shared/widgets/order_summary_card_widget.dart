@@ -32,7 +32,7 @@ class OrderSummaryCard extends StatelessWidget {
           const Gap(12),
           ConfirmingOrderRow(
             label: AppStrings.deliveryPrice,
-            value: '$shippingPrice ${AppStrings.currency}',
+            value: AppStrings.shippingPriceText(shippingPrice),
           ),
           const Gap(12),
           const Divider(height: 1, color: AppColors.searchFieldBackground),

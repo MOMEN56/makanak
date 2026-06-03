@@ -10,14 +10,19 @@ class CartViewArguments {
     required int quantity,
     required Color primaryColor,
     ShopModel? shopModel,
-    int shippingPrice = 35,
+    int? shippingPrice,
   }) {
+    final resolvedShippingPrice = _resolveShippingPrice(
+      shippingPrice: shippingPrice,
+      shopModel: shopModel,
+    );
+
     return CartViewArguments._(
       productData: product == null ? null : ProductRouteData.fromModel(product),
       quantity: quantity,
       primaryColor: primaryColor,
       shopData: shopModel == null ? null : ShopRouteData.fromModel(shopModel),
-      shippingPrice: shippingPrice,
+      shippingPrice: resolvedShippingPrice,
     );
   }
 
@@ -26,7 +31,7 @@ class CartViewArguments {
     required this.quantity,
     required this.primaryColor,
     ShopRouteData? shopData,
-    this.shippingPrice = 35,
+    this.shippingPrice = 0,
   }) : _productData = productData,
        _shopData = shopData;
 
@@ -69,5 +74,13 @@ class CartViewArguments {
       shopModel: shopModel ?? this.shopModel,
       shippingPrice: shippingPrice ?? this.shippingPrice,
     );
+  }
+
+  static int _resolveShippingPrice({
+    required int? shippingPrice,
+    required ShopModel? shopModel,
+  }) {
+    final resolvedPrice = shippingPrice ?? shopModel?.shippingPrice ?? 0;
+    return resolvedPrice < 0 ? 0 : resolvedPrice;
   }
 }

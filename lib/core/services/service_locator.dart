@@ -21,11 +21,13 @@ import 'package:makanak/features/auth/data/data_sources/profile_remote_data_sour
 import 'package:makanak/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:makanak/features/auth/domain/repos/auth_repo.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit.dart';
+import 'package:makanak/features/cart/services/cart_availability_service.dart';
 import 'package:makanak/features/cart/data/repos/cart_repository_impl.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_cubit_registry.dart';
+import 'package:makanak/features/cart/presentation/manager/checkout_cubit/checkout_cubit.dart';
 import 'package:makanak/features/notifications/data/data_sources/push_token_remote_data_source.dart';
 import 'package:makanak/features/notifications/data/repos/notifications_repository.dart';
 import 'package:makanak/features/notifications/data/repos/notifications_repository_impl.dart';
@@ -229,12 +231,23 @@ void _registerCartFeature() {
     () => CartRepositoryImpl(getIt<OrdersRemoteDataSource>()),
   );
 
+  getIt.registerLazySingleton<CartAvailabilityService>(
+    () => CartAvailabilityService(getIt<ProductsRepo>(), getIt<ShopsRepo>()),
+  );
+
   getIt.registerFactoryParam<CartCubit, String, void>(
     (userId, _) => CartCubit(
-      getIt<CartRepository>(),
       getIt<ProductsRepo>(),
-      getIt<ShopsRepo>(),
+      getIt<CartAvailabilityService>(),
       userId: userId,
+    ),
+  );
+
+  getIt.registerFactory<CheckoutCubit>(
+    () => CheckoutCubit(
+      getIt<CartRepository>(),
+      getIt<CartAvailabilityService>(),
+      getIt<ShopsRepo>(),
     ),
   );
 

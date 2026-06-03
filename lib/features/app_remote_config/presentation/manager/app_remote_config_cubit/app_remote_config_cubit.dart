@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makanak/core/helper/print_helper.dart';
 import 'package:makanak/features/app_remote_config/domain/entities/app_access_result.dart';
 import 'package:makanak/features/app_remote_config/domain/repos/app_remote_config_repo.dart';
 import 'package:makanak/features/app_remote_config/presentation/manager/app_remote_config_cubit/app_remote_config_state.dart';
@@ -30,11 +30,12 @@ class AppRemoteConfigCubit extends Cubit<AppRemoteConfigState> {
 
       emit(AppRemoteConfigResolved(result));
     } catch (error, stackTrace) {
-      if (kDebugMode) {
-        debugPrint('App remote config check failed. Allowing startup.');
-        debugPrint('$error');
-        debugPrint('$stackTrace');
-      }
+      PrintHelper.error(
+        'App remote config check failed. Allowing startup.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: 'RemoteConfig',
+      );
 
       if (isClosed) return;
 

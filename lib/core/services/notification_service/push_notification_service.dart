@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:makanak/core/helper/print_helper.dart';
 import 'package:makanak/core/services/notification_service/notification_event.dart';
 import 'package:makanak/core/services/notification_service/notification_navigation_service.dart';
 import 'package:makanak/core/services/notification_service/notification_navigator.dart';
@@ -325,15 +326,15 @@ FirebaseMessaging Function() _buildMessagingFactory(
 }
 
 void _debugLog(String message, {Object? error, StackTrace? stackTrace}) {
-  if (!kDebugMode) {
+  if (error == null && stackTrace == null) {
+    PrintHelper.tag('PushNotification', message);
     return;
   }
 
-  debugPrint(message);
-  if (error != null) {
-    debugPrint('Push notification error: $error');
-  }
-  if (stackTrace != null) {
-    debugPrint('$stackTrace');
-  }
+  PrintHelper.error(
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    tag: 'PushNotification',
+  );
 }

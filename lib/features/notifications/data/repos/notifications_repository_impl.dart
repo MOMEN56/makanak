@@ -1,7 +1,7 @@
-﻿import 'dart:async';
+import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:makanak/core/errors/database_exception.dart';
+import 'package:makanak/core/helper/print_helper.dart';
 import 'package:makanak/core/services/supabase_request_guard.dart';
 import 'package:makanak/core/services/notification_service/notification_event.dart';
 import 'package:makanak/core/services/services.dart';
@@ -260,12 +260,11 @@ class SupabaseNotificationsRepository implements NotificationsRepository {
     Object error,
     StackTrace stackTrace,
   ) {
-    if (!kDebugMode) {
-      return;
-    }
-
-    debugPrint(message);
-    debugPrint('Notifications repository error: $error');
-    debugPrint('$stackTrace');
+    PrintHelper.error(
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      tag: 'Notifications',
+    );
   }
 }

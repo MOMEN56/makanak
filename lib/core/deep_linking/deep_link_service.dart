@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:app_links/app_links.dart';
-import 'package:flutter/foundation.dart';
 import 'package:makanak/core/deep_linking/app_deep_link.dart';
 import 'package:makanak/core/deep_linking/deep_link_navigator.dart';
 import 'package:makanak/core/deep_linking/deep_link_parser.dart';
+import 'package:makanak/core/helper/print_helper.dart';
 
 class DeepLinkService {
   DeepLinkService(
@@ -111,15 +111,15 @@ class DeepLinkService {
 }
 
 void _debugLog(String message, {Object? error, StackTrace? stackTrace}) {
-  if (!kDebugMode) {
+  if (error == null && stackTrace == null) {
+    PrintHelper.tag('DeepLink', message);
     return;
   }
 
-  debugPrint(message);
-  if (error != null) {
-    debugPrint('Deep link error: $error');
-  }
-  if (stackTrace != null) {
-    debugPrint('$stackTrace');
-  }
+  PrintHelper.error(
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    tag: 'DeepLink',
+  );
 }

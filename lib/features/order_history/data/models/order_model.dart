@@ -18,7 +18,7 @@ class OrderModel extends Equatable {
     this.address,
   });
 
-  static const int defaultShippingPrice = 35;
+  static const int defaultShippingPrice = 0;
 
   final String id;
   final String userId;

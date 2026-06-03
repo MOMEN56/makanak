@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:makanak/core/helper/print_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 abstract final class AuthLogger {
@@ -7,37 +7,37 @@ abstract final class AuthLogger {
     PlatformException error,
     StackTrace stackTrace,
   ) {
-    if (!kDebugMode) return;
-
-    debugPrint(
-      'Google sign-in PlatformException: '
-      'code=${error.code}, message=${error.message}, details=${error.details}',
+    PrintHelper.error(
+      'Google sign-in PlatformException.',
+      error:
+          'code=${error.code}, message=${error.message}, details=${error.details}',
+      stackTrace: stackTrace,
+      tag: 'Auth',
     );
-    debugPrintStack(stackTrace: stackTrace);
   }
 
   static void logUnexpectedGoogleSignInError(
     Object error,
     StackTrace stackTrace,
   ) {
-    if (!kDebugMode) return;
-
-    debugPrint('Unexpected Google sign-in error: $error');
-    debugPrintStack(stackTrace: stackTrace);
+    PrintHelper.error(
+      'Unexpected Google sign-in error.',
+      error: error,
+      stackTrace: stackTrace,
+      tag: 'Auth',
+    );
   }
 
   static void logAuthException(String operation, supa.AuthException error) {
-    if (!kDebugMode) return;
-
-    debugPrint(
-      '$operation AuthException: '
-      'message=${error.message}, statusCode=${error.statusCode}, code=${error.code}',
+    PrintHelper.error(
+      '$operation AuthException.',
+      error:
+          'message=${error.message}, statusCode=${error.statusCode}, code=${error.code}',
+      tag: 'Auth',
     );
   }
 
   static void logAuthSetupIssue(String message) {
-    if (!kDebugMode) return;
-
-    debugPrint('Auth setup issue: $message');
+    PrintHelper.warning('Auth setup issue: $message', tag: 'Auth');
   }
 }

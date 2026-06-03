@@ -52,6 +52,7 @@ class AppStrings {
   static const confirmation = 'التأكيد';
   static const productsTotal = 'إجمالي المنتجات';
   static const deliveryPrice = 'سعر التوصيل';
+  static const freeDelivery = 'مجانًا';
   static const orderTotal = 'إجمالي الطلب';
   static const currency = 'ج.م';
   static const trackOrder = 'تتبع طلبي';
@@ -298,6 +299,14 @@ class AppStrings {
       'المنتج $productName لم يعد متاحًا وتم حذفه من السلة.';
 
   static String priceInEgyptianPounds(int price) => '$price جنيه';
+
+  static String shippingPriceText(int shippingPrice) {
+    if (shippingPrice <= 0) {
+      return freeDelivery;
+    }
+
+    return '$shippingPrice $currency';
+  }
 
   static String orderStatusUpdated(String status) =>
       'تم تحديث حالة طلبك إلى $status';

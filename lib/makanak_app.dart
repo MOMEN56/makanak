@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:makanak/core/deep_linking/deep_link_navigator.dart';
@@ -23,6 +22,7 @@ import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_cubit
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:makanak/features/auth/presentation/views/auth_gate_view.dart';
 import 'package:makanak/shared/views/release_error_view.dart';
+import 'package:makanak/shared/widgets/app_system_ui_wrapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
 
 class MakanakApp extends StatefulWidget {
@@ -149,32 +149,7 @@ class _MakanakAppState extends State<MakanakApp> {
               ),
             );
 
-            return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: const SystemUiOverlayStyle(
-                statusBarColor: Colors.white,
-                statusBarIconBrightness: Brightness.dark,
-                statusBarBrightness: Brightness.light,
-                systemStatusBarContrastEnforced: false,
-                systemNavigationBarColor: Colors.transparent,
-                systemNavigationBarDividerColor: Colors.transparent,
-                systemNavigationBarIconBrightness: Brightness.dark,
-                systemNavigationBarContrastEnforced: false,
-              ),
-              child: Stack(
-                children: [
-                  gatedChild,
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: MediaQuery.paddingOf(context).top,
-                    child: const IgnorePointer(
-                      child: ColoredBox(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            );
+            return AppSystemUiWrapper(child: gatedChild);
           },
           initialRoute: AuthGateView.routeName,
           onGenerateRoute: onGenerateRoute,

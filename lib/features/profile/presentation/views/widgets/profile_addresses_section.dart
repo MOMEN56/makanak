@@ -53,7 +53,7 @@ class ProfileAddressesSection extends StatelessWidget {
                 : state.selectedAddressIndex;
         final selectedAddress = state.addresses[selectedAddressIndex];
 
-        return ListView(
+        return Column(
           children: [
             AddressCard(
               address: selectedAddress,
