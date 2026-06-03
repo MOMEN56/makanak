@@ -50,7 +50,7 @@ class ShopsCubit extends Cubit<ShopsState> with SafeEmitMixin<ShopsState> {
     final shouldPreserveContent = currentState is ShopsSuccess;
 
     if (!shouldPreserveContent) {
-      emit(const ShopsLoading());
+      safeEmit(const ShopsLoading());
     }
 
     final result = await _shopsRepo.fetchShops(query: query);

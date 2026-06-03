@@ -97,7 +97,7 @@ class AddressCubit extends Cubit<AddressState>
     if (!_hasAuthenticatedUser()) return;
 
     final requestUserId = _activeUserId;
-    emit(_loadingFromState());
+    safeEmit(_loadingFromState());
     final result = await _addressRepository.saveAddress(
       street: street,
       floor: floor,
@@ -137,7 +137,7 @@ class AddressCubit extends Cubit<AddressState>
       return true;
     }
 
-    emit(_loadingFromState());
+    safeEmit(_loadingFromState());
     final result = await _addressRepository.setDefaultAddress(address.id);
     if (!_isActiveUser(requestUserId)) return false;
 

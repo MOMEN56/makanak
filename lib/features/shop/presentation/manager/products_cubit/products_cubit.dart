@@ -73,7 +73,7 @@ class ProductsCubit extends Cubit<ProductsState>
     final shouldPreserveContent = currentState is ProductsSuccess;
 
     if (!shouldPreserveContent) {
-      emit(ProductsLoading(priceSort: priceSort));
+      safeEmit(ProductsLoading(priceSort: priceSort));
     }
 
     final result = await _productsRepo.fetchProductsByShopId(
