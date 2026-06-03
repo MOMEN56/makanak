@@ -46,16 +46,25 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
     return SafeArea(
       child: Padding(
         padding: AppResponsive.all(context, AppSpacing.screenEdge),
-        child: ListView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const ProfileHeaderSection(),
+
             const Gap(16),
-            LatestNotificationCard(
-              repository: getIt<NotificationsRepository>(),
+
+            Expanded(
+              child: ListView(
+                children: [
+                  LatestNotificationCard(
+                    repository: getIt<NotificationsRepository>(),
+                  ),
+                  const Gap(16),
+                  ProfileAddressesSection(onError: _showError),
+                  const Gap(70),
+                ],
+              ),
             ),
-            const Gap(16),
-            ProfileAddressesSection(onError: _showError),
-            const Gap(70),
           ],
         ),
       ),
