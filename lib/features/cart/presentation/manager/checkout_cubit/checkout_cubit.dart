@@ -75,6 +75,8 @@ class CheckoutCubit extends Cubit<CheckoutState>
         shopId,
         fetchFailureMessage: AppStrings.cartAvailabilityCheckFailed,
       );
+      if (isClosed) return;
+
       if (!shopValidation.isValid) {
         safeEmit(_failure(shopValidation.message));
         return;
@@ -84,6 +86,8 @@ class CheckoutCubit extends Cubit<CheckoutState>
         sourceItems: itemsToSubmit,
         shopId: shopId,
       );
+      if (isClosed) return;
+
       if (preSubmitSync.syncFailed) {
         safeEmit(
           _failure(
@@ -127,6 +131,7 @@ class CheckoutCubit extends Cubit<CheckoutState>
         return;
       }
 
+      if (isClosed) return;
       safeEmit(const CheckoutLoading());
       final submittedShippingPrice = _shippingPriceFor(
         itemsToSubmit,
@@ -138,6 +143,7 @@ class CheckoutCubit extends Cubit<CheckoutState>
         shippingPrice: submittedShippingPrice,
         items: orderItems,
       );
+      if (isClosed) return;
 
       await result.fold<Future<void>>(
         (failure) async {

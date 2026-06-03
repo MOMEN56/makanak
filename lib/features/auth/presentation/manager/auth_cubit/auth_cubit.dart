@@ -4,12 +4,13 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/utils/app_strings.dart';
+import 'package:makanak/core/utils/bloc/safe_emit_mixin.dart';
 import 'package:makanak/features/auth/domain/entities/profile_entity.dart';
 import 'package:makanak/features/auth/domain/repos/auth_repo.dart';
 import 'package:makanak/features/auth/presentation/manager/auth_cubit/auth_state.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
-class AuthCubit extends Cubit<AuthState> {
+class AuthCubit extends Cubit<AuthState> with SafeEmitMixin<AuthState> {
   AuthCubit(this._authRepo) : super(const AuthLoading());
 
   final AuthRepo _authRepo;
@@ -128,10 +129,11 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final result = await _authRepo.signOut();
       result.fold(
-        (failure) =>
-            emit(AuthUnauthenticated(message: failure.message, isError: true)),
+        (failure) => safeEmit(
+          AuthUnauthenticated(message: failure.message, isError: true),
+        ),
         (_) {
-          emit(const AuthUnauthenticated());
+          safeEmit(const AuthUnauthenticated());
         },
       );
     } finally {
@@ -159,20 +161,20 @@ class AuthCubit extends Cubit<AuthState> {
       case supa.AuthChangeEvent.mfaChallengeVerified:
         final session = authState.session;
         if (session == null) {
-          emit(const AuthUnauthenticated());
+          safeEmit(const AuthUnauthenticated());
           return;
         }
         await _emitAuthenticatedState(session);
         return;
       case supa.AuthChangeEvent.passwordRecovery:
-        emit(
+        safeEmit(
           const AuthUnauthenticated(
             message: AppStrings.authPasswordRecoveryMessage,
           ),
         );
         return;
       case supa.AuthChangeEvent.signedOut:
-        emit(const AuthUnauthenticated());
+        safeEmit(const AuthUnauthenticated());
         return;
       default:
         return;
@@ -181,12 +183,13 @@ class AuthCubit extends Cubit<AuthState> {
 
   void _consumeAuthResult(Either<Failure, AuthOperationResult> result) {
     result.fold(
-      (failure) =>
-          emit(AuthUnauthenticated(message: failure.message, isError: true)),
+      (failure) => safeEmit(
+        AuthUnauthenticated(message: failure.message, isError: true),
+      ),
       (authResult) {
         final session = authResult.session;
         if (session == null) {
-          emit(
+          safeEmit(
             AuthUnauthenticated(message: authResult.message, isError: false),
           );
           return;
@@ -194,7 +197,7 @@ class AuthCubit extends Cubit<AuthState> {
 
         final profile =
             authResult.profile ?? ProfileEntity(id: session.user.id);
-        emit(AuthAuthenticated(profile: profile));
+        safeEmit(AuthAuthenticated(profile: profile));
       },
     );
   }
@@ -209,11 +212,11 @@ class AuthCubit extends Cubit<AuthState> {
     profileResult.fold(
       (_) {
         final fallback = ProfileEntity(id: session.user.id);
-        emit(AuthAuthenticated(profile: fallback));
+        safeEmit(AuthAuthenticated(profile: fallback));
       },
       (profile) {
         final resolved = profile ?? ProfileEntity(id: session.user.id);
-        emit(AuthAuthenticated(profile: resolved));
+        safeEmit(AuthAuthenticated(profile: resolved));
       },
     );
   }
