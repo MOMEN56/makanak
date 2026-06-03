@@ -2,15 +2,16 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/app_strings.dart';
+import 'package:makanak/core/utils/bloc/safe_emit_mixin.dart';
 import 'package:makanak/features/cart/data/models/cart_view_arguments.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
-import 'package:makanak/features/cart/services/cart_availability_service.dart';
 import 'package:makanak/features/cart/presentation/manager/cart_cubit/cart_state.dart';
+import 'package:makanak/features/cart/services/cart_availability_service.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
 
-class CartCubit extends Cubit<CartState> {
+class CartCubit extends Cubit<CartState> with SafeEmitMixin<CartState> {
   CartCubit(
     this._productsRepo,
     this._cartAvailabilityService, {
@@ -35,9 +36,7 @@ class CartCubit extends Cubit<CartState> {
       _cartItemsForShop(savedCart, normalizedShopId),
       _cartItemsForShop(state.items, normalizedShopId),
     );
-    if (isClosed) return;
-
-    emit(
+    safeEmit(
       CartInitial(items: shopCart, shippingPrice: _shippingPriceFor(shopCart)),
     );
     if (shopCart.isEmpty) return;
@@ -88,7 +87,7 @@ class CartCubit extends Cubit<CartState> {
       currentItems[existingIndex] = updatedItem;
     }
 
-    emit(
+    safeEmit(
       CartInitial(
         items: currentItems,
         shippingPrice: _shippingPriceFor(currentItems),
@@ -297,9 +296,9 @@ class CartCubit extends Cubit<CartState> {
     String? shopId,
   }) async {
     await _persistShopItems(items: items, shopId: shopId);
-    if (isClosed) return;
-
-    emit(CartInitial(items: items, shippingPrice: _shippingPriceFor(items)));
+    safeEmit(
+      CartInitial(items: items, shippingPrice: _shippingPriceFor(items)),
+    );
   }
 
   Future<void> clearItemsForShop({
@@ -310,12 +309,10 @@ class CartCubit extends Cubit<CartState> {
     if (normalizedShopId.isEmpty) return;
 
     await _persistShopItems(items: const [], shopId: normalizedShopId);
-    if (isClosed) return;
-
     _isInitialized = false;
     _lastRestoredShopId = null;
 
-    emit(CartInitial(items: const [], shippingPrice: shippingPrice));
+    safeEmit(CartInitial(items: const [], shippingPrice: shippingPrice));
   }
 
   CartError _errorFromItems(List<CartLocalData> items, String message) {
@@ -330,7 +327,7 @@ class CartCubit extends Cubit<CartState> {
     required String message,
     required AddProductToCartStatus status,
   }) {
-    emit(_errorFromItems(state.items, message));
+    safeEmit(_errorFromItems(state.items, message));
     return AddProductToCartResult.failure(status: status, message: message);
   }
 

@@ -1,10 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makanak/core/utils/bloc/safe_emit_mixin.dart';
 import 'package:makanak/core/utils/debouncer.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
 import 'package:makanak/features/shop/presentation/manager/products_cubit/products_state.dart';
 
-class ProductsCubit extends Cubit<ProductsState> {
+class ProductsCubit extends Cubit<ProductsState>
+    with SafeEmitMixin<ProductsState> {
   ProductsCubit(this._productsRepo) : super(const ProductsInitial());
 
   final ProductsRepo _productsRepo;
@@ -79,14 +81,14 @@ class ProductsCubit extends Cubit<ProductsState> {
       query: query,
       priceSort: priceSort,
     );
-    if (currentRequestId != _requestId || isClosed) return;
+    if (currentRequestId != _requestId) return;
 
     result.fold(
       (failure) {
         if (shouldPreserveContent) {
           _pendingQuery = previousAppliedQuery;
           _pendingPriceSort = previousAppliedPriceSort;
-          emit(
+          safeEmit(
             ProductsSuccess(
               List.unmodifiable(previousProducts),
               priceSort: previousAppliedPriceSort,
@@ -97,14 +99,14 @@ class ProductsCubit extends Cubit<ProductsState> {
           return;
         }
 
-        emit(ProductsFailure(failure, priceSort: priceSort));
+        safeEmit(ProductsFailure(failure, priceSort: priceSort));
       },
       (products) {
         _appliedQuery = query;
         _pendingQuery = query;
         _appliedPriceSort = priceSort;
         _pendingPriceSort = priceSort;
-        emit(ProductsSuccess(products, priceSort: priceSort));
+        safeEmit(ProductsSuccess(products, priceSort: priceSort));
       },
     );
   }

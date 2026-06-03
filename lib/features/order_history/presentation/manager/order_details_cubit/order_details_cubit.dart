@@ -1,10 +1,12 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/core/utils/app_strings.dart';
+import 'package:makanak/core/utils/bloc/safe_emit_mixin.dart';
 import 'package:makanak/features/order_history/domain/repos/order_history_repository.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_details_cubit/order_details_state.dart';
 
-class OrderDetailsCubit extends Cubit<OrderDetailsState> {
+class OrderDetailsCubit extends Cubit<OrderDetailsState>
+    with SafeEmitMixin<OrderDetailsState> {
   OrderDetailsCubit(this._repository) : super(OrderDetailsInitial());
 
   final OrderHistoryRepository _repository;
@@ -12,9 +14,7 @@ class OrderDetailsCubit extends Cubit<OrderDetailsState> {
   Future<void> fetchOrder(String orderId) async {
     if (orderId.trim().isEmpty) {
       emit(
-        const OrderDetailsFailure(
-          Failure(AppStrings.orderDetailsUnavailable),
-        ),
+        const OrderDetailsFailure(Failure(AppStrings.orderDetailsUnavailable)),
       );
       return;
     }
@@ -22,21 +22,17 @@ class OrderDetailsCubit extends Cubit<OrderDetailsState> {
     emit(OrderDetailsLoading());
 
     final result = await _repository.fetchOrderById(orderId);
-    if (isClosed) return;
 
-    result.fold(
-      (failure) => emit(OrderDetailsFailure(failure)),
-      (order) {
-        if (order == null) {
-          emit(
-            const OrderDetailsFailure(
-              Failure(AppStrings.orderDetailsUnavailable),
-            ),
-          );
-        } else {
-          emit(OrderDetailsSuccess(order));
-        }
-      },
-    );
+    result.fold((failure) => safeEmit(OrderDetailsFailure(failure)), (order) {
+      if (order == null) {
+        safeEmit(
+          const OrderDetailsFailure(
+            Failure(AppStrings.orderDetailsUnavailable),
+          ),
+        );
+      } else {
+        safeEmit(OrderDetailsSuccess(order));
+      }
+    });
   }
 }

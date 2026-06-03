@@ -1,9 +1,11 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makanak/core/utils/bloc/safe_emit_mixin.dart';
 import 'package:makanak/features/order_history/data/models/order_model.dart';
 import 'package:makanak/features/order_history/domain/repos/order_history_repository.dart';
 import 'package:makanak/features/order_history/presentation/manager/order_history_cubit/order_history_state.dart';
 
-class OrderHistoryCubit extends Cubit<OrderHistoryState> {
+class OrderHistoryCubit extends Cubit<OrderHistoryState>
+    with SafeEmitMixin<OrderHistoryState> {
   OrderHistoryCubit(this._repository) : super(const OrderHistoryInitial());
 
   final OrderHistoryRepository _repository;
@@ -22,24 +24,20 @@ class OrderHistoryCubit extends Cubit<OrderHistoryState> {
     }
 
     final result = await _repository.fetchOrders();
-    if (isClosed) return;
 
-    result.fold(
-      (failure) {
-        if (shouldPreserveContent) {
-          emit(
-            OrderHistorySuccess(
-              previousOrders,
-              refreshFailure: failure,
-              refreshFailureId: ++_refreshFailureId,
-            ),
-          );
-          return;
-        }
+    result.fold((failure) {
+      if (shouldPreserveContent) {
+        safeEmit(
+          OrderHistorySuccess(
+            previousOrders,
+            refreshFailure: failure,
+            refreshFailureId: ++_refreshFailureId,
+          ),
+        );
+        return;
+      }
 
-        emit(OrderHistoryFailure(failure));
-      },
-      (orders) => emit(OrderHistorySuccess(orders)),
-    );
+      safeEmit(OrderHistoryFailure(failure));
+    }, (orders) => safeEmit(OrderHistorySuccess(orders)));
   }
 }

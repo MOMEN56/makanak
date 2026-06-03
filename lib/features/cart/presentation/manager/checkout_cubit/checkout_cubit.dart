@@ -1,13 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/utils/app_strings.dart';
-import 'package:makanak/features/cart/services/cart_availability_service.dart';
+import 'package:makanak/core/utils/bloc/safe_emit_mixin.dart';
 import 'package:makanak/features/cart/data/services/cart_local_storage.dart';
 import 'package:makanak/features/cart/domain/entities/create_order_item.dart';
 import 'package:makanak/features/cart/domain/repos/cart_repository.dart';
 import 'package:makanak/features/cart/presentation/manager/checkout_cubit/checkout_state.dart';
+import 'package:makanak/features/cart/services/cart_availability_service.dart';
 import 'package:makanak/features/shops/data/repos/shops_repo.dart';
 
-class CheckoutCubit extends Cubit<CheckoutState> {
+class CheckoutCubit extends Cubit<CheckoutState>
+    with SafeEmitMixin<CheckoutState> {
   CheckoutCubit(
     this._cartRepository,
     this._cartAvailabilityService,
@@ -73,10 +75,8 @@ class CheckoutCubit extends Cubit<CheckoutState> {
         shopId,
         fetchFailureMessage: AppStrings.cartAvailabilityCheckFailed,
       );
-      if (isClosed) return;
-
       if (!shopValidation.isValid) {
-        emit(_failure(shopValidation.message));
+        safeEmit(_failure(shopValidation.message));
         return;
       }
 
@@ -84,10 +84,8 @@ class CheckoutCubit extends Cubit<CheckoutState> {
         sourceItems: itemsToSubmit,
         shopId: shopId,
       );
-      if (isClosed) return;
-
       if (preSubmitSync.syncFailed) {
-        emit(
+        safeEmit(
           _failure(
             preSubmitSync.failureMessage ??
                 AppStrings.cartAvailabilityCheckFailed,
@@ -99,7 +97,7 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       if (preSubmitSync.didFetchLatestProducts) {
         itemsToSubmit = preSubmitSync.availableItems;
         if (preSubmitSync.removedItems.isNotEmpty) {
-          emit(
+          safeEmit(
             _failure(
               _cartAvailabilityService.messageForRemovedItems(
                 preSubmitSync.removedItems,
@@ -125,13 +123,11 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       if (validatedShopId == null ||
           hasMixedShops ||
           orderItems.length != itemsToSubmit.length) {
-        if (isClosed) return;
-        emit(_failure(AppStrings.invalidProduct));
+        safeEmit(_failure(AppStrings.invalidProduct));
         return;
       }
 
-      if (isClosed) return;
-      emit(const CheckoutLoading());
+      safeEmit(const CheckoutLoading());
       final submittedShippingPrice = _shippingPriceFor(
         itemsToSubmit,
         fallbackShippingPrice: fallbackShippingPrice,
@@ -142,13 +138,11 @@ class CheckoutCubit extends Cubit<CheckoutState> {
         shippingPrice: submittedShippingPrice,
         items: orderItems,
       );
-      if (isClosed) return;
 
       await result.fold<Future<void>>(
         (failure) async {
           if (_isShopStateFailureMessage(failure.message)) {
-            if (isClosed) return;
-            emit(_failure(failure.message));
+            safeEmit(_failure(failure.message));
             return;
           }
 
@@ -156,10 +150,8 @@ class CheckoutCubit extends Cubit<CheckoutState> {
             sourceItems: itemsToSubmit,
             shopId: validatedShopId,
           );
-          if (isClosed) return;
-
           if (postFailureSync.syncFailed) {
-            emit(
+            safeEmit(
               _failure(
                 postFailureSync.failureMessage ??
                     AppStrings.cartAvailabilityCheckFailed,
@@ -180,7 +172,7 @@ class CheckoutCubit extends Cubit<CheckoutState> {
             itemsToSubmit = syncedCartItems;
 
             if (postFailureSync.removedItems.isNotEmpty) {
-              emit(
+              safeEmit(
                 _failure(
                   _cartAvailabilityService.messageForRemovedItems(
                     postFailureSync.removedItems,
@@ -198,8 +190,7 @@ class CheckoutCubit extends Cubit<CheckoutState> {
             }
           }
 
-          if (isClosed) return;
-          emit(
+          safeEmit(
             _failure(
               failure.message,
               syncedItems: syncedItems,
@@ -208,7 +199,7 @@ class CheckoutCubit extends Cubit<CheckoutState> {
           );
         },
         (_) async {
-          emit(
+          safeEmit(
             CheckoutSubmitted(
               shopId: validatedShopId,
               shippingPrice: submittedShippingPrice,

@@ -8,9 +8,11 @@ import 'package:makanak/core/models/user_address_model.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_state.dart';
 import 'package:makanak/core/services/supabase_auth_service.dart';
 import 'package:makanak/core/utils/address_form_validator.dart';
+import 'package:makanak/core/utils/bloc/safe_emit_mixin.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
-class AddressCubit extends Cubit<AddressState> {
+class AddressCubit extends Cubit<AddressState>
+    with SafeEmitMixin<AddressState> {
   AddressCubit(this._addressRepository, this._authService)
     : _activeUserId = _currentUserId(_authService),
       super(const AddressInitial()) {
@@ -30,18 +32,21 @@ class AddressCubit extends Cubit<AddressState> {
 
     final requestUserId = _activeUserId;
     final storedAddresses = await _addressRepository.loadStoredAddresses();
-    if (isClosed || !_isActiveUser(requestUserId)) return;
+    if (!_isActiveUser(requestUserId)) return;
 
     if (storedAddresses.isNotEmpty) {
       _emitAddressState(storedAddresses);
     } else {
-      emit(_loadingFromState());
+      safeEmit(_loadingFromState());
     }
 
     final result = await _addressRepository.fetchUserAddresses();
-    if (isClosed || !_isActiveUser(requestUserId)) return;
+    if (!_isActiveUser(requestUserId)) return;
 
-    result.fold((failure) => emit(_errorFromState(failure)), _emitAddressState);
+    result.fold(
+      (failure) => safeEmit(_errorFromState(failure)),
+      _emitAddressState,
+    );
   }
 
   Future<void> fetchAddresses({bool forceRefresh = false}) async {
@@ -59,7 +64,7 @@ class AddressCubit extends Cubit<AddressState> {
         forceRefresh
             ? const <UserAddressModel>[]
             : await _addressRepository.loadStoredAddresses();
-    if (isClosed || !_isActiveUser(requestUserId)) return;
+    if (!_isActiveUser(requestUserId)) return;
 
     if (storedAddresses.isNotEmpty) {
       _emitAddressesLoaded(
@@ -70,13 +75,13 @@ class AddressCubit extends Cubit<AddressState> {
         ),
       );
     } else {
-      emit(_loadingFromState());
+      safeEmit(_loadingFromState());
     }
 
     final result = await _addressRepository.fetchUserAddresses();
-    if (isClosed || !_isActiveUser(requestUserId)) return;
+    if (!_isActiveUser(requestUserId)) return;
 
-    result.fold((failure) => emit(_errorFromState(failure)), (addresses) {
+    result.fold((failure) => safeEmit(_errorFromState(failure)), (addresses) {
       _emitAddressesLoaded(addresses);
     });
   }
@@ -101,9 +106,9 @@ class AddressCubit extends Cubit<AddressState> {
       notes: notes,
       phoneNumber: phoneNumber,
     );
-    if (isClosed || !_isActiveUser(requestUserId)) return;
+    if (!_isActiveUser(requestUserId)) return;
 
-    result.fold((failure) => emit(_errorFromState(failure)), (address) {
+    result.fold((failure) => safeEmit(_errorFromState(failure)), (address) {
       final updatedAddresses = [
         ...state.addresses,
         if (!state.addresses.any((item) => item.id == address.id)) address,
@@ -134,11 +139,11 @@ class AddressCubit extends Cubit<AddressState> {
 
     emit(_loadingFromState());
     final result = await _addressRepository.setDefaultAddress(address.id);
-    if (isClosed || !_isActiveUser(requestUserId)) return false;
+    if (!_isActiveUser(requestUserId)) return false;
 
     return result.fold(
       (failure) {
-        emit(_errorFromState(failure));
+        safeEmit(_errorFromState(failure));
         return false;
       },
       (_) {
@@ -227,7 +232,7 @@ class AddressCubit extends Cubit<AddressState> {
   }
 
   void _emitAddressState(List<UserAddressModel> addresses) {
-    emit(
+    safeEmit(
       AddressChecked(
         addresses.isNotEmpty,
         addresses: addresses,
@@ -241,7 +246,7 @@ class AddressCubit extends Cubit<AddressState> {
     List<UserAddressModel> addresses, {
     int? selectedAddressIndex,
   }) {
-    emit(
+    safeEmit(
       AddressesLoaded(
         addresses,
         selectedAddressIndex: _validatedAddressIndex(
@@ -292,7 +297,7 @@ class AddressCubit extends Cubit<AddressState> {
     if (userId == _activeUserId) return;
 
     _activeUserId = userId;
-    if (!isClosed) emit(const AddressInitial());
+    safeEmit(const AddressInitial());
   }
 
   static String? _currentUserId(SupabaseAuthService authService) {

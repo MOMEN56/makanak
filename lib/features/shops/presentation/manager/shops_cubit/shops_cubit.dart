@@ -1,10 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:makanak/core/utils/bloc/safe_emit_mixin.dart';
 import 'package:makanak/core/utils/debouncer.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 import 'package:makanak/features/shops/data/repos/shops_repo.dart';
 import 'package:makanak/features/shops/presentation/manager/shops_cubit/shops_state.dart';
 
-class ShopsCubit extends Cubit<ShopsState> {
+class ShopsCubit extends Cubit<ShopsState> with SafeEmitMixin<ShopsState> {
   ShopsCubit(this._shopsRepo) : super(const ShopsInitial());
 
   final ShopsRepo _shopsRepo;
@@ -53,13 +54,13 @@ class ShopsCubit extends Cubit<ShopsState> {
     }
 
     final result = await _shopsRepo.fetchShops(query: query);
-    if (currentRequestId != _requestId || isClosed) return;
+    if (currentRequestId != _requestId) return;
 
     result.fold(
       (failure) {
         if (shouldPreserveContent) {
           _pendingQuery = previousAppliedQuery;
-          emit(
+          safeEmit(
             ShopsSuccess(
               List.unmodifiable(previousShops),
               refreshFailure: failure,
@@ -69,12 +70,12 @@ class ShopsCubit extends Cubit<ShopsState> {
           return;
         }
 
-        emit(ShopsFailure(failure));
+        safeEmit(ShopsFailure(failure));
       },
       (shops) {
         _appliedQuery = query;
         _pendingQuery = query;
-        emit(ShopsSuccess(shops));
+        safeEmit(ShopsSuccess(shops));
       },
     );
   }
