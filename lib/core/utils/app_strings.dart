@@ -226,14 +226,11 @@ class AppStrings {
   static const authRequestFailed =
       'تعذر تنفيذ الطلب الآن. حاول مرة أخرى بعد قليل.';
 
-  static const networkActionError =
-      'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
+  static const networkActionError = 'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
 
-  static const noInternetTitle =
-      'لا يوجد اتصال بالإنترنت';
+  static const noInternetTitle = 'لا يوجد اتصال بالإنترنت';
 
-  static const noInternetSubtitle =
-      'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
+  static const noInternetSubtitle = 'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
 
   static const googleSignInStartError =
       'تعذر بدء تسجيل الدخول بحساب Google الآن.';
@@ -280,6 +277,7 @@ class AppStrings {
   static const authPasswordTooShort = 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
   static const authConfirmPasswordRequired = 'من فضلك أكدي كلمة المرور.';
   static const authPasswordsDoNotMatch = 'كلمتا المرور غير متطابقتين.';
+  static const noInternetConnection = "لا يوجد اتصال بالإنترنت";
 
   static String requiredField(String fieldName) => '$fieldName مطلوب';
 

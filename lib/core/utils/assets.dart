@@ -42,9 +42,9 @@ class Assets {
   /// assets/icons/is_stat_notification.png
   static const String assetsIconsIsStatNotification = "assets/icons/is_stat_notification.png";
 
-  /// Assets for assetsIconsNoConnectionEmoji
-  /// assets/icons/no_connection_emoji.png
-  static const String assetsIconsNoConnectionEmoji = "assets/icons/no_connection_emoji.png";
+  /// Assets for assetsIconsNoConnectionIcon
+  /// assets/icons/no_connection_icon.png
+  static const String assetsIconsNoConnectionIcon = "assets/icons/no_connection_icon.png";
 
   /// Assets for assetsIconsOopsEmoji
   /// assets/icons/oops_emoji.png

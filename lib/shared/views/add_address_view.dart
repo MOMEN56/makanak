@@ -4,9 +4,14 @@ import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.da
 import 'package:makanak/shared/widgets/add_address_view_body.dart';
 
 class AddAddressView extends StatelessWidget {
-  const AddAddressView({super.key});
+  const AddAddressView({super.key, this.bottomContentPadding = 0});
 
-  static Route<void> route({required AddressCubit addressCubit}) {
+  final double bottomContentPadding;
+
+  static Route<void> route({
+    required AddressCubit addressCubit,
+    double bottomContentPadding = 0,
+  }) {
     return PageRouteBuilder<void>(
       transitionDuration: const Duration(milliseconds: 300),
       reverseTransitionDuration: const Duration(milliseconds: 300),
@@ -14,7 +19,9 @@ class AddAddressView extends StatelessWidget {
           (context, animation, secondaryAnimation) =>
               BlocProvider<AddressCubit>.value(
                 value: addressCubit,
-                child: const AddAddressView(),
+                child: AddAddressView(
+                  bottomContentPadding: bottomContentPadding,
+                ),
               ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curvedAnimation = CurvedAnimation(
@@ -36,6 +43,8 @@ class AddAddressView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: AddAddressViewBody());
+    return Scaffold(
+      body: AddAddressViewBody(bottomContentPadding: bottomContentPadding),
+    );
   }
 }

@@ -14,7 +14,9 @@ import 'package:makanak/shared/widgets/address_form_fields.dart';
 import 'package:makanak/shared/widgets/app_snack_bar.dart';
 
 class AddAddressViewBody extends StatefulWidget {
-  const AddAddressViewBody({super.key});
+  const AddAddressViewBody({super.key, this.bottomContentPadding = 0});
+
+  final double bottomContentPadding;
 
   @override
   State<AddAddressViewBody> createState() => _AddAddressViewBodyState();
@@ -83,6 +85,7 @@ class _AddAddressViewBodyState extends State<AddAddressViewBody> {
         final isSavingAddress = state is AddressLoading;
 
         return SafeArea(
+          bottom: widget.bottomContentPadding == 0,
           child: Padding(
             padding: AppResponsive.all(context, AppSpacing.screenEdge),
             child: Form(
@@ -109,6 +112,7 @@ class _AddAddressViewBodyState extends State<AddAddressViewBody> {
                             : AppStrings.addAddress,
                     onTap: isSavingAddress ? null : _saveAddress,
                   ),
+                  SizedBox(height: widget.bottomContentPadding),
                 ],
               ),
             ),

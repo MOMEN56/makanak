@@ -43,7 +43,32 @@ class OrderDetailsInfoCard extends StatelessWidget {
     final timeOfDay = TimeOfDay.fromDateTime(value);
 
     return '${materialLocalizations.formatMediumDate(value)} - '
-        '${materialLocalizations.formatTimeOfDay(timeOfDay, alwaysUse24HourFormat: true)}';
+        '${_formatOrderTime(materialLocalizations, timeOfDay)}';
+  }
+
+  String _formatOrderTime(
+    MaterialLocalizations materialLocalizations,
+    TimeOfDay timeOfDay,
+  ) {
+    final hour = timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod;
+    final minute = _formatTwoDigits(materialLocalizations, timeOfDay.minute);
+    final periodLabel =
+        timeOfDay.period == DayPeriod.am
+            ? materialLocalizations.anteMeridiemAbbreviation
+            : materialLocalizations.postMeridiemAbbreviation;
+    final suffix = periodLabel.isEmpty ? '' : ' $periodLabel';
+
+    return '${materialLocalizations.formatDecimal(hour)}:$minute$suffix';
+  }
+
+  String _formatTwoDigits(
+    MaterialLocalizations materialLocalizations,
+    int value,
+  ) {
+    final formattedValue = materialLocalizations.formatDecimal(value);
+    if (value >= 10) return formattedValue;
+
+    return '${materialLocalizations.formatDecimal(0)}$formattedValue';
   }
 }
 

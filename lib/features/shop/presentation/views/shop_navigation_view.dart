@@ -124,7 +124,10 @@ class _ShopNavigationViewState extends State<ShopNavigationView> {
                     onFullScreenNetworkStateChanged:
                         _handleOrderHistoryNoInternetStateChanged,
                   ),
-                  const ProfileView(),
+                  const ProfileView(
+                    addAddressBottomPadding:
+                        AppSpacing.buttonBottomExtraGapWithLiquidGlassNavigation,
+                  ),
                 ],
               ),
             ),

@@ -48,16 +48,20 @@ class _CartNavigationTabState extends State<CartNavigationTab> {
     bool hasSavedAddress,
   ) {
     setState(() {
-      _cartArguments = routeArguments ?? _cartArguments ?? _initialCartArguments;
+      _cartArguments =
+          routeArguments ?? _cartArguments ?? _initialCartArguments;
       _showAddressStep = !hasSavedAddress;
       _currentStep =
-          hasSavedAddress ? _CartFlowStep.confirmingOrder : _CartFlowStep.addAddress;
+          hasSavedAddress
+              ? _CartFlowStep.confirmingOrder
+              : _CartFlowStep.addAddress;
     });
   }
 
   void _openConfirmingOrder(CartViewArguments? routeArguments) {
     setState(() {
-      _cartArguments = routeArguments ?? _cartArguments ?? _initialCartArguments;
+      _cartArguments =
+          routeArguments ?? _cartArguments ?? _initialCartArguments;
       _showAddressStep = true;
       _currentStep = _CartFlowStep.confirmingOrder;
     });
@@ -65,7 +69,8 @@ class _CartNavigationTabState extends State<CartNavigationTab> {
 
   void _openSubmitOrder(CartViewArguments? routeArguments) {
     setState(() {
-      _cartArguments = routeArguments ?? _cartArguments ?? _initialCartArguments;
+      _cartArguments =
+          routeArguments ?? _cartArguments ?? _initialCartArguments;
       _currentStep = _CartFlowStep.submitOrder;
     });
   }
@@ -79,7 +84,8 @@ class _CartNavigationTabState extends State<CartNavigationTab> {
 
   void _goBackFromConfirmingOrder() {
     setState(() {
-      _currentStep = _showAddressStep ? _CartFlowStep.addAddress : _CartFlowStep.cart;
+      _currentStep =
+          _showAddressStep ? _CartFlowStep.addAddress : _CartFlowStep.cart;
     });
   }
 
@@ -95,6 +101,8 @@ class _CartNavigationTabState extends State<CartNavigationTab> {
       ),
       _CartFlowStep.addAddress => AddUserAddressViewBody(
         cartArguments: _cartArguments,
+        bottomContentPadding:
+            AppSpacing.buttonBottomExtraGapWithLiquidGlassNavigation,
         onBack: _goBackToCart,
         onContinueRequested: _openConfirmingOrder,
       ),

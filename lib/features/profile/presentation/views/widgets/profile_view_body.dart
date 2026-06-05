@@ -13,7 +13,9 @@ import 'package:makanak/features/profile/presentation/views/widgets/profile_head
 import 'package:makanak/shared/widgets/app_snack_bar.dart';
 
 class ProfileViewBody extends StatefulWidget {
-  const ProfileViewBody({super.key});
+  const ProfileViewBody({super.key, this.addAddressBottomPadding = 0});
+
+  final double addAddressBottomPadding;
 
   @override
   State<ProfileViewBody> createState() => _ProfileViewBodyState();
@@ -61,7 +63,7 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                   ),
                   const Gap(16),
                   ProfileAddressesSection(onError: _showError),
-                  const Gap(70),
+                  Gap(80),
                 ],
               ),
             ),
