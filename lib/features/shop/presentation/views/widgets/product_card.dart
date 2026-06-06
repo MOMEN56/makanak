@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/app_text_styles.dart';
-import 'package:makanak/features/order_history/presentation/views/widgets/order_meta_chip.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/domain/entities/product_availability_extension.dart';
-import 'package:makanak/features/shop/presentation/views/widgets/add_button.dart';
+import 'package:makanak/features/shop/presentation/views/widgets/product_card_action_switcher.dart';
 import 'package:makanak/shared/widgets/network_image_with_placeholder.dart';
-import 'package:makanak/shared/widgets/quantity_selector.dart';
 
 class ProductCard extends StatefulWidget {
   const ProductCard({
@@ -162,48 +160,16 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    transitionBuilder: (child, animation) {
-                      return SizeTransition(
-                        sizeFactor: animation,
-                        axis: Axis.horizontal,
-                        axisAlignment: -1,
-                        child: FadeTransition(opacity: animation, child: child),
-                      );
-                    },
-                    child:
-                        canPurchase
-                            ? _showQuantitySelector
-                                ? QuantitySelector(
-                                  key: const ValueKey('quantity-selector'),
-                                  initialQuantity: _quantity,
-                                  minQuantity: 0,
-                                  color: widget.primaryColor,
-                                  buttonSize: 28,
-                                  iconSize: 18,
-                                  valueWidth: 34,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 4,
-                                  ),
-                                  onChanged: _onQuantityChanged,
-                                )
-                                : AddButton(
-                                  key: const ValueKey('add-button'),
-                                  color: widget.primaryColor,
-                                  onTap: _showSelector,
-                                )
-                            : OrderMetaChip(
-                              key: const ValueKey('availability-badge'),
-                              label: statusLabel,
-                              backgroundColor: statusBackgroundColor,
-                              foregroundColor: statusForegroundColor,
-                              compact: false,
-                              maxTextWidth: 120,
-                            ),
+                  ProductCardActionSwitcher(
+                    canPurchase: canPurchase,
+                    showQuantitySelector: _showQuantitySelector,
+                    quantity: _quantity,
+                    primaryColor: widget.primaryColor,
+                    statusLabel: statusLabel,
+                    statusBackgroundColor: statusBackgroundColor,
+                    statusForegroundColor: statusForegroundColor,
+                    onAddTap: _showSelector,
+                    onQuantityChanged: _onQuantityChanged,
                   ),
                 ],
               ),

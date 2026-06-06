@@ -20,7 +20,7 @@ class OrderHistoryCubit extends Cubit<OrderHistoryState>
     final shouldPreserveContent = currentState is OrderHistorySuccess;
 
     if (!shouldPreserveContent) {
-      emit(const OrderHistoryLoading());
+      safeEmit(const OrderHistoryLoading());
     }
 
     final result = await _repository.fetchOrders();

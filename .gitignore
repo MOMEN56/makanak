@@ -54,6 +54,10 @@ app.*.map.json
 # Project-local files
 /google-services.json
 /android/app/google-services.json
+/android/key.properties
+/android/upload-keystore.jks
+/android/*.jks
+*.keystore
 /pubspec.lock
 AGENTS.md
 Global_Engineering_Rules.md

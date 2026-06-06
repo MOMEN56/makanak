@@ -24,7 +24,7 @@ class AppRemoteConfigCubit extends Cubit<AppRemoteConfigState>
   }
 
   Future<void> _loadAccess() async {
-    emit(const AppRemoteConfigLoading());
+    safeEmit(const AppRemoteConfigLoading());
 
     try {
       final result = await _repo.checkAppAccess();

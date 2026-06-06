@@ -38,6 +38,7 @@ class OrderHistoryCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Gap(4),
               SizedBox(
                 width: imageWidth,
                 child: SizedBox.expand(
@@ -45,7 +46,7 @@ class OrderHistoryCard extends StatelessWidget {
                     imageUrl: order.previewImageUrl,
                     height: double.infinity,
                     width: double.infinity,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     cacheWidth: 260,
                     placeholderIcon: Icons.storefront_outlined,
                     placeholderColor: AppColors.primaryDarkColor,
