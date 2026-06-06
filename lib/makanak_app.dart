@@ -111,7 +111,10 @@ class _MakanakAppState extends State<MakanakApp> {
             unawaited(resetAuthenticatedSessionState());
           }
 
-          appNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+          appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+            AuthGateView.routeName,
+            (route) => false,
+          );
 
           if (state is AuthAuthenticated) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
