@@ -129,9 +129,16 @@ class AuthCubit extends Cubit<AuthState> with SafeEmitMixin<AuthState> {
     try {
       final result = await _authRepo.signOut();
       result.fold(
-        (failure) => safeEmit(
-          AuthUnauthenticated(message: failure.message, isError: true),
-        ),
+        (failure) {
+          if (_authRepo.getCurrentSession() == null) {
+            safeEmit(const AuthUnauthenticated());
+            return;
+          }
+
+          safeEmit(
+            AuthUnauthenticated(message: failure.message, isError: true),
+          );
+        },
         (_) {
           safeEmit(const AuthUnauthenticated());
         },

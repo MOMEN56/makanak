@@ -1,4 +1,4 @@
-﻿import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/features/shop/data/models/product_model.dart';
 import 'package:makanak/features/shop/data/repos/products_repo.dart';
@@ -24,16 +24,26 @@ class ProductsSuccess extends ProductsState {
   const ProductsSuccess(
     this.products, {
     super.priceSort,
+    this.query = '',
     this.refreshFailure,
     this.refreshFailureId = 0,
   });
 
   final List<ProductModel> products;
+  final String query;
   final Failure? refreshFailure;
   final int refreshFailureId;
 
+  bool get hasActiveSearch => query.trim().isNotEmpty;
+
   @override
-  List<Object?> get props => [products, priceSort, refreshFailure, refreshFailureId];
+  List<Object?> get props => [
+    products,
+    priceSort,
+    query,
+    refreshFailure,
+    refreshFailureId,
+  ];
 }
 
 class ProductsFailure extends ProductsState {

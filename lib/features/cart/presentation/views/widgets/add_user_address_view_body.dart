@@ -22,12 +22,14 @@ class AddUserAddressViewBody extends StatefulWidget {
   const AddUserAddressViewBody({
     super.key,
     this.cartArguments,
+    this.bottomContentPadding = 0,
     this.returnOnSave = false,
     this.onBack,
     this.onContinueRequested,
   });
 
   final CartViewArguments? cartArguments;
+  final double bottomContentPadding;
   final bool returnOnSave;
   final VoidCallback? onBack;
   final ValueChanged<CartViewArguments?>? onContinueRequested;
@@ -158,6 +160,7 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
         }
 
         return SafeArea(
+          bottom: widget.bottomContentPadding == 0,
           child: Padding(
             padding: AppResponsive.all(context, AppSpacing.screenEdge),
             child: Form(
@@ -200,6 +203,7 @@ class _AddUserAddressViewBodyState extends State<AddUserAddressViewBody> {
                     hasShadowEffect: false,
                     color: primaryColor,
                   ),
+                  SizedBox(height: widget.bottomContentPadding),
                 ],
               ),
             ),

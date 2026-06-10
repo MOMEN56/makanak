@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:gap/gap.dart';
 import 'package:makanak/core/helpers/bloc_state_change_helpers.dart';
+import 'package:makanak/core/utils/app_empty_state_strings.dart';
 import 'package:makanak/core/utils/app_colors.dart';
 import 'package:makanak/core/utils/app_spacing.dart';
 import 'package:makanak/core/utils/app_strings.dart';
@@ -348,16 +349,24 @@ class _ProductsViewBodyState extends State<ProductsViewBody> {
                             ProductsLoading() => ProductsGridSkeleton(
                               bottomPadding: _productsBottomPadding,
                             ),
-                            ProductsSuccess(:final products) => ProductsList(
-                              products: products,
-                              primaryColor: shopPrimaryColor,
-                              resetSelectionSignal: _resetSelectionSignal,
-                              shopModel: widget.shopModel,
-                              isShopOpen: widget.shopModel.isOpen,
-                              onProductSelected: _onProductSelected,
-                              onCartRequested: widget.onCartRequested,
-                              bottomPadding: _productsBottomPadding,
-                            ),
+                            ProductsSuccess(
+                              :final products,
+                              :final hasActiveSearch,
+                            ) =>
+                              ProductsList(
+                                products: products,
+                                primaryColor: shopPrimaryColor,
+                                resetSelectionSignal: _resetSelectionSignal,
+                                shopModel: widget.shopModel,
+                                isShopOpen: widget.shopModel.isOpen,
+                                emptyMessage:
+                                    hasActiveSearch
+                                        ? AppStrings.productsEmptySearch
+                                        : AppEmptyStateStrings.productsEmpty,
+                                onProductSelected: _onProductSelected,
+                                onCartRequested: widget.onCartRequested,
+                                bottomPadding: _productsBottomPadding,
+                              ),
                             ProductsFailure() => const SizedBox.shrink(),
                           };
                         },
@@ -464,7 +473,8 @@ bool _shouldRebuildProductsContent(
   }
 
   if (previous is ProductsSuccess && current is ProductsSuccess) {
-    return previous.products != current.products;
+    return previous.products != current.products ||
+        previous.query != current.query;
   }
 
   if (previous is ProductsFailure && current is ProductsFailure) {

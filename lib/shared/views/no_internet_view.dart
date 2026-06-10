@@ -23,10 +23,16 @@ class NoInternetView extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Image.asset(
-                    Assets.assetsIconsNoConnectionEmoji,
+                    Assets.assetsIconsNoConnectionIcon,
                     width: AppResponsive.width(context, 180),
                     height: AppResponsive.width(context, 180),
                     fit: BoxFit.contain,
+                  ),
+                  SizedBox(height: AppResponsive.spacing(context, 16)),
+                  Text(
+                    AppStrings.noInternetConnection,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   SizedBox(height: AppResponsive.spacing(context, 24)),
                   CustomButton(

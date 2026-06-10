@@ -1,13 +1,14 @@
 class AppStrings {
   const AppStrings._();
 
-  static const addToCartChecking =
-      '\u062C\u0627\u0631\u064A \u0627\u0644\u062A\u062D\u0642\u0642...';
+  // General App & Cart
+  static const addToCartChecking = 'جاري التحقق...';
   static const appTitle = 'مكانك';
   static const cartTitle = 'سلة المشتريات';
   static const cartEmpty = 'السلة فارغة';
   static const product = 'منتج';
   static const continueText = 'متابعة';
+  // Address Form
   static const addAddress = 'إضافة عنوان';
   static const addressNameHint = 'شارع النصر سموحة';
   static const addressName = 'اسم العنوان';
@@ -20,20 +21,20 @@ class AppStrings {
   static const notes = 'ملاحظات';
   static const saving = 'جاري الحفظ...';
   static const saveAddressAndContinue = 'حفظ العنوان والمتابعة';
+  // Checkout & Order Confirmation
   static const confirmOrder = 'تأكيد الطلب';
   static const confirmingOrder = 'جاري تأكيد الطلب...';
   static const noSavedAddresses = 'لا توجد عناوين محفوظة';
   static const addressSaveError = 'حدث خطأ أثناء حفظ العنوان';
   static const addressLoadError = 'حدث خطأ أثناء تحميل العناوين';
   static const defaultAddressError = 'حدث خطأ أثناء تحديد العنوان الرئيسي';
-  static const orderConfirmError =
-      '\u062D\u062F\u062B \u062E\u0637\u0623 \u0623\u062B\u0646\u0627\u0621 \u062A\u0623\u0643\u064A\u062F \u0627\u0644\u0637\u0644\u0628';
+  static const orderConfirmError = 'حدث خطأ أثناء تأكيد الطلب';
+  // Cart Availability
   static const cartAvailabilityCheckFailed =
-      '\u062A\u0639\u0630\u0631 \u0627\u0644\u062A\u062D\u0642\u0642 \u0645\u0646 \u062A\u0648\u0641\u0631 \u0627\u0644\u0645\u0646\u062A\u062C\u0627\u062A\u060C \u062D\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062E\u0631\u0649.';
+      'تعذر التحقق من توفر المنتجات، حاول مرة أخرى.';
   static const productAvailabilityCheckFailed =
-      '\u062A\u0639\u0630\u0631 \u0627\u0644\u062A\u062D\u0642\u0642 \u0645\u0646 \u062A\u0648\u0641\u0631 \u0627\u0644\u0645\u0646\u062A\u062C\u060C \u062D\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062E\u0631\u0649.';
-  static const productOutOfStock =
-      '\u0646\u0641\u062F \u0645\u0646 \u0627\u0644\u0645\u062E\u0632\u0648\u0646';
+      'تعذر التحقق من توفر المنتج، حاول مرة أخرى.';
+  static const productOutOfStock = 'نفد من المخزون';
   static const productUnavailableNow = 'غير متاح الآن';
   static const outOfStockProductsRemovedFromCart =
       'بعض المنتجات نفدت من المخزون وتم حذفها من السلة.';
@@ -41,12 +42,13 @@ class AppStrings {
       'بعض المنتجات لم تعد متاحة وتم حذفها من السلة.';
   static const invalidProduct = 'بيانات المنتج غير صالحة';
   static const invalidAddress = 'بيانات العنوان غير صالحة';
+  // Checkout Steps & Totals
   static const deliveryAddress = 'عنوان التوصيل';
   static const chooseDeliveryAddress = 'اختيار عنوان التوصيل';
   static const useThisAddress = 'استخدام هذا العنوان';
   static const change = 'تغيير';
   static const defaultAddress = 'العنوان الأساسي';
-  static const makeDefault = 'خليه اساسي';
+  static const makeDefault = 'اجعله أساسي';
   static const cart = 'السلة';
   static const address = 'العنوان';
   static const confirmation = 'التأكيد';
@@ -56,6 +58,7 @@ class AppStrings {
   static const orderTotal = 'إجمالي الطلب';
   static const currency = 'ج.م';
   static const trackOrder = 'تتبع طلبي';
+  // Routing & Data Availability
   static const shopDataUnavailable = 'بيانات المحل غير متاحة';
   static const productDataUnavailable = 'بيانات المنتج غير متاحة';
   static const routeDataUnavailable = 'تعذر فتح هذه الشاشة الآن.';
@@ -66,8 +69,10 @@ class AppStrings {
   static const phoneLength = 'رقم الهاتف يجب أن يكون 11 رقم';
   static const phonePrefix =
       'رقم الهاتف يجب أن يبدأ بـ 010 أو 011 أو 012 أو 015';
-  static const addToCart = 'اضف للسلة';
-  static const productSearchHint = 'نفسك تجيب ايه؟';
+  // Product Actions
+  static const addToCart = 'أضف للسلة';
+  static const productSearchHint = 'نفسك تجيب إيه؟';
+  // Account & Navigation
   static const account = 'الحساب';
   static const savedAddresses = 'العناوين المحفوظة';
   static const signOut = 'تسجيل الخروج';
@@ -76,14 +81,16 @@ class AppStrings {
   static const releaseErrorTitle = 'حصلت مشكلة تقنية';
   static const releaseErrorAction = 'العودة للرئيسية';
 
+  // Main Navigation
   static const home = 'الرئيسية';
   static const orderHistory = 'سجل الطلبات';
+  // Admin Notification Screen
   static const adminNotificationViewTitle = 'إرسال إشعار داخلي';
   static const adminNotificationViewSubtitle =
       'هذه شاشة داخلية للإدارة لإرسال إشعارات يدوية للمستخدمين المسجلين فقط.';
   static const adminNotificationFormTitle = 'بيانات الإشعار';
   static const adminNotificationFormSubtitle =
-      'اتركي معرف المستخدم فارغًا لإرسال الإشعار لكل المستخدمين.';
+      'اترك معرف المستخدم فارغًا لإرسال الإشعار لكل المستخدمين.';
   static const adminNotificationTitleLabel = 'عنوان الإشعار';
   static const adminNotificationTitleHint = 'مثال: عرض جديد';
   static const adminNotificationBodyLabel = 'محتوى الإشعار';
@@ -102,27 +109,29 @@ class AppStrings {
   static const adminNotificationPermissionError =
       'حسابك الحالي غير مصرح له بإرسال الإشعارات.';
   static const adminNotificationInvalidPayload =
-      'بيانات الإشعار غير مكتملة. راجعي العنوان والمحتوى ثم حاولي مرة أخرى.';
+      'بيانات الإشعار غير مكتملة. راجع العنوان والمحتوى ثم حاول مرة أخرى.';
   static const adminNotificationServerError =
-      'خدمة الإشعارات غير متاحة الآن. حاولي مرة أخرى بعد قليل.';
+      'خدمة الإشعارات غير متاحة الآن. حاول مرة أخرى بعد قليل.';
   static const adminNotificationSendError =
-      'تعذر إرسال الإشعار الآن. حاولي مرة أخرى بعد قليل.';
+      'تعذر إرسال الإشعار الآن. حاول مرة أخرى بعد قليل.';
   static const adminNotificationAccessDenied = 'هذه الشاشة مخصصة للإدارة فقط.';
   static const adminNotificationAccessHint =
       'لن يتم إرسال أي إشعارات من هذه الشاشة إلا بحساب يحمل دور admin.';
+  // Order History
   static const orderHistorySubtitle =
       'كل طلباتك السابقة في مكان واحد مع حالة الطلب وتفاصيله.';
   static const orderHistoryOverviewTitle = 'ملخص الطلبات';
   static const orderHistoryOverviewSubtitle =
-      'راجعي إجمالي طلباتك والمدفوعات بسرعة.';
+      'راجع إجمالي طلباتك والمدفوعات بسرعة.';
   static const orderHistoryOrdersCount = 'عدد الطلبات';
   static const orderHistoryDeliveredCount = 'تم توصيله';
   static const orderLatestOrders = 'آخر الطلبات';
   static const orderHistorySectionSubtitle =
-      'اسحبي يمين ويسار لعرض الطلبات واضغطي على أي طلب للتفاصيل.';
+      'اسحب يمين ويسار لعرض الطلبات واضغط على أي طلب للتفاصيل.';
   static const orderHistoryEmpty = 'لا توجد طلبات سابقة حتى الآن.';
   static const orderHistoryLoadError =
       'تعذر تحميل الطلبات الآن. حاول مرة أخرى بعد قليل.';
+  // Order Details
   static const orderDetails = 'تفاصيل الطلب';
   static const orderDetailsUnavailable = 'بيانات الطلب غير متاحة';
   static const orderDetailsLoadError =
@@ -145,6 +154,7 @@ class AppStrings {
   static const orderStatusOutForDelivery = 'خرج للتوصيل';
   static const orderStatusRejected = 'رفض';
 
+  // Shops & Products Listing
   static const shopsHeaderTitle = 'نفسك في إيه؟';
   static const shopsSearchHint = 'ابحث عن المكان اللي نفسك فيه..';
   static const shopsEmptySearch = 'لا توجد محلات بهذا الاسم.';
@@ -163,6 +173,7 @@ class AppStrings {
   static const priceSortLowToHigh = 'السعر: من الأقل للأعلى';
   static const priceSortHighToLow = 'السعر: من الأعلى للأقل';
 
+  // Auth Screens
   static const authSignInTitle = 'أهلًا بك في مكانك';
   static const authSignInSubtitle =
       'سجّل دخولك للوصول السريع إلى المتاجر والمنتجات ومتابعة طلباتك بسهولة.';
@@ -172,6 +183,7 @@ class AppStrings {
   static const authSignUpSubtitle =
       'أنشئ حسابًا جديدًا لحفظ بياناتك والدخول السريع إلى تجربة تسوق عربية سهلة.';
   static const authSignUpFormTitle = 'حساب جديد';
+  // Remote Config
   static const appRemoteConfigLoadingTitle = 'جار التحقق من حالة التطبيق';
   static const appRemoteConfigLoadingSubtitle =
       'لحظات بسيطة ونتأكد أن كل شيء جاهز قبل الدخول.';
@@ -186,15 +198,16 @@ class AppStrings {
       'يرجى تحديث التطبيق للاستمرار.';
   static const appRemoteConfigMaintenanceFallbackMessage =
       'التطبيق تحت الصيانة حاليًا. حاول مرة أخرى لاحقًا.';
+  // Auth Form Fields
   static const authEmail = 'البريد الإلكتروني';
   static const authEmailHint = 'example@email.com';
   static const authPassword = 'كلمة المرور';
-  static const authPasswordHint = 'أدخلي كلمة المرور';
-  static const authSignUpPasswordHint = 'أنشئي كلمة مرور قوية';
+  static const authPasswordHint = 'أدخل كلمة المرور';
+  static const authSignUpPasswordHint = 'أنشئ كلمة مرور قوية';
   static const authConfirmPassword = 'تأكيد كلمة المرور';
-  static const authConfirmPasswordHint = 'أعيدي كتابة كلمة المرور';
+  static const authConfirmPasswordHint = 'أعد كتابة كلمة المرور';
   static const authFullName = 'الاسم الكامل';
-  static const authFullNameHint = 'اكتبي اسمك كما تحبين ظهوره';
+  static const authFullNameHint = 'اكتب اسمك كما تحب ظهوره';
   static const authSignInButton = 'دخول';
   static const authCreateAccountButton = 'إنشاء الحساب';
   static const authCreateAccountLink = 'إنشاء حساب';
@@ -205,6 +218,7 @@ class AppStrings {
   static const authPreparingAccountSubtitle =
       'لحظات بسيطة ونوصلك للصفحة المناسبة.';
 
+  // Auth Loading & Session Messages
   static const authSignInLoading = 'جاري تسجيل الدخول...';
   static const authSignUpLoading = 'جاري إنشاء الحساب...';
   static const authGoogleLoading = 'جاري تجهيز تسجيل الدخول بحساب Google...';
@@ -216,7 +230,7 @@ class AppStrings {
   static const authSignInError =
       'تعذر تسجيل الدخول الآن. حاول مرة أخرى بعد قليل.';
   static const authSignUpConfirmMessage =
-      'تم إنشاء الحساب بنجاح. راجعي بريدك الإلكتروني لتأكيد الحساب ثم سجلي الدخول.';
+      'تم إنشاء الحساب بنجاح. راجع بريدك الإلكتروني لتأكيد الحساب ثم سجّل الدخول.';
   static const authSignUpError =
       'تعذر إنشاء الحساب الآن. حاول مرة أخرى بعد قليل.';
   static const authProfileSyncError =
@@ -226,15 +240,14 @@ class AppStrings {
   static const authRequestFailed =
       'تعذر تنفيذ الطلب الآن. حاول مرة أخرى بعد قليل.';
 
-  static const networkActionError =
-      'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
+  // Network & Connectivity
+  static const networkActionError = 'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
 
-  static const noInternetTitle =
-      'لا يوجد اتصال بالإنترنت';
+  static const noInternetTitle = 'لا يوجد اتصال بالإنترنت';
 
-  static const noInternetSubtitle =
-      'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
+  static const noInternetSubtitle = 'تحقق من اتصالك بالشبكة ثم حاول مرة أخرى';
 
+  // Google Sign-In
   static const googleSignInStartError =
       'تعذر بدء تسجيل الدخول بحساب Google الآن.';
   static const googleSignInStartLaterError =
@@ -247,48 +260,52 @@ class AppStrings {
   static const googleSignInLaunchError =
       'تعذر فتح شاشة تسجيل الدخول بحساب Google الآن.';
   static const googleOAuthContinueMessage =
-      'كمّلي تسجيل الدخول بحساب Google من الشاشة التي فُتحت.';
+      'كمّل تسجيل الدخول بحساب Google من الشاشة التي فُتحت.';
   static const googleSignInNetworkError =
-      'تعذر تسجيل Google الآن بسبب مشكلة اتصال. تحققي من الإنترنت ثم حاولي مرة أخرى.';
+      'تعذر تسجيل الدخول بحساب Google الآن بسبب مشكلة اتصال. تحقق من الإنترنت ثم حاول مرة أخرى.';
 
+  // Auth Error Messages
   static const authEmailSendRateLimit =
-      'تم إرسال محاولات كثيرة خلال وقت قصير. انتظري قليلًا ثم حاولي مرة أخرى.';
+      'تم إرسال محاولات كثيرة خلال وقت قصير. انتظر قليلًا ثم حاول مرة أخرى.';
   static const authInvalidCredentials =
       'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
   static const authEmailNotConfirmed =
-      'فعّلي بريدك الإلكتروني أولًا ثم حاولي مرة أخرى.';
+      'فعّلي بريدك الإلكتروني أولًا ثم حاول مرة أخرى.';
   static const authUserAlreadyRegistered =
       'يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل.';
-  static const authWeakPassword =
-      'كلمة المرور ضعيفة. استخدمي 8 أحرف على الأقل.';
-  static const authNetworkError = 'تحققي من اتصال الإنترنت ثم حاولي مرة أخرى.';
+  static const authWeakPassword = 'كلمة المرور ضعيفة. استخدم 8 أحرف على الأقل.';
+  static const authNetworkError = 'تحقق من اتصال الإنترنت ثم حاول مرة أخرى.';
   static const authSignUpDisabled =
-      'إنشاء الحساب غير متاح الآن. حاولي مرة أخرى لاحقًا.';
+      'إنشاء الحساب غير متاح الآن. حاول مرة أخرى لاحقًا.';
   static const authInvalidEmail =
-      'صيغة البريد الإلكتروني غير مقبولة. جرّبي بريدًا آخر.';
+      'صيغة البريد الإلكتروني غير مقبولة. جرّب بريدًا آخر.';
   static const authTooManyRequests =
-      'تمت محاولات كثيرة خلال وقت قصير. انتظري دقيقة ثم جرّبي مرة أخرى ببريد جديد.';
+      'تمت محاولات كثيرة خلال وقت قصير. انتظر دقيقة ثم جرّب مرة أخرى ببريد جديد.';
   static const authSignUpFailed =
-      'تعذر إنشاء الحساب الآن. راجعي البيانات وحاولي مرة أخرى.';
+      'تعذر إنشاء الحساب الآن. راجع البيانات وحاول مرة أخرى.';
 
-  static const authFullNameRequired = 'من فضلك أدخلي الاسم الكامل.';
+  // Auth Validation
+  static const authFullNameRequired = 'من فضلك أدخل الاسم الكامل.';
   static const authFullNameTooShort =
       'الاسم الكامل يجب أن يكون 3 أحرف على الأقل.';
-  static const authEmailRequired = 'من فضلك أدخلي البريد الإلكتروني.';
+  static const authEmailRequired = 'من فضلك أدخل البريد الإلكتروني.';
   static const authEmailInvalid = 'صيغة البريد الإلكتروني غير صحيحة.';
-  static const authPasswordRequired = 'من فضلك أدخلي كلمة المرور.';
+  static const authPasswordRequired = 'من فضلك أدخل كلمة المرور.';
   static const authPasswordTooShort = 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
-  static const authConfirmPasswordRequired = 'من فضلك أكدي كلمة المرور.';
+  static const authConfirmPasswordRequired = 'من فضلك أكد كلمة المرور.';
   static const authPasswordsDoNotMatch = 'كلمتا المرور غير متطابقتين.';
+  static const noInternetConnection = "لا يوجد اتصال بالإنترنت";
 
+  // Dynamic Validation Helpers
   static String requiredField(String fieldName) => '$fieldName مطلوب';
 
   static String maxWords(String fieldName, int maxWords) =>
       '$fieldName يجب ألا يزيد عن $maxWords كلمات';
 
   static String feminineMaxWords(String fieldName, int maxWords) =>
-      '$fieldName يجب ألا تزيد عن $maxWords كلمات';
+      '$fieldName يجب ألا يزيد عن $maxWords كلمات';
 
+  // Cart Dynamic Messages
   static String productAddedToCart(String productName, String quantityText) =>
       'تمت إضافة$quantityText $productName إلى';
 
@@ -298,6 +315,7 @@ class AppStrings {
   static String unavailableProductRemovedFromCart(String productName) =>
       'المنتج $productName لم يعد متاحًا وتم حذفه من السلة.';
 
+  // Price & Shipping Helpers
   static String priceInEgyptianPounds(int price) => '$price جنيه';
 
   static String shippingPriceText(int shippingPrice) {
@@ -308,6 +326,7 @@ class AppStrings {
     return '$shippingPrice $currency';
   }
 
+  // Order Dynamic Helpers
   static String orderStatusUpdated(String status) =>
       'تم تحديث حالة طلبك إلى $status';
 

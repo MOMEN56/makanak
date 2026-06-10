@@ -13,13 +13,13 @@ class OrderDetailsCubit extends Cubit<OrderDetailsState>
 
   Future<void> fetchOrder(String orderId) async {
     if (orderId.trim().isEmpty) {
-      emit(
+      safeEmit(
         const OrderDetailsFailure(Failure(AppStrings.orderDetailsUnavailable)),
       );
       return;
     }
 
-    emit(OrderDetailsLoading());
+    safeEmit(OrderDetailsLoading());
 
     final result = await _repository.fetchOrderById(orderId);
 

@@ -50,7 +50,7 @@ class ShopsCubit extends Cubit<ShopsState> with SafeEmitMixin<ShopsState> {
     final shouldPreserveContent = currentState is ShopsSuccess;
 
     if (!shouldPreserveContent) {
-      emit(const ShopsLoading());
+      safeEmit(const ShopsLoading());
     }
 
     final result = await _shopsRepo.fetchShops(query: query);
@@ -63,6 +63,7 @@ class ShopsCubit extends Cubit<ShopsState> with SafeEmitMixin<ShopsState> {
           safeEmit(
             ShopsSuccess(
               List.unmodifiable(previousShops),
+              query: previousAppliedQuery,
               refreshFailure: failure,
               refreshFailureId: ++_refreshFailureId,
             ),
@@ -75,7 +76,7 @@ class ShopsCubit extends Cubit<ShopsState> with SafeEmitMixin<ShopsState> {
       (shops) {
         _appliedQuery = query;
         _pendingQuery = query;
-        safeEmit(ShopsSuccess(shops));
+        safeEmit(ShopsSuccess(shops, query: query));
       },
     );
   }

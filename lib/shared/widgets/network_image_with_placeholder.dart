@@ -8,7 +8,7 @@ class NetworkImageWithPlaceholder extends StatelessWidget {
     required this.imageUrl,
     this.height,
     this.width,
-    this.fit = BoxFit.cover,
+    this.fit = BoxFit.contain,
     this.cacheWidth,
     this.cacheHeight,
     this.filterQuality = FilterQuality.low,

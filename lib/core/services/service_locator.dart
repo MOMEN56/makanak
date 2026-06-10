@@ -5,6 +5,8 @@ import 'package:makanak/core/data/repos/address_repository_impl.dart';
 import 'package:makanak/core/deep_linking/deep_link_navigator.dart';
 import 'package:makanak/core/deep_linking/deep_link_parser.dart';
 import 'package:makanak/core/deep_linking/deep_link_service.dart';
+import 'package:makanak/core/deep_linking/install_referrer_parser.dart';
+import 'package:makanak/core/deep_linking/install_referrer_service.dart';
 import 'package:makanak/core/deep_linking/pending_deep_link_manager.dart';
 import 'package:makanak/core/domain/repos/address_repository.dart';
 import 'package:makanak/core/presentation/manager/address_cubit/address_cubit.dart';
@@ -211,6 +213,7 @@ void _registerDeepLinkingFeature() {
   );
 
   getIt.registerLazySingleton<DeepLinkParser>(DeepLinkParser.new);
+  getIt.registerLazySingleton<InstallReferrerParser>(InstallReferrerParser.new);
 
   getIt.registerLazySingleton<DeepLinkNavigator>(
     () => DeepLinkNavigator(
@@ -223,6 +226,13 @@ void _registerDeepLinkingFeature() {
 
   getIt.registerFactory<DeepLinkService>(
     () => DeepLinkService(getIt<DeepLinkParser>(), getIt<DeepLinkNavigator>()),
+  );
+
+  getIt.registerFactory<InstallReferrerService>(
+    () => InstallReferrerService(
+      getIt<InstallReferrerParser>(),
+      getIt<DeepLinkNavigator>(),
+    ),
   );
 }
 

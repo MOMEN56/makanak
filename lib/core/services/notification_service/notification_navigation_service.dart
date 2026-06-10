@@ -9,6 +9,11 @@ class NotificationNavigationService {
 
   static const String _manualNotificationType = 'manual_notification';
   static const String _legacyManualNotificationType = 'manual-notification';
+  static const String _manualCustomerNotificationType =
+      'manual_customer_notification';
+
+  static const String _customerAppType = 'customer';
+  static const String _notificationsHistoryScreen = 'notifications_history';
 
   static String? _lastHandledNavigationKey;
   static String? _pendingNavigationKey;
@@ -48,12 +53,16 @@ class NotificationNavigationService {
 
   static bool isManualNotificationData(Map<String, dynamic> data) {
     final rawType = data['type']?.toString().trim().toLowerCase();
+    final appType = data['app_type']?.toString().trim().toLowerCase();
+    final screen = data['screen']?.toString().trim().toLowerCase();
+
     if (rawType == _manualNotificationType ||
-        rawType == _legacyManualNotificationType) {
+        rawType == _legacyManualNotificationType ||
+        rawType == _manualCustomerNotificationType) {
       return true;
     }
 
-    return false;
+    return appType == _customerAppType && screen == _notificationsHistoryScreen;
   }
 
   static void _queueOrNavigate(

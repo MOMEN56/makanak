@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:makanak/core/deep_linking/deep_link_navigator.dart';
 import 'package:makanak/core/deep_linking/deep_link_service.dart';
+import 'package:makanak/core/deep_linking/install_referrer_service.dart';
 import 'package:makanak/core/routing/app_router.dart';
 import 'package:makanak/core/services/service_locator.dart';
 import 'package:makanak/core/services/services.dart';
@@ -35,6 +36,7 @@ class MakanakApp extends StatefulWidget {
 class _MakanakAppState extends State<MakanakApp> {
   late final AppRemoteConfigCubit _appRemoteConfigCubit;
   late final DeepLinkService _deepLinkService;
+  late final InstallReferrerService _installReferrerService;
   late final ErrorWidgetBuilder _previousErrorWidgetBuilder;
 
   @override
@@ -43,6 +45,7 @@ class _MakanakAppState extends State<MakanakApp> {
     _previousErrorWidgetBuilder = ErrorWidget.builder;
     _configureReleaseErrorWidget();
     _deepLinkService = getIt<DeepLinkService>();
+    _installReferrerService = getIt<InstallReferrerService>();
     _appRemoteConfigCubit = AppRemoteConfigCubit(
       AppRemoteConfigRepoImpl(
         AppRemoteConfigRemoteDataSource(getIt<SupabaseClient>()),
@@ -51,6 +54,7 @@ class _MakanakAppState extends State<MakanakApp> {
     );
     unawaited(_appRemoteConfigCubit.checkAccessOnce());
     unawaited(_deepLinkService.initialize());
+    unawaited(_installReferrerService.initialize());
   }
 
   @override
@@ -77,7 +81,7 @@ class _MakanakAppState extends State<MakanakApp> {
     final navigator = appNavigatorKey.currentState;
     if (navigator == null) return;
 
-    navigator.pushNamedAndRemoveUntil(AuthGateView.routeName, (route) => false);
+    appNavigatorKey.currentState?.popUntil((route) => route.isFirst);
   }
 
   Future<void> _handleAuthenticatedNavigation(
@@ -107,7 +111,10 @@ class _MakanakAppState extends State<MakanakApp> {
             unawaited(resetAuthenticatedSessionState());
           }
 
-          appNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+          appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+            AuthGateView.routeName,
+            (route) => false,
+          );
 
           if (state is AuthAuthenticated) {
             WidgetsBinding.instance.addPostFrameCallback((_) {

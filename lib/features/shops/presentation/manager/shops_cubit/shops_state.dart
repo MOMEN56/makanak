@@ -1,4 +1,4 @@
-﻿import 'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart';
 import 'package:makanak/core/errors/failures.dart';
 import 'package:makanak/features/shops/data/models/shop_model.dart';
 
@@ -20,16 +20,20 @@ class ShopsLoading extends ShopsState {
 class ShopsSuccess extends ShopsState {
   const ShopsSuccess(
     this.shops, {
+    this.query = '',
     this.refreshFailure,
     this.refreshFailureId = 0,
   });
 
   final List<ShopModel> shops;
+  final String query;
   final Failure? refreshFailure;
   final int refreshFailureId;
 
+  bool get hasActiveSearch => query.trim().isNotEmpty;
+
   @override
-  List<Object?> get props => [shops, refreshFailure, refreshFailureId];
+  List<Object?> get props => [shops, query, refreshFailure, refreshFailureId];
 }
 
 class ShopsFailure extends ShopsState {

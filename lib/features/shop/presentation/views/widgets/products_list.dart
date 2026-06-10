@@ -21,6 +21,7 @@ class ProductsList extends StatefulWidget {
     this.onProductSelected,
     this.onCartRequested,
     this.bottomPadding = 0,
+    this.emptyMessage = AppStrings.productsEmptySearch,
   });
 
   final List<ProductModel> products;
@@ -31,6 +32,7 @@ class ProductsList extends StatefulWidget {
   final void Function(ProductModel product, int quantity)? onProductSelected;
   final VoidCallback? onCartRequested;
   final double bottomPadding;
+  final String emptyMessage;
 
   @override
   State<ProductsList> createState() => _ProductsListState();
@@ -62,17 +64,16 @@ class _ProductsListState extends State<ProductsList> {
 
   @override
   Widget build(BuildContext context) {
-    final visibleProducts =
-        widget.products
-            .where((product) => !product.isHiddenFromCustomers)
-            .toList(growable: false);
+    final visibleProducts = widget.products
+        .where((product) => !product.isHiddenFromCustomers)
+        .toList(growable: false);
 
     if (visibleProducts.isEmpty) {
       return Padding(
         padding: EdgeInsets.only(bottom: widget.bottomPadding),
-        child: const MessageEmojiWidget(
+        child: MessageEmojiWidget(
           image: Assets.assetsIconsIdkEmoji,
-          text: AppStrings.productsEmptySearch,
+          text: widget.emptyMessage,
         ),
       );
     }
@@ -118,4 +119,3 @@ class _ProductsListState extends State<ProductsList> {
     );
   }
 }
-

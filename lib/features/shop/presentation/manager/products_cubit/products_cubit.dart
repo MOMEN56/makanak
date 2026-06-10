@@ -73,7 +73,7 @@ class ProductsCubit extends Cubit<ProductsState>
     final shouldPreserveContent = currentState is ProductsSuccess;
 
     if (!shouldPreserveContent) {
-      emit(ProductsLoading(priceSort: priceSort));
+      safeEmit(ProductsLoading(priceSort: priceSort));
     }
 
     final result = await _productsRepo.fetchProductsByShopId(
@@ -92,6 +92,7 @@ class ProductsCubit extends Cubit<ProductsState>
             ProductsSuccess(
               List.unmodifiable(previousProducts),
               priceSort: previousAppliedPriceSort,
+              query: previousAppliedQuery,
               refreshFailure: failure,
               refreshFailureId: ++_refreshFailureId,
             ),
@@ -106,7 +107,7 @@ class ProductsCubit extends Cubit<ProductsState>
         _pendingQuery = query;
         _appliedPriceSort = priceSort;
         _pendingPriceSort = priceSort;
-        safeEmit(ProductsSuccess(products, priceSort: priceSort));
+        safeEmit(ProductsSuccess(products, priceSort: priceSort, query: query));
       },
     );
   }

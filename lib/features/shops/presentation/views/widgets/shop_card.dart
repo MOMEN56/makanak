@@ -26,26 +26,32 @@ class ShopCard extends StatelessWidget {
         padding: const EdgeInsets.all(15),
         child: Column(
           children: [
-            SizedBox(
-              height: 140,
-              width: double.infinity,
+            AspectRatio(
+              aspectRatio: 16 / 9,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    NetworkImageWithPlaceholder(
-                      imageUrl: shop.imageUrl,
-                      height: 140,
-                      width: double.infinity,
-                      cacheWidth: 700,
-                      placeholderIcon: Icons.storefront_outlined,
-                      placeholderColor: AppColors.greyBackground,
-                      borderRadius: BorderRadius.circular(12),
+                    Container(
+                      color: AppColors.greyBackground,
+                      child: NetworkImageWithPlaceholder(
+                        imageUrl: shop.imageUrl,
+                        height: double.infinity,
+                        width: double.infinity,
+                        fit: BoxFit.contain,
+                        cacheWidth: 700,
+                        placeholderIcon: Icons.storefront_outlined,
+                        placeholderColor: AppColors.greyBackground,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+
                     if (!shop.isOpen)
                       ColoredBox(
-                        color: AppColors.searchFieldGrey.withValues(alpha: 0.58),
+                        color: AppColors.searchFieldGrey.withValues(
+                          alpha: 0.58,
+                        ),
                         child: Center(
                           child: Text(
                             AppStrings.shopClosedLabel,
@@ -59,7 +65,9 @@ class ShopCard extends StatelessWidget {
                 ),
               ),
             ),
+
             const Gap(16),
+
             Row(
               children: [
                 Container(
@@ -69,7 +77,7 @@ class ShopCard extends StatelessWidget {
                     color: AppColors.shopCategoryIconBackground,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Icon(
                       Icons.local_restaurant_sharp,
                       size: 22.5,
@@ -77,7 +85,9 @@ class ShopCard extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const Gap(12),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +113,9 @@ class ShopCard extends StatelessWidget {
                 ),
               ],
             ),
+
             const Gap(16),
+
             CustomButton(
               hint: AppStrings.shopCardAction,
               onTap: onShopTap,

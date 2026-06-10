@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:makanak/core/utils/app_empty_state_strings.dart';
 import 'package:makanak/core/utils/app_responsive.dart';
 import 'package:makanak/core/utils/app_strings.dart';
 import 'package:makanak/core/utils/assets.dart';
@@ -110,13 +111,16 @@ class _ShopsViewBodyState extends State<ShopsViewBody> {
                 ),
               switch (state) {
                 ShopsInitial() || ShopsLoading() => const ShopsSkeleton(),
-                ShopsSuccess(:final shops) =>
+                ShopsSuccess(:final shops, :final hasActiveSearch) =>
                   shops.isEmpty
-                      ? const SliverFillRemaining(
+                      ? SliverFillRemaining(
                         hasScrollBody: false,
                         child: MessageEmojiWidget(
                           image: Assets.assetsIconsIdkEmoji,
-                          text: AppStrings.shopsEmptySearch,
+                          text:
+                              hasActiveSearch
+                                  ? AppStrings.shopsEmptySearch
+                                  : AppEmptyStateStrings.shopsEmpty,
                         ),
                       )
                       : ShopsList(shops: shops),
@@ -144,7 +148,7 @@ bool _shouldRebuildShopsView(ShopsState previous, ShopsState current) {
   }
 
   if (previous is ShopsSuccess && current is ShopsSuccess) {
-    return previous.shops != current.shops;
+    return previous.shops != current.shops || previous.query != current.query;
   }
 
   if (previous is ShopsFailure && current is ShopsFailure) {

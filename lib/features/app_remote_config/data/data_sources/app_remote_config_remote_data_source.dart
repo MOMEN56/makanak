@@ -15,8 +15,8 @@ class AppRemoteConfigRemoteDataSource extends SupabaseRemoteDataSource {
           .from(_tableName)
           .select(
             'platform, min_supported_version, latest_version, '
-            'blocked_versions, maintenance_mode, force_update_message, '
-            'maintenance_message, update_url, is_active',
+            'blocked_versions, maintenance_mode:customer_maintenance_mode, '
+            'force_update_message, maintenance_message, update_url, is_active',
           )
           .eq('platform', platform)
           .eq('is_active', true)

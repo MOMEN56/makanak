@@ -32,9 +32,9 @@ class AppRemoteConfigBlockingWidget extends StatelessWidget {
     final double iconSize = AppResponsive.width(context, 42);
     final double iconContainerSize = AppResponsive.width(context, 82);
 
-    return ColoredBox(
-      color: AppColors.greyBackground,
-      child: SafeArea(
+    return Scaffold(
+      backgroundColor: AppColors.greyBackground,
+      body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),

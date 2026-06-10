@@ -11,9 +11,9 @@ class AppRemoteConfigLoadingViewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.greyBackground,
-      child: SafeArea(
+    return Scaffold(
+      backgroundColor: AppColors.greyBackground,
+      body: SafeArea(
         child: Center(
           child: Padding(
             padding: AppResponsive.symmetric(context, horizontal: 24),
