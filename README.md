@@ -51,6 +51,8 @@
 - [Other Apps in the Platform](#other-apps-in-the-platform)
 - [Project Screenshots](#project-screenshots)
 - [Platform Diagram](#platform-diagram)
+- [Customer Journey Diagram](#customer-journey-diagram)
+- [App Architecture Diagram](#app-architecture-diagram)
 - [Role of This App in the Platform](#role-of-this-app-in-the-platform)
 - [Main Features](#main-features)
 - [Tech Stack](#tech-stack)
@@ -207,6 +209,64 @@ https://github.com/MOMEN56/makanak_admin
               - Edge Functions where used
 ```
 
+## Customer Journey Diagram
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    participant App as Makanak Customer App
+    participant Supabase as Supabase Backend
+    participant Vendor as Vendor App
+    participant FCM as Firebase Messaging
+
+    Customer->>App: Browse shops and products
+    App->>Supabase: Load active shops and visible products
+    Customer->>App: Add products to cart
+    Customer->>App: Select delivery address
+    App->>Supabase: Create order
+    Supabase-->>Vendor: New order available
+    Vendor->>Supabase: Update order status
+    Supabase-->>App: Updated order status
+    FCM-->>Customer: Push notification
+```
+
+---
+
+## App Architecture Diagram
+
+```mermaid
+flowchart TB
+    UI[Presentation Layer<br/>Views + Widgets + Cubits]
+    Domain[Domain Layer<br/>Entities + Repository Contracts]
+    Data[Data Layer<br/>Repositories + Models + Data Sources]
+    Services[Core Services<br/>Supabase + Notifications + Deep Links]
+    Backend[(Supabase Backend)]
+    Firebase[(Firebase Messaging)]
+
+    UI --> Domain
+    Domain --> Data
+    Data --> Services
+    Services --> Backend
+    Services --> Firebase
+
+    subgraph Features
+        Auth[Auth]
+        Shops[Shops]
+        Products[Products]
+        Cart[Cart]
+        Orders[Orders]
+        Profile[Profile]
+        RemoteConfig[Remote Config]
+    end
+
+    UI --> Auth
+    UI --> Shops
+    UI --> Products
+    UI --> Cart
+    UI --> Orders
+    UI --> Profile
+    UI --> RemoteConfig
+```
 ---
 
 ## Role of This App in the Platform
@@ -286,7 +346,7 @@ The customer app includes:
 - Cairo font
 
 ---
-## Flutter App Packages
+Key Flutter Packages
 
 | Package | Version | Usage |
 |---|---|---|
